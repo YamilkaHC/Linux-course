@@ -1,0 +1,165 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 36. Fuente: transcripciones/video_29.md (chown, chgrp, prueba con segundo usuario)
+---
+
+<Layout titulo="Cambiar propietario y grupo: chown y chgrp — Curso Linux" descripcion="Cambia el dueño de un fichero con chown y su grupo con chgrp, entiende por qué hace falta root y comprueba el efecto real sobre los permisos.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 36</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Cambiar propietario y grupo: chown y chgrp</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Los <a href="/Linux-course/lecciones/33-permisos-rwx">permisos</a> no significan nada sin saber <strong>a quién</strong> se aplican. Aquí cambias esa pieza: el dueño y el grupo del fichero.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A cambiar el <strong>propietario</strong> de un fichero o directorio con <code>chown</code> y su <strong>grupo</strong> con <code>chgrp</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Por qué un usuario normal <strong>no</strong> puede regalar ficheros: es una regla de seguridad, no un fallo.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A comprobar el efecto real: al cambiar de dueño, los tres primeros permisos dejan de ser tuyos.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Dónde vive el dueño: ls -l</h2>
+    <p class="mt-4">En cada línea de <code>ls -l</code> hay dos columnas que hasta ahora quizá ignorabas: el <strong>propietario</strong> y el <strong>grupo</strong>. Son las que deciden qué bloque de permisos te aplica.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ pwd
+/home/user001
+$ ls -l p1
+-rw-r--r-- 1 user001 user001 0 ago  4 10:12 p1
+                 ^^^^^^^ ^^^^^^^
+                 dueño   grupo</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>ls -l</code> en tu home y localiza las dos columnas de dueño y grupo. <strong>Meta:</strong> reconocer de un vistazo a quién pertenece cada fichero.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Preparar la prueba: un segundo usuario</h2>
+    <p class="mt-4">Para ver el cambio de dueño de verdad necesitas <strong>otro usuario</strong>. Créalo así (el tema de usuarios se trata a fondo más adelante; por ahora, cópialo tal cual):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo useradd -d /home/prueba prueba   # -d indica el directorio home
+$ cat /etc/passwd                       # ahí está: prueba, UID 1001
+$ sudo passwd prueba                    # le pones contraseña (te la pide dos veces)</code></pre>
+    <p class="mt-4"><code>sudo</code> ejecuta el comando como si fueras <strong>root</strong>. Ahora entra con ese usuario en una <a href="/Linux-course/lecciones/15-autocompletado-e-historial">sesión virtual</a>: <code>Ctrl+Alt+F3</code> para abrir la consola de texto, y <code>Ctrl+Alt+F2</code> para volver al escritorio.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code># ya dentro como "prueba":
+$ cd /home/user001
+$ ls -l                 # puede mirar...
+$ touch f1              # permiso denegado: no es suyo
+$ mkdir documentos      # permiso denegado también</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">chown: change owner</h2>
+    <p class="mt-4">Vuelve a tu usuario, crea un fichero y pásaselo a <code>prueba</code>. La sintaxis es <code>chown <em>nuevo_dueño</em> <em>fichero</em></code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ touch p1
+$ ls -l p1
+-rw-r--r-- 1 user001 user001 ... p1
+
+$ sudo chown prueba p1     # cambia el propietario a "prueba"
+$ ls -l p1
+-rw-r--r-- 1 prueba  user001 ... p1
+
+$ touch p1                 # ¡permiso denegado! ya no es tuyo</code></pre>
+    <p class="mt-4">Ese último error es la lección entera: los tres primeros caracteres (<code>rw-</code>) ya no te describen a ti, sino a <code>prueba</code>. Tú caes ahora en el bloque de "otros".</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">chown cambia quién es "usuario"</text>
+        <rect x="30" y="40" width="200" height="75" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="130" y="63" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">antes: dueño user001</text>
+        <text x="130" y="86" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">rw- para TI</text>
+        <text x="130" y="105" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">puedes escribir</text>
+        <path d="M240 78 L280 78 M272 72 L280 78 L272 84"/>
+        <rect x="290" y="40" width="200" height="75" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="390" y="63" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">después: dueño prueba</text>
+        <text x="390" y="86" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">rw- para PRUEBA</text>
+        <text x="390" y="105" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">tú pasas a "otros"</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Los permisos no cambian; cambia <strong>a quién</strong> se aplican.</figcaption>
+    </figure>
+
+    <p class="mt-4">Comprueba el otro lado: entra como <code>prueba</code> con <code>Ctrl+Alt+F3</code> y ejecuta <code>touch p1</code>. Ahora sí funciona, porque el fichero es suyo.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>touch p1</code>, míralo con <code>ls -l p1</code>, ejecuta <code>sudo chown prueba p1</code> y vuelve a mirarlo. Después intenta <code>touch p1</code>. <strong>Meta:</strong> ver el "permiso denegado" sobre un fichero que acabas de crear tú.</p>
+    </div>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">Un usuario normal no puede cambiar el propietario</p>
+      <p class="!mt-2 text-cream/90">Regalar un fichero a otro usuario es una operación reservada a <strong>root</strong> (por eso el <code>sudo</code>). Si cualquiera pudiera hacerlo, podría endosarle ficheros a otro y saltarse cuotas o responsabilidades. Puede variar entre distribuciones, pero en escritorio y servidor esta es la regla habitual.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">chgrp: change group</h2>
+    <p class="mt-4">El grupo se cambia igual, con <code>chgrp <em>nuevo_grupo</em> <em>fichero</em></code>, y también necesita permisos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ chgrp root p1            # sin sudo: operación no permitida
+$ sudo chgrp root p1       # ahora sí
+$ ls -l p1
+-rw-r--r-- 1 prueba root ... p1     # dueño prueba, grupo root</code></pre>
+    <p class="mt-4">Dueño y grupo son <strong>independientes</strong>: aquí el fichero pertenece al usuario <code>prueba</code> pero al grupo <code>root</code>. Es exactamente lo que ya viste en <a href="/Linux-course/lecciones/32-usuarios-y-grupos">usuarios y grupos</a>: un usuario y un grupo con el mismo nombre no son la misma cosa.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Prueba primero <code>chgrp root p1</code> sin <code>sudo</code> y lee el error. Repítelo con <code>sudo</code> y confirma con <code>ls -l p1</code>. <strong>Meta:</strong> distinguir la columna de grupo de la de dueño.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: dueño, grupo y permisos juntos</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Crea el usuario con <code>sudo useradd -d /home/prueba prueba</code> y dale contraseña con <code>sudo passwd prueba</code>. Verifícalo con <code>cat /etc/passwd | grep prueba</code>.</li>
+        <li>Crea <code>touch p1</code>, apunta el dueño y grupo con <code>ls -l p1</code>, y pásalo con <code>sudo chown prueba p1</code>. Intenta <code>touch p1</code> y explica el error.</li>
+        <li>Cambia el grupo con <code>sudo chgrp root p1</code> y comprueba que dueño y grupo son distintos en <code>ls -l p1</code>.</li>
+        <li><strong>Reto:</strong> antes de devolverte el fichero, dale permisos de escritura a "otros" con <code>sudo chmod o+w p1</code> y prueba a escribir en él con <code>echo hola &gt;&gt; p1</code>. ¿Por qué ahora sí puedes, aunque no seas el dueño? Recupéralo después con <code>sudo chown user001 p1</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>chown usuario fichero</code> cambia el <strong>propietario</strong> y <code>chgrp grupo fichero</code> cambia el <strong>grupo</strong>. Ambas columnas se leen en <code>ls -l</code> y deciden qué bloque de permisos te aplica.</p>
+      <p>Un usuario normal no puede regalar ficheros: es una restricción de seguridad, así que estas operaciones se hacen con <code>sudo</code> (como root).</p>
+      <p>Cambiar el dueño tiene efecto inmediato: los tres primeros permisos dejan de describirte y pasas al bloque de "otros", con el "permiso denegado" que eso implica.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Por qué <code>chown prueba p1</code> falla sin <code>sudo</code>, aunque el fichero sea tuyo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque cambiar el propietario es una operación reservada a root. Si un usuario normal pudiera endosarle sus ficheros a otro, se podrían saltar cuotas y responsabilidades del sistema. Por eso se usa <code>sudo chown</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Creas <code>p1</code>, haces <code>sudo chown prueba p1</code> y luego <code>touch p1</code> te da permiso denegado. ¿Qué ha pasado?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Los permisos del fichero (<code>-rw-r--r--</code>) no han cambiado, pero ahora el bloque de dueño (<code>rw-</code>) se aplica a <code>prueba</code>. Tú pasaste al bloque de "otros", que solo tiene <code>r--</code>: puedes leer, no escribir.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué diferencia hay entre <code>chown</code> y <code>chgrp</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>chown</code> (change owner) cambia el <strong>usuario propietario</strong>, la primera de las dos columnas de <code>ls -l</code>. <code>chgrp</code> (change group) cambia el <strong>grupo</strong>, la segunda columna. Son independientes: un fichero puede ser del usuario <code>prueba</code> y del grupo <code>root</code> a la vez.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/35-permisos-octal-y-umask" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/37-variables-de-entorno" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

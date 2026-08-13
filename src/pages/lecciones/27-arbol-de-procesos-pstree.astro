@@ -1,0 +1,145 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 27. Fuente: transcripciones/video_23.md (rastrear padres con ps+grep, ps x, ps xf, pstree -p/-s)
+---
+
+<Layout titulo="El árbol de procesos: ps xf y pstree — Curso Linux" descripcion="Rastrea el padre de un proceso con ps -ef | grep, visualiza tus procesos con ps x y ps xf, y dibuja el árbol completo con pstree (-p, -s).">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 27</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Ver el árbol de procesos: ps xf y pstree</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Ya sabes que los procesos forman una <a href="/Linux-course/lecciones/26-procesos-y-ps">jerarquía padre-hijo</a>. Ahora vas a recorrerla: rastrear el padre de cualquier proceso y dibujar el árbol completo de un vistazo.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A rastrear el padre de un proceso combinando <code>ps -ef</code> con <a href="/Linux-course/lecciones/23-buscar-texto-grep"><code>grep</code></a> hasta llegar al proceso 1.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A ver todos tus procesos con <strong><code>ps x</code></strong> y en forma de árbol con <strong><code>ps xf</code></strong>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A dibujar el árbol completo con <strong><code>pstree</code></strong>, mostrar PIDs con <code>-p</code> y los ancestros con <code>-s</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Rastrear el padre con ps + grep</h2>
+    <p class="mt-4">Con <code>ps -f</code> ves el PPID de tus procesos, pero para uno que no sea tuyo tienes que buscarlo entre todos. La solución: <a href="/Linux-course/lecciones/21-tuberias-y-filtros">tubería</a> a <code>grep</code> con el PID que investigas.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps -ef | grep 1767    # busca el proceso 1767: su PPID es, p. ej., 908
+$ ps -ef | grep 908     # ahora busca el 908: su padre es el 1
+</code></pre>
+    <p class="mt-4">Vas saltando de hijo a padre —1772 → 1767 → 908 → 1— y siempre acabas en el proceso <strong>1</strong> (<code>systemd</code>). Es la forma manual de confirmar la jerarquía, pero es lenta. Hay maneras mejores.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Buscar un programa concreto</p>
+      <p class="!mt-2">Este patrón es utilísimo para saber si algo se está ejecutando: <code>ps -ef | grep firefox</code> te muestra los procesos de Firefox. Si abres el navegador y repites, verás cómo aumentan.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Tus procesos: ps x y ps xf</h2>
+    <p class="mt-4"><code>ps x</code> muestra <strong>todos los procesos de tu usuario</strong>, se ejecuten o no en esta terminal (incluye los del entorno gráfico X Window, las sesiones de GNOME, etc.). Como son muchos, paginalos con <a href="/Linux-course/lecciones/12-ver-mas-y-explorar"><code>less</code></a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps x | less           # todos los procesos de tu usuario, paginados</code></pre>
+    <p class="mt-4">Añade una <code>f</code> —<code>ps xf</code>— y los verás en <strong>modo árbol</strong>: cada hijo tabulado bajo su padre. Se aprecia cómo el terminal server abre <code>bash</code>, y dentro de <code>bash</code> corre tu <code>ps</code>.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps xf                 # tus procesos en forma de árbol (padre → hijos)</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Compara <code>ps x | less</code> con <code>ps xf</code>. <strong>Meta:</strong> ver la misma lista, primero plana y luego jerárquica, y localizar tu <code>bash</code> con su <code>ps</code> colgando debajo.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">ps es enorme</p>
+      <p class="!mt-2">Consulta <code>man ps</code> y verás una lista inmensa de opciones de entrada y salida. Casi cualquier dato que quieras de un proceso tiene su parámetro; no hace falta memorizarlos, solo saber que están.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">pstree: el árbol dibujado</h2>
+    <p class="mt-4"><code>pstree</code> muestra el árbol de procesos ya dibujado con líneas, arrancando en <code>systemd</code> (el proceso real; recuerda que <code>init</code> es solo un <a href="/Linux-course/lecciones/13-enlaces">enlace</a>). Es la forma más clara de ver la jerarquía padre-hijo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ pstree | less         # todo el árbol desde systemd, paginado (q para salir)
+$ pstree -p             # igual, pero mostrando el PID de cada proceso</code></pre>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 175" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-md mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">pstree: hacia adelante y hacia atrás</text>
+        <rect x="200" y="35" width="120" height="32" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="55" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">systemd</text>
+        <line x1="260" y1="67" x2="260" y2="90"/>
+        <rect x="200" y="90" width="120" height="32" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="110" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">bash (1772)</text>
+        <line x1="260" y1="122" x2="260" y2="143"/>
+        <rect x="200" y="143" width="120" height="30" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="162" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">pstree</text>
+        <text x="415" y="55" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">-s: ancestros ↑</text>
+        <text x="415" y="160" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">PID: subárbol ↓</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2"><code>pstree PID</code> muestra el subárbol; <code>pstree -s PID</code> añade los ancestros hasta systemd.</figcaption>
+    </figure>
+
+    <p class="mt-4">Puedes centrarte en un proceso concreto. <code>pstree PID</code> muestra ese proceso y sus hijos; con <code>-s</code> añade también sus <strong>padres</strong> hacia atrás, hasta <code>systemd</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ pstree 1772           # el proceso 1772 y lo que cuelga de él (hijos)
+$ pstree -s 1772        # además, la cadena de padres hasta systemd</code></pre>
+    <p class="text-sm text-ink/60">Si un proceso aparece dos veces, no está repetido: significa que ha generado un subproceso. Con el formato largo se ven sus datos distintos.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>pstree -p | less</code> y localiza <code>systemd</code> arriba del todo. Luego coge el PID de tu <code>bash</code> (con <code>ps</code>) y prueba <code>pstree -s ESE_PID</code>. <strong>Meta:</strong> ver la cadena completa de tu shell hasta el proceso 1.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: recorrer la jerarquía</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Coge el PID de tu <code>bash</code> con <code>ps -f</code> y rastrea su padre con <code>ps -ef | grep ESE_PID</code>. Repite subiendo hasta llegar al proceso 1.</li>
+        <li>Comprueba si un programa corre: <code>ps -ef | grep firefox</code>. Ábrelo y repite para ver cómo cambian los procesos.</li>
+        <li>Compara <code>ps x | less</code> con <code>ps xf</code> y localiza tu shell con su <code>ps</code> como hijo.</li>
+        <li>Dibuja el árbol con <code>pstree -p | less</code>. <strong>Reto:</strong> usa <code>pstree -s PID</code> con el PID de tu bash y confirma la cadena de ancestros hasta <code>systemd</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Para rastrear el padre de un proceso ajeno, combina <code>ps -ef | grep PID</code> y ve saltando de hijo a padre; siempre terminas en el proceso 1 (<code>systemd</code>). El mismo patrón sirve para localizar un programa: <code>ps -ef | grep firefox</code>.</p>
+      <p><code>ps x</code> lista todos los procesos de tu usuario y <code>ps xf</code> los presenta en forma de árbol. El comando <code>ps</code> tiene muchísimas opciones (<code>man ps</code>).</p>
+      <p><code>pstree</code> dibuja el árbol completo desde <code>systemd</code>; <code>-p</code> añade los PIDs, <code>pstree PID</code> muestra el subárbol de un proceso y <code>-s PID</code> incluye sus ancestros hacia atrás.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Cómo encuentras el proceso padre de un PID que no es tuyo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Con <code>ps -ef | grep PID</code>: filtras ese proceso entre todos y lees su columna PPID. Luego repites con ese PPID para subir un nivel, hasta llegar al proceso 1.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué añade la <code>f</code> en <code>ps xf</code> respecto a <code>ps x</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">La <code>f</code> presenta los procesos en forma de árbol (<em>forest</em>): cada hijo aparece tabulado bajo su padre, en vez de una lista plana. Así ves la jerarquía de un vistazo.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué diferencia hay entre <code>pstree PID</code> y <code>pstree -s PID</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>pstree PID</code> muestra ese proceso y sus hijos (hacia abajo). <code>pstree -s PID</code> añade además sus ancestros (hacia arriba), la cadena de padres hasta llegar a <code>systemd</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/26-procesos-y-ps" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/28-prioridad-nice-renice" class="btn-primario">Siguiente: prioridad de procesos</a>
+    </nav>
+
+  </article>
+</Layout>

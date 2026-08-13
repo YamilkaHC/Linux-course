@@ -1,0 +1,154 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 23. Fuente: transcripciones/video_20.md (grep: buscar texto en ficheros y salidas; -s, -l, -c, -i; como filtro)
+---
+
+<Layout titulo="Buscar texto con grep — Curso Linux" descripcion="Busca texto en ficheros y en la salida de comandos con grep; silencia errores con -s, lista ficheros con -l, cuenta con -c, ignora mayúsculas con -i y úsalo como filtro tras una tubería.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 23</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Buscar texto con grep</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      <code>grep</code> es uno de los comandos más usados de Linux: encuentra un texto dentro de ficheros o dentro de la salida de otro comando. Con él revisas logs, filtras listados y contestas «¿dónde aparece esto?».
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A buscar un texto dentro de uno o varios ficheros con <strong><code>grep patrón fichero</code></strong> y comodines.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Las opciones clave: <code>-s</code> (silenciar errores), <code>-l</code> (listar ficheros), <code>-c</code> (contar) e <code>-i</code> (ignorar mayúsculas).</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A usar <code>grep</code> como <a href="/Linux-course/lecciones/21-tuberias-y-filtros">filtro</a> tras una tubería, para buscar en la salida de otro comando.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Buscar en un fichero</h2>
+    <p class="mt-4">Con el fichero <code>nombres</code> de lecciones anteriores, busca un texto pasándole el patrón y el fichero:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ grep Tomas nombres    # muestra las líneas de "nombres" que contienen "Tomas"</code></pre>
+    <p class="mt-4">Y con <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo">comodines</a> buscas en varios ficheros a la vez. <code>grep</code> te dice en qué fichero apareció:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ grep Tomas *          # busca "Tomas" en todos los ficheros
+nombres:Tomas           # formato: fichero:línea encontrada
+repetidos.txt:Tomas
+grep: Descargas: es un directorio   # aviso: no puede buscar dentro de carpetas</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">-s: silenciar los avisos</p>
+      <p class="!mt-2">Esos «es un directorio» o «permiso denegado» ensucian la salida. La opción <code>-s</code> (<em>silent</em>) los oculta y deja solo las coincidencias reales: <code>grep -s Tomas *</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Un caso real: revisar logs</h2>
+    <p class="mt-4">El directorio <code>/var/log</code> guarda los mensajes del sistema. Un administrador que busca fallos no lee cada fichero línea a línea: filtra con <code>grep</code>. Muévete allí y busca la palabra <code>error</code> en todos los <code>.log</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /var/log
+$ grep -s error *.log   # busca "error" en todos los ficheros .log, sin avisos</code></pre>
+
+    <p class="mt-4">Sobre esa misma búsqueda, tres opciones cambian <strong>qué</strong> te devuelve:</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Opciones de grep</text>
+        <rect x="20" y="45" width="150" height="80" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="95" y="72" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">-l</text>
+        <text x="95" y="94" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">en qué ficheros</text>
+        <text x="95" y="110" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">aparece</text>
+        <rect x="185" y="45" width="150" height="80" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="72" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">-c</text>
+        <text x="260" y="94" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">cuántas veces</text>
+        <text x="260" y="110" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">por fichero</text>
+        <rect x="350" y="45" width="150" height="80" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="425" y="72" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">-i</text>
+        <text x="425" y="94" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">ignora mayúsc./</text>
+        <text x="425" y="110" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">minúsculas</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Combínalas: <code>grep -ics error *.log</code> cuenta sin importar mayúsculas y sin avisos.</figcaption>
+    </figure>
+
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ grep -l error *.log   # solo los NOMBRES de ficheros donde aparece "error"
+$ grep -c error *.log   # cuántas veces aparece en cada fichero
+$ grep -i error *.log   # encuentra "error", "Error", "ERROR"... (ignora may/min)</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">En <code>/var/log</code> ejecuta <code>grep -s error *.log</code>, luego <code>grep -c error *.log</code> y <code>grep -i error *.log</code>. <strong>Meta:</strong> ver la misma búsqueda pero con distinto formato de resultado. (Recuerda: <code>-i</code> también capta «Error» en mayúscula.)</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">grep como filtro: buscar en una salida</h2>
+    <p class="mt-4">Aquí brilla de verdad. Tras una <a href="/Linux-course/lecciones/21-tuberias-y-filtros">tubería</a>, <code>grep</code> no mira ficheros: filtra lo que le entrega el comando anterior. Por ejemplo, de un <a href="/Linux-course/lecciones/07-navegar-ficheros"><code>ls</code></a> quedarte solo con lo que lleva una <code>D</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls * | grep D         # de la salida de ls, solo lo que contiene "D"
+$ ls * | grep D | wc -l # y cuántos son (encadenando con wc)</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Textos con espacios: comillas dobles</p>
+      <p class="!mt-2">Si el patrón lleva espacios, enciérralo entre comillas dobles para que <code>grep</code> lo trate como un solo texto. Por ejemplo, filtrar un <code>ls -l</code> por fecha: <code>ls -l | grep "abril 28"</code>.</p>
+    </div>
+
+    <p class="mt-4">Un ejemplo potente sobre <a href="/Linux-course/lecciones/11-ver-contenido-cat"><code>/etc/passwd</code></a>: cada usuario indica su shell. Los usuarios de sistema usan <code>nologin</code>. Cuenta cuántos hay combinando filtros:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat /etc/passwd | grep nologin           # usuarios de sistema (no-login)
+$ cat /etc/passwd | grep nologin | wc -l   # cuántos son
+$ cat /etc/passwd | grep bash              # usuarios reales (con shell bash)</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>cat /etc/passwd | grep bash</code> y luego añade <code>| wc -l</code>. <strong>Meta:</strong> ver qué usuarios usan bash y contarlos; suelen ser <code>root</code> y el tuyo.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: buscar y filtrar</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Busca un nombre en tu fichero con <code>grep Tomas nombres</code>, luego en todos con <code>grep Tomas *</code> y silencia los avisos con <code>grep -s Tomas *</code>.</li>
+        <li>En <code>/var/log</code>, prueba <code>grep -l error *.log</code>, <code>grep -c error *.log</code> y <code>grep -i error *.log</code>. Explica qué devuelve cada uno.</li>
+        <li>Filtra una salida: <code>ls * | grep D</code> y cuenta con <code>ls * | grep D | wc -l</code>.</li>
+        <li>Cuenta los usuarios de sistema: <code>cat /etc/passwd | grep nologin | wc -l</code>. <strong>Reto:</strong> lista los usuarios con bash (<code>grep bash</code>) y filtra un <code>ls -l</code> por una fecha usando comillas dobles.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>grep patrón fichero</code> muestra las líneas que contienen el texto; con comodines busca en varios ficheros y avisa del fichero donde aparece. <code>-s</code> silencia los mensajes de error y directorios.</p>
+      <p>Tres opciones cambian el resultado: <code>-l</code> lista solo los ficheros con coincidencia, <code>-c</code> cuenta cuántas veces aparece en cada uno e <code>-i</code> ignora mayúsculas y minúsculas. Se pueden combinar (<code>grep -ics ...</code>).</p>
+      <p>Tras una tubería, <code>grep</code> filtra la salida de otro comando (<code>ls * | grep D</code>, <code>cat /etc/passwd | grep nologin</code>). Si el patrón tiene espacios, va entre comillas dobles.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué diferencia hay entre <code>grep -l error *.log</code> y <code>grep -c error *.log</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>-l</code> devuelve solo los nombres de los ficheros donde aparece «error». <code>-c</code> devuelve, por cada fichero, cuántas veces aparece. Uno dice «dónde», el otro «cuántas».</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Para qué sirve la opción <code>-i</code> en grep?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Hace que la búsqueda ignore mayúsculas y minúsculas, así que <code>grep -i error</code> encuentra «error», «Error» y «ERROR». Útil porque distintos programas escriben el texto de formas diferentes.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿En qué se diferencia <code>grep error fichero</code> de <code>ls | grep error</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">En el primero, <code>grep</code> busca dentro del contenido de un fichero. En el segundo, tras la tubería, <code>grep</code> filtra la salida del comando <code>ls</code> (no mira ficheros): actúa como filtro sobre lo que le entrega el comando anterior.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/22-contar-y-tee" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/24-ordenar-sort" class="btn-primario">Siguiente: ordenar con sort</a>
+    </nav>
+
+  </article>
+</Layout>

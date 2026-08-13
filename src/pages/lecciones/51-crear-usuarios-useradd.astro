@@ -1,0 +1,164 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 51. Fuente: transcripciones/video_41.md (primera parte: useradd)
+---
+
+<Layout titulo="Crear usuarios con useradd — Curso Linux" descripcion="Crea usuarios con useradd controlando tú cada campo: -u el UID, -d el home, -g el grupo, -s la shell y -c el comentario.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 51</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">4 min de lectura</span>
+      <span class="etiqueta-arribita">Por arribita</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Crear usuarios con useradd</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Ya tienes grupos. Toca meter gente dentro, decidiendo tú cada campo.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Cada opción de <code>useradd</code> rellena <strong>un campo</strong> de <code>/etc/passwd</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Las cinco opciones clave: <code>-u</code>, <code>-d</code>, <code>-g</code>, <code>-s</code> y <code>-c</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Por qué conviene fijar el <strong>UID a mano</strong>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Opciones → campos de /etc/passwd</h2>
+    <p class="mt-4">Comando de administración: sin <code>sudo</code> no funciona. Mismo patrón que <a href="/Linux-course/lecciones/50-grupos-y-groupadd">groupadd</a>.</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Opción</th>
+            <th class="text-left p-3 border-b border-line font-bold">Campo que rellena</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>-u</code></td><td class="p-3 border-b border-line">UID (número de usuario)</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>-g</code></td><td class="p-3 border-b border-line">GID del grupo principal</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>-c</code></td><td class="p-3 border-b border-line">Comentario</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>-d</code></td><td class="p-3 border-b border-line">Directorio home</td></tr>
+          <tr><td class="p-3"><code>-s</code></td><td class="p-3">Shell de login</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Ejemplo: crear dos usuarios</h2>
+    <p class="mt-4">Primero sin <code>-u</code> (UID automático), luego con <code>-u</code> (UID controlado):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo useradd -d /home/dsa1 -g 1002 -s /bin/bash -c "usuario desarrollo 1" dsa1
+
+$ cat /etc/passwd | grep dsa1
+dsa1:x:1002:1002:usuario desarrollo 1:/home/dsa1:/bin/bash</code></pre>
+    <p class="mt-4">UID 1002: lo eligió el sistema. Ahora con control total:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo useradd -u 3000 -d /home/dsa2 -g 1002 -s /bin/bash -c "usuario desarrollo 2" dsa2
+
+$ cat /etc/passwd | grep dsa2
+dsa2:x:3000:1002:usuario desarrollo 2:/home/dsa2:/bin/bash</code></pre>
+    <p class="mt-4"><strong>El nombre del usuario va siempre al final.</strong> En producción, fija el UID tú: los automáticos generan confusión con el tiempo.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Cada opción, un campo de /etc/passwd</text>
+
+        <rect x="26" y="44" width="72" height="28" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="62" y="62" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">dsa2</text>
+        <rect x="102" y="44" width="42" height="28" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="123" y="62" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">x</text>
+        <rect x="148" y="44" width="62" height="28" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="179" y="62" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">3000</text>
+        <rect x="214" y="44" width="62" height="28" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="245" y="62" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">1002</text>
+        <rect x="280" y="44" width="98" height="28" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="329" y="62" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">comentario</text>
+        <rect x="382" y="44" width="80" height="28" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="422" y="62" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">/home/dsa2</text>
+        <rect x="466" y="44" width="70" height="28" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="501" y="62" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">/bin/bash</text>
+
+        <line x1="62" y1="80" x2="62" y2="104" stroke="#E5E1D8"/>
+        <line x1="179" y1="80" x2="179" y2="104" stroke="#E5E1D8"/>
+        <line x1="245" y1="80" x2="245" y2="104" stroke="#E5E1D8"/>
+        <line x1="329" y1="80" x2="329" y2="104" stroke="#E5E1D8"/>
+        <line x1="422" y1="80" x2="422" y2="104" stroke="#E5E1D8"/>
+        <line x1="501" y1="80" x2="501" y2="104" stroke="#E5E1D8"/>
+
+        <text x="62" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">login</text>
+        <text x="179" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">-u</text>
+        <text x="245" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">-g</text>
+        <text x="329" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">-c</text>
+        <text x="422" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">-d</text>
+        <text x="501" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">-s</text>
+
+        <line x1="26" y1="140" x2="536" y2="140" stroke="#E5E1D8"/>
+        <text x="280" y="162" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">sudo useradd -u 3000 -d /home/dsa2 -g 1002 -s /bin/bash -c "..." dsa2</text>
+        <text x="280" y="182" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">el nombre del usuario va SIEMPRE al final</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">El comando es el fichero, escrito de otra manera.</figcaption>
+    </figure>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Estos usuarios aún no pueden entrar</p>
+      <p class="!mt-0"><code>useradd</code> crea la cuenta <strong>sin contraseña</strong>. Para que hagan login: <code>sudo passwd dsa1</code>.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: dar de alta un equipo</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Anota GIDs de tus grupos con <code>cat /etc/group | tail -n 5</code>.</li>
+        <li>Crea <code>dsa1</code> sin <code>-u</code> y <code>dsa2</code> con <code>-u 3000</code>. Verifica con <code>cat /etc/passwd | grep dsa</code>.</li>
+        <li><strong>Reto:</strong> crea <code>dsa3</code> con UID 3001, grupo <code>testing</code> (GID 3000) y comentario propio. Comprueba su clave en <code>sudo grep dsa3 /etc/shadow</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>useradd</code> necesita <code>sudo</code>. Cada opción rellena un campo de <code>/etc/passwd</code>: <code>-u</code> UID, <code>-g</code> GID, <code>-c</code> comentario, <code>-d</code> home, <code>-s</code> shell.</p>
+      <p>El nombre del usuario va al final. Sin <code>-u</code>, el sistema elige el UID; en producción conviene fijarlo.</p>
+      <p>Crear cuenta ≠ dar acceso: el usuario nace sin contraseña hasta que se asigna con <code>sudo passwd</code>.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué campo de <code>/etc/passwd</code> rellena <code>-d</code>, <code>-s</code> y <code>-g</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>-d</code> el home (sexto campo), <code>-s</code> la shell (séptimo), <code>-g</code> el GID del grupo principal (cuarto).</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Creas un usuario sin <code>-u</code>. ¿Qué UID tendrá?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">El siguiente libre que tenga el sistema. Funciona, pero en producción mejor asignarlo con <code>-u</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Creaste <code>dsa1</code> y no puede entrar. ¿Qué falta?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">La contraseña. Se asigna con <code>sudo passwd dsa1</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/50-grupos-y-groupadd" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/52-modificar-usuarios-y-grupos" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

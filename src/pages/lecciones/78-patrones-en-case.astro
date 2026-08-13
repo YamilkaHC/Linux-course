@@ -1,0 +1,133 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 78. Fuente: transcripciones/video_55.md (segunda parte: patrones en case)
+---
+
+<Layout titulo="Patrones en case — Curso Linux" descripcion="Usa rangos [a-c], comodines *a, alternativas x|X y el orden correcto de patrones dentro de case para hacer scripts flexibles.">
+  <article class="prose-editorial">
+
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 78</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">4 min de lectura</span>
+      <span class="etiqueta-arribita">Por arribita</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Patrones en case</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      <code>case</code> no solo compara literales: soporta rangos, comodines y alternativas.
+    </p>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Rangos: <code>[a-c]</code>, <code>[0-9]</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Comodines: <code>*a</code> (termina en a), <code>*</code> (cualquier cosa).</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Alternativas: <code>s|S</code> para aceptar mayúscula y minúscula.</span></li>
+      </ul>
+    </section>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Rangos y comodines</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>case $letra in
+    [a-c])
+        echo "Es a, b o c"
+        ;;
+    [0-9])
+        echo "Es un dígito"
+        ;;
+    *a)
+        echo "Termina en a"
+        ;;
+    *)
+        echo "Otra cosa"
+        ;;
+esac</code></pre>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Patrón</th>
+            <th class="text-left p-3 border-b border-line font-bold">Coincide con</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>[a-c]</code></td><td class="p-3 border-b border-line">Un carácter entre a y c</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>[0-9]</code></td><td class="p-3 border-b border-line">Un dígito</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>*a</code></td><td class="p-3 border-b border-line">Cualquier cosa que termine en «a»</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>s|S</code></td><td class="p-3 border-b border-line">«s» o «S» (alternativas con <code>|</code>)</td></tr>
+          <tr><td class="p-3"><code>*</code></td><td class="p-3">Todo lo demás</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Alternativas con |</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>read -p "¿Continuar? (s/n): " resp
+case $resp in
+    s|S)
+        echo "Continuando..."
+        ;;
+    n|N)
+        echo "Saliendo"
+        exit 0
+        ;;
+    *)
+        echo "Respuesta no válida"
+        exit 1
+        ;;
+esac</code></pre>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">El orden importa</p>
+      <p class="!mt-0"><code>case</code> ejecuta la <strong>primera coincidencia</strong>. Si pones <code>*)</code> antes de un patrón específico, <code>*</code> se lo traga todo y los de abajo nunca se ejecutan. <code>*)</code> siempre al final.</p>
+    </div>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Escribe script que pida una letra y use <code>[a-m]</code> y <code>[n-z]</code> para decir «primera/segunda mitad».</li>
+        <li>Modifica confirmación s/n para aceptar «sí» y «no» completos con <code>s|S|si|SI)</code>.</li>
+        <li><strong>Reto:</strong> escribe <code>extensión.sh</code> que reciba nombre de fichero y use <code>*.sh</code>, <code>*.txt</code>, <code>*.log</code> y <code>*</code> para clasificar.</li>
+      </ol>
+    </section>
+
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>case</code> compara patrones tipo glob: <code>[a-c]</code> rangos, <code>*a</code> comodines, <code>s|S</code> alternativas.</p>
+      <p>El orden importa: primera coincidencia gana. <code>*)</code> siempre al final.</p>
+      <p>Combinar <code>|</code> con letras y variantes resuelve el clásico «aceptar mayúsculas y minúsculas».</p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué coincide con el patrón <code>[0-9]</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Un solo carácter que sea dígito (0 a 9).</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Pones <code>*)</code> como primer patrón. ¿Qué pasa con los demás?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Nunca se ejecutan. <code>*</code> coincide con todo, y <code>case</code> usa la primera coincidencia.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Cómo aceptar «s» y «S» en la misma rama?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>s|S)</code> — el pipe <code>|</code> separa alternativas dentro del patrón.</p>
+        </details>
+      </div>
+    </section>
+
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/77-la-clausula-case" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/79-el-bucle-for" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

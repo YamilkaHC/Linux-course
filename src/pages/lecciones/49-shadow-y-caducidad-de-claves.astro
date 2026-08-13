@@ -1,0 +1,245 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 49. Fuente: transcripciones/video_39.md (/etc/passwd, /etc/shadow y el comando chage)
+---
+
+<Layout titulo="El fichero shadow y la caducidad de claves — Curso Linux" descripcion="Los tres ficheros de usuarios de Linux: repasa /etc/passwd, descifra los campos de /etc/shadow y lee la caducidad de una contraseña con chage -l.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 49</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+      <span class="etiqueta-saltar">Saltar</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">El fichero shadow y la caducidad de claves</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Dónde guarda Linux las contraseñas, por qué tú no puedes leerlas y cómo saber cuándo caduca la tuya.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Los <strong>tres ficheros</strong> sobre los que se apoya toda la gestión de usuarios en Linux, y por qué <strong>no se editan nunca a mano</strong>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A descifrar los campos de <code>/etc/shadow</code>: caducidad, avisos y desactivación de cuentas.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A leer todo eso en cristiano con <code>chage -l</code>, sin tener que contar días desde 1970.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Los tres ficheros</h2>
+    <p class="mt-4">Empiezas aquí el bloque de gestión de usuarios, y todo gira alrededor de tres ficheros que viven en <code>/etc</code>:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Fichero</th>
+            <th class="text-left p-3 border-b border-line font-bold">Contiene</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>/etc/passwd</code></td><td class="p-3 border-b border-line">Los usuarios del sistema</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>/etc/shadow</code></td><td class="p-3 border-b border-line">Las contraseñas cifradas y sus reglas de caducidad</td></tr>
+          <tr><td class="p-3"><code>/etc/group</code></td><td class="p-3">Los grupos del sistema</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">Los dos primeros ya te suenan de <a href="/Linux-course/lecciones/32-usuarios-y-grupos">usuarios y grupos</a>. Recuerda la regla de fondo: <strong>todo usuario pertenece al menos a un grupo</strong>.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Nunca los edites a mano</p>
+      <p class="!mt-0">Estos tres ficheros <strong>no se tocan con un editor de texto</strong>. Un carácter de más, un nombre mal escrito o un campo que falte pueden dejar el sistema sin arrancar o arrancando de forma inestable. Para dar de alta un usuario, borrarlo o cambiarle la clave, se usan siempre las herramientas que Linux trae para eso. En los Unix antiguos había que hacerlo a mano; hace muchísimo que no.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Repaso rápido: /etc/passwd</h2>
+    <p class="mt-4">Ábrelo con <a href="/Linux-course/lecciones/12-ver-mas-y-explorar">less</a>, que lo pagina y se sale con <code>q</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ less /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+...
+user001:x:1000:1000:Tomas,,,:/home/user001:/bin/bash</code></pre>
+    <p class="mt-4">Una línea por usuario y siete campos separados por <code>:</code></p>
+    <ul class="mt-4 space-y-2">
+      <li><strong>Nombre</strong> del usuario.</li>
+      <li><strong>x</strong> — la clave no está aquí: está cifrada en <code>/etc/shadow</code>.</li>
+      <li><strong>UID</strong>, el número de usuario. Root siempre es el 0; los usuarios normales suelen empezar en 1000.</li>
+      <li><strong>GID</strong>, el número de su grupo principal.</li>
+      <li><strong>Comentario</strong> — texto libre, normalmente el nombre real.</li>
+      <li><strong>Home</strong>, el directorio donde aterriza al hacer login.</li>
+      <li><strong>Shell</strong>, el intérprete que se le abre al entrar.</li>
+    </ul>
+    <p class="mt-4">Fíjate en ese <code>/usr/sbin/nologin</code> de <code>daemon</code> y <code>bin</code>: son <strong>usuarios del sistema</strong>, existen para ejecutar procesos en segundo plano y no pueden hacer login. Tu usuario, en cambio, termina en <code>/bin/bash</code>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Localiza tu línea con <code>grep $USER /etc/passwd</code>, usando la <a href="/Linux-course/lecciones/37-variables-de-entorno">variable USER</a>. <strong>Meta:</strong> identificar tu UID, tu home y tu shell sin contar los campos con el dedo.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">/etc/shadow: aquí no entras</h2>
+    <p class="mt-4">Prueba a abrirlo igual que el anterior:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ less /etc/shadow
+/etc/shadow: Permiso denegado
+
+$ ls -l /etc/shadow
+-rw-r----- 1 root shadow 1420 ago  4 09:12 /etc/shadow</code></pre>
+    <p class="mt-4">Los <a href="/Linux-course/lecciones/33-permisos-rwx">permisos</a> lo explican solos: <code>rw-</code> para el dueño (root), <code>r--</code> para el grupo <code>shadow</code> y <strong>nada para los otros</strong>. Ahí es donde estás tú. Es exactamente lo que quieres de un fichero con las contraseñas de todo el sistema.</p>
+    <p class="mt-4">Para verlo hay que elevar privilegios con <code>sudo</code>, que ya usaste en <a href="/Linux-course/lecciones/36-cambiar-propietario-chown-chgrp">chown y chgrp</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo less /etc/shadow
+[sudo] contraseña para user001:
+root:!:19088:0:99999:7:::
+daemon:*:19088:0:99999:7:::
+user001:$6$xR2p...:19088:0:99999:7:::</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Descifrar esos números</h2>
+    <p class="mt-4">Cada línea son nueve campos separados por <code>:</code>. Los dos primeros identifican:</p>
+    <ul class="mt-4 space-y-2">
+      <li><strong>Nombre</strong> del usuario.</li>
+      <li><strong>Contraseña cifrada</strong>. Y aquí hay tres símbolos que sustituyen a la clave: <code>*</code> es un usuario del sistema, <code>!!</code> significa que no tiene clave y <code>!</code> aparece en cuentas como root.</li>
+    </ul>
+    <p class="mt-4">Los siete restantes son todos sobre el tiempo:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Campo</th>
+            <th class="text-left p-3 border-b border-line font-bold">Qué significa</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line">3.º</td><td class="p-3 border-b border-line">Último cambio de clave, en <strong>días desde el 1 de enero de 1970</strong></td></tr>
+          <tr><td class="p-3 border-b border-line">4.º</td><td class="p-3 border-b border-line">Días <strong>mínimos</strong> entre dos cambios de clave (0 = puedes cambiarla cuando quieras)</td></tr>
+          <tr><td class="p-3 border-b border-line">5.º</td><td class="p-3 border-b border-line">Días <strong>máximos</strong> de validez de la clave (99999 = prácticamente ilimitada)</td></tr>
+          <tr><td class="p-3 border-b border-line">6.º</td><td class="p-3 border-b border-line">Días de <strong>aviso</strong> antes de que caduque (7 = te avisa una semana antes)</td></tr>
+          <tr><td class="p-3 border-b border-line">7.º</td><td class="p-3 border-b border-line">Días desde que caduca la clave hasta que se <strong>deshabilita</strong> la cuenta</td></tr>
+          <tr><td class="p-3 border-b border-line">8.º</td><td class="p-3 border-b border-line"><strong>Fecha de caducidad</strong> de la cuenta, otra vez en días desde 1970</td></tr>
+          <tr><td class="p-3">9.º</td><td class="p-3">Reservado para futuras versiones</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">Ojo con el 7.º y el 8.º, que parecen lo mismo y no lo son: el <strong>séptimo</strong> es un plazo de gracia <em>relativo</em> —«cuando la clave caduque, quedan tantos días antes de cerrar la cuenta»— y el <strong>octavo</strong> es una <em>fecha concreta</em> a partir de la cual esa cuenta deja de servir.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 180" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">La vida de una contraseña</text>
+
+        <line x1="50" y1="90" x2="510" y2="90" stroke="#1A1A1A"/>
+        <path d="M510 90 l-8 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+
+        <line x1="90" y1="82" x2="90" y2="98" stroke="#1A1A1A"/>
+        <text x="90" y="72" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">se cambia</text>
+        <text x="90" y="114" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">campo 3</text>
+
+        <line x1="250" y1="82" x2="250" y2="98" stroke="#1A1A1A"/>
+        <text x="250" y="72" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">aviso</text>
+        <text x="250" y="114" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">campo 6</text>
+
+        <line x1="350" y1="82" x2="350" y2="98" stroke="#1A1A1A"/>
+        <text x="350" y="72" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">caduca</text>
+        <text x="350" y="114" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">campo 5</text>
+
+        <line x1="460" y1="82" x2="460" y2="98" stroke="#1A1A1A"/>
+        <text x="460" y="72" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">cuenta cerrada</text>
+        <text x="460" y="114" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">campo 7</text>
+
+        <rect x="250" y="130" width="100" height="18" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="300" y="143" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">te avisa</text>
+        <rect x="350" y="130" width="110" height="18" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="405" y="143" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">plazo de gracia</text>
+
+        <text x="280" y="170" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">todas las fechas se guardan en días desde el 1 de enero de 1970</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Del cambio de clave al cierre de la cuenta.</figcaption>
+    </figure>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>ls -l /etc/shadow</code> y después <code>sudo less /etc/shadow</code>. <strong>Meta:</strong> ver primero por qué te lo deniega y localizar luego tu línea y la de root, comparando el segundo campo de cada una.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">chage: lo mismo, pero legible</h2>
+    <p class="mt-4">Contar días desde 1970 no es plan. Para eso está <code>chage -l</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ chage -l user001
+Último cambio de contraseña                             : ago 04, 2026
+La contraseña caduca                                    : nunca
+Contraseña inactiva                                     : nunca
+La cuenta caduca                                        : nunca
+Número de días mínimo entre cambio de contraseña        : 0
+Número de días máximo entre cambio de contraseña        : 99999
+Número de días de aviso antes de que caduque la contraseña : 7</code></pre>
+    <p class="mt-4">Los mismos datos de <code>/etc/shadow</code>, ya traducidos a fechas de verdad. Es la forma práctica de responder a «¿cuándo caduca mi clave?».</p>
+    <p class="mt-4">Puedes consultar tu propio usuario sin permisos especiales, pero el de otro no:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ chage -l root
+chage: permiso denegado
+
+$ sudo chage -l root
+Último cambio de contraseña                             : ago 04, 2026
+...</code></pre>
+    <p class="mt-4">La misma lógica de antes: la información de otras cuentas es cosa del administrador. Y verás que root tiene, en una instalación nueva, prácticamente los mismos plazos que tu usuario.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lanza <code>chage -l $USER</code> y luego <code>sudo chage -l root</code>. <strong>Meta:</strong> emparejar cada línea de la salida con su campo numérico de <code>/etc/shadow</code>.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: recorrer las cuentas del sistema</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Cuenta cuántos usuarios hay en total y cuántos son de sistema: <code>wc -l /etc/passwd</code> y <code>grep -c nologin /etc/passwd</code>, con el <a href="/Linux-course/lecciones/23-buscar-texto-grep">grep</a> de siempre.</li>
+        <li>Comprueba los permisos de los tres ficheros con <code>ls -l /etc/passwd /etc/shadow /etc/group</code> y explica por qué solo uno de ellos te da «permiso denegado» al leerlo.</li>
+        <li>Mira tu línea de shadow con <code>sudo grep $USER /etc/shadow</code> y cuenta los nueve campos. Identifica cuál es el 5.º (validez máxima) y cuál el 6.º (días de aviso).</li>
+        <li><strong>Reto:</strong> contrasta las dos vistas del mismo dato. Saca el 6.º campo de tu línea de shadow con <code>sudo grep $USER /etc/shadow | cut -d ":" -f6</code> —usando el <a href="/Linux-course/lecciones/25-cortar-campos-cut">cut</a> que ya conoces— y compáralo con la línea de aviso de <code>chage -l $USER</code>. Deben coincidir.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>La gestión de usuarios se apoya en tres ficheros de <code>/etc</code>: <code>passwd</code> (usuarios), <code>shadow</code> (contraseñas y caducidad) y <code>group</code> (grupos). Ninguno se edita a mano: un error puede dejar el sistema sin arrancar.</p>
+      <p><code>/etc/shadow</code> solo lo lee root, por eso hace falta <code>sudo</code>. Sus nueve campos guardan la clave cifrada y las reglas de tiempo: último cambio, mínimo y máximo de días, aviso previo, plazo antes de deshabilitar y fecha de caducidad de la cuenta. Las fechas van en días desde el 1 de enero de 1970.</p>
+      <p><code>chage -l usuario</code> muestra esa misma información ya traducida a fechas legibles. Sobre tu propio usuario funciona directamente; sobre otros, con <code>sudo</code>.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Por qué el segundo campo de <code>/etc/passwd</code> es una <code>x</code> y no la contraseña?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque la clave cifrada está en <code>/etc/shadow</code>. <code>/etc/passwd</code> lo puede leer cualquiera, así que dejar ahí las contraseñas sería un agujero de seguridad; la <code>x</code> solo indica que la clave vive en el otro fichero, que únicamente lee root.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Ves un usuario cuyo último campo en <code>/etc/passwd</code> es <code>/usr/sbin/nologin</code>. ¿Qué significa?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Que es un usuario del sistema y <strong>no puede hacer login</strong>. Existe para que ciertos procesos se ejecuten en segundo plano con su identidad, no para que alguien entre con él.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Quieres saber cuándo caduca la contraseña de tu usuario. ¿Miras shadow o hay algo mejor?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>chage -l $USER</code>. Da la misma información que <code>/etc/shadow</code> pero en fechas legibles, sin tener que convertir días transcurridos desde 1970 ni necesitar <code>sudo</code> para tu propia cuenta.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/48-tu-propio-crontab" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/50-grupos-y-groupadd" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

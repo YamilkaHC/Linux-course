@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base editorial. Fondo Cream, cuerpo Inter. */
+@layer base {
+  body {
+    @apply bg-cream text-ink font-body antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+}
+
+/* Componentes reutilizables segun linea grafica. */
+@layer components {
+  .btn-primario {
+    @apply bg-[#1A1A1A] text-white text-xs uppercase font-bold tracking-[0.15em] px-8 py-4 inline-block;
+  }
+  .btn-secundario {
+    @apply border border-[#E5E1D8] text-[#1A1A1A] text-xs uppercase font-bold tracking-[0.15em] px-8 py-4 inline-block;
+  }
+  .etiqueta {
+    @apply bg-[#F4F1EA] text-[#1A1A1A] text-[10px] uppercase font-bold px-3 py-1 inline-block;
+  }
+  .tarjeta {
+    @apply bg-white border border-[#E5E1D8] p-8 md:p-12;
+  }
+  /* Marcas de prioridad de estudio. Sin marca = estudiar en serio. */
+  .etiqueta-saltar {
+    @apply bg-[#C0392B] text-white text-[10px] uppercase font-bold tracking-[0.15em] px-3 py-1 inline-block;
+  }
+  .etiqueta-arribita {
+    @apply bg-[#F2C230] text-[#1A1A1A] text-[10px] uppercase font-bold tracking-[0.15em] px-3 py-1 inline-block;
+  }
+}
+
+/* Ritmo de lectura del cuerpo de leccion. */
+.prose-editorial p {
+  @apply leading-relaxed text-ink/80;
+  font-size: 1.0625rem;
+}
+.prose-editorial p + p {
+  @apply mt-5;
+}
+.prose-editorial a {
+  @apply underline decoration-line underline-offset-4;
+}
+.prose-editorial a:hover {
+  @apply decoration-ink;
+}

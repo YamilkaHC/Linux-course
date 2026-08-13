@@ -1,0 +1,207 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 57. Fuente: transcripciones/video_44.md (introducción a vi/vim: modos y movimiento)
+---
+
+<Layout titulo="El editor vi: primeros pasos — Curso Linux" descripcion="Entra en vi, entiende sus dos modos de trabajo y muévete por un documento con h, j, k, l, w, b, $ y ^.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 57</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+      <span class="etiqueta-arribita">Por arribita</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">El editor vi: primeros pasos</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      El editor que vas a encontrar en cualquier servidor del mundo. Empieza por entender por qué no puedes escribir nada más abrirlo.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Por qué necesitas un editor en modo texto: los servidores de verdad <strong>no tienen entorno gráfico</strong>, así que <code>edit</code> no te sirve allí.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Los <strong>dos modos</strong> de <code>vi</code> —comando y edición— y por qué al abrirlo estás siempre en el primero.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A moverte por un documento con las teclas propias de <code>vi</code>: <code>w</code>, <code>b</code>, <code>$</code> y <code>^</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Por qué esto importa</h2>
+    <p class="mt-4">Durante el curso has editado ficheros con <a href="/Linux-course/lecciones/16-editar-y-localizar-comandos">edit</a>, un editor gráfico. Cómodo, pero inútil donde de verdad se trabaja: los servidores que administran las empresas <strong>no llevan escritorio</strong>. Se manejan en modo comando, exactamente como llevas haciendo tú desde el principio en la terminal.</p>
+    <p class="mt-4">Ahí es donde entra <code>vi</code>. Un editor viejísimo —de las primeras versiones de Unix— que se estandarizó justo por venir incluido en el sistema, y que sigue estando en todas partes: Linux, HP-UX, Solaris, AIX. Aprenderlo es prácticamente obligatorio si quieres llamarte administrador.</p>
+    <p class="mt-4">Tiene fama de difícil. No es del todo cierto: editar texto sin ratón nunca será lo más cómodo del mundo, pero con cuatro comandos básicos te defiendes, y con la práctica resulta un editor excelente.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">vi, vim, ¿lo mismo?</p>
+      <p class="!mt-0">Los Linux modernos no traen el <code>vi</code> original, sino <strong>vim</strong> (<em>vi improved</em>, «vi mejorado»), con más funciones orientadas a programación. Al escribir <code>vi</code> se abre vim y verás su cabecera con la versión. Para lo que vas a aprender aquí, <strong>los comandos son idénticos en los dos</strong>. Más adelante aparecerá también <code>nano</code>, útil en algunas situaciones, pero <code>vi</code> está siempre.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Abrir un fichero</h2>
+    <p class="mt-4">Necesitas un texto con el que practicar: cualquier <code>.txt</code> con varios párrafos te vale. Si no tienes uno a mano, genéralo con lo que ya sabes, por ejemplo <code>man ls &gt; loren.txt</code>.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd Documentos
+$ ls
+loren.txt
+
+$ vi loren.txt</code></pre>
+    <p class="mt-4">Un detalle importante: <strong>si el fichero no existe —o escribes mal el nombre—, <code>vi</code> no protesta: lo crea vacío</strong>. Así que si abres un fichero conocido y aparece en blanco, sospecha del nombre antes que del contenido.</p>
+    <p class="mt-4">Abajo del todo verás una <strong>barra de estado</strong> con el nombre del fichero, el número de líneas y el de caracteres. La información exacta varía entre versiones, pero esos tres datos suelen estar.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Los dos modos</h2>
+    <p class="mt-4">Ahora prueba algo: escribe <code>hola</code>. Verás que no aparece el texto y que pasan cosas raras en pantalla.</p>
+    <p class="mt-4">No está roto. Es que <code>vi</code> tiene <strong>dos modos de trabajo</strong>:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Modo</th>
+            <th class="text-left p-3 border-b border-line font-bold">Qué haces en él</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><strong>Comando</strong></td><td class="p-3 border-b border-line">Moverte, borrar líneas, buscar, guardar, salir. Cada tecla es una orden</td></tr>
+          <tr><td class="p-3"><strong>Edición</strong></td><td class="p-3">Escribir texto, como en cualquier editor normal</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">Y aquí está lo que hay que grabarse: <strong>al abrir <code>vi</code> siempre entras en modo comando</strong>. Por eso tu «hola» no se escribió: la <code>h</code>, la <code>o</code>, la <code>l</code> y la <code>a</code> se interpretaron como órdenes.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 175" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Al abrir vi estás aquí</text>
+
+        <rect x="40" y="48" width="200" height="76" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="140" y="76" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">MODO COMANDO</text>
+        <text x="140" y="98" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">cada tecla es una orden</text>
+        <text x="140" y="114" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">moverse · borrar · guardar</text>
+
+        <rect x="320" y="48" width="200" height="76" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="420" y="76" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">MODO EDICIÓN</text>
+        <text x="420" y="98" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">cada tecla es texto</text>
+        <text x="420" y="114" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">escribir con normalidad</text>
+
+        <line x1="246" y1="72" x2="314" y2="72" stroke="#E5E1D8"/>
+        <path d="M314 72 l-6 -4 v8 z" fill="#E5E1D8" stroke="none"/>
+        <text x="280" y="66" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">próxima lección</text>
+
+        <text x="280" y="152" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">si escribes y no aparece nada, estás en modo comando</text>
+        <text x="280" y="168" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">es el error número uno de quien empieza</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Dos modos y un solo teclado.</figcaption>
+    </figure>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Abre <code>vi loren.txt</code>, intenta escribir una frase cualquiera y observa qué pasa. <strong>Meta:</strong> convencerte de que las teclas son órdenes. Para salir sin guardar nada, pulsa <code>Esc</code> y escribe <code>:q!</code> seguido de Enter.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Moverse: lo que funciona hoy</h2>
+    <p class="mt-4">Empieza por lo evidente: <strong>las flechas del teclado funcionan</strong>, y también <code>AvPág</code> y <code>RePág</code> para saltar de página. En un vim moderno no necesitas nada más para desplazarte.</p>
+    <p class="mt-4">Pero verás en cualquier manual estas cuatro letras, y conviene reconocerlas:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Tecla</th>
+            <th class="text-left p-3 border-b border-line font-bold">Mueve el cursor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>h</code></td><td class="p-3 border-b border-line">A la izquierda</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>j</code></td><td class="p-3 border-b border-line">Hacia abajo</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>k</code></td><td class="p-3 border-b border-line">Hacia arriba</td></tr>
+          <tr><td class="p-3"><code>l</code></td><td class="p-3">A la derecha</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">Están ahí por pura historia: <code>vi</code> nació cuando los terminales <strong>no tenían teclas de flecha</strong>. Hoy su uso es casi nulo, pero explica por qué el editor se comporta como se comporta.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Moverse: lo que sí vas a usar</h2>
+    <p class="mt-4">Estos cuatro comandos no tienen equivalente en las flechas y ahorran muchísimo tiempo:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Tecla</th>
+            <th class="text-left p-3 border-b border-line font-bold">Salta a</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>w</code></td><td class="p-3 border-b border-line">La siguiente palabra (<em>word</em>)</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>b</code></td><td class="p-3 border-b border-line">La palabra anterior (<em>back</em>)</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>$</code></td><td class="p-3 border-b border-line">El final de la línea</td></tr>
+          <tr><td class="p-3"><code>^</code></td><td class="p-3">El principio de la línea</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">Colócate en la primera palabra de un párrafo y pulsa <code>w</code> varias veces: el cursor va saltando palabra a palabra. Con <code>b</code> vuelve hacia atrás igual de rápido.</p>
+    <p class="mt-4">Un apunte práctico sobre el <code>^</code>: en un teclado inglés está sobre el número 6, así que se escribe con <code>Shift+6</code>. En teclado español está en otro sitio y puede costar encontrarlo. Es lo normal en estas herramientas: <strong>se diseñaron pensando en teclados en inglés</strong>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Dentro del fichero, recorre una línea entera solo con <code>w</code>, vuelve al principio con <code>b</code> y termina saltando con <code>$</code> y <code>^</code>. <strong>Meta:</strong> llegar al final de una línea larga en un solo golpe de tecla en lugar de veinte pulsaciones de flecha.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: primer contacto con vi</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Prepara el fichero de trabajo: <code>man ls &gt; loren.txt</code> y compruébalo con <code>wc -l loren.txt</code>, como en <a href="/Linux-course/lecciones/22-contar-y-tee">contar con wc</a>.</li>
+        <li>Ábrelo con <code>vi loren.txt</code> y localiza en la barra de estado el nombre, las líneas y los caracteres. Sal con <code>Esc</code> y <code>:q!</code>.</li>
+        <li>Abre ahora un nombre que no exista: <code>vi noexiste.txt</code>. Comprueba que aparece vacío, sal con <code>:q!</code> y verifica con <code>ls</code> qué ha pasado.</li>
+        <li><strong>Reto:</strong> vuelve a <code>loren.txt</code> y cronométrate. Ve hasta la última palabra de la quinta línea usando <strong>solo</strong> flechas; después repítelo usando <code>j</code> para bajar y <code>$</code> para saltar al final. Compara los dos recorridos.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Los servidores reales no tienen entorno gráfico, así que hace falta un editor en modo texto. <code>vi</code> —hoy <strong>vim</strong> en la práctica— está en absolutamente todos los sistemas tipo Unix, y sus comandos básicos son los mismos en ambos.</p>
+      <p><code>vi fichero</code> lo abre, y si no existe lo crea vacío. Tiene dos modos: <strong>comando</strong> (cada tecla es una orden) y <strong>edición</strong> (se escribe texto). Al abrirlo entras siempre en modo comando, por eso lo que tecleas al principio no aparece.</p>
+      <p>Para moverte funcionan las flechas y <code>AvPág</code>/<code>RePág</code>. Las teclas propias son <code>h j k l</code> (izquierda, abajo, arriba, derecha), y las que de verdad ahorran tiempo: <code>w</code> siguiente palabra, <code>b</code> anterior, <code>$</code> final de línea y <code>^</code> principio.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Abres un fichero con <code>vi</code>, escribes una frase y no aparece nada. ¿Qué ocurre?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Estás en <strong>modo comando</strong>, que es donde entra <code>vi</code> al abrirse. Cada tecla se interpreta como una orden, no como texto. Para escribir hay que pasar antes al modo edición.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Escribes <code>vi informe.txt</code> y el editor aparece completamente vacío. ¿Se ha borrado el fichero?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Casi seguro que no: cuando el nombre no existe, <code>vi</code> lo crea vacío sin avisar. Lo más probable es que hayas escrito mal el nombre o estés en otro directorio. Sal con <code>:q!</code> y comprueba con <code>ls</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Estás al principio de una línea muy larga y quieres ir a su final. ¿Qué pulsas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>$</code>, en modo comando. Te lleva al final de la línea de un solo golpe. Para volver al principio, <code>^</code>. Y para avanzar palabra a palabra, <code>w</code> y <code>b</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/56-cambiar-de-usuario-con-su" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/58-insertar-texto-en-vi" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

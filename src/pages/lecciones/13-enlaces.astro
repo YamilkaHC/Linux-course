@@ -1,0 +1,176 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 13. Fuente: transcripciones/video 10.md (inodos, enlaces hard con ln, enlaces soft con ln -s)
+---
+
+<Layout titulo="Enlaces en Linux: hard y soft — Curso Linux" descripcion="Entiende qué es un i-nodo y crea enlaces duros (hard) con ln y enlaces simbólicos (soft) con ln -s. Aprende por qué un enlace hard sobrevive al borrado del original y un enlace soft queda roto.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 13</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">4 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Enlaces en Linux: hard y soft</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Un enlace es como un acceso directo de Windows: te lleva a un archivo sin recorrer toda la jerarquía. Hay dos tipos, y la diferencia está en cómo Linux guarda los ficheros por dentro.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Qué es un <strong>i-nodo</strong>: dónde guarda Linux de verdad los datos de un fichero, y por qué el nombre vive en el directorio, no en el i-nodo.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A crear <strong>enlaces duros</strong> con <code>ln</code>: varios nombres para un mismo i-nodo, que sobreviven aunque borres el original.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A crear <strong>enlaces simbólicos</strong> con <code>ln -s</code>: accesos directos que quedan rotos si desaparece el archivo al que apuntan.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Antes de nada: el i-nodo</h2>
+    <p class="mt-4">Al crear un archivo, Linux no guarda juntos «nombre + contenido». Asocia un <strong>i-nodo</strong> (<em>inode</em>): un registro con los <strong>metadatos</strong> —tamaño, usuario, grupo, tipo— y la dirección de los <strong>bloques de datos</strong> donde está el contenido real.</p>
+    <p class="mt-4">Clave: el i-nodo <strong>no guarda el nombre</strong>. Cada i-nodo lleva un número; el nombre lo guarda el <strong>directorio</strong>, una lista de parejas «nombre → número de i-nodo». Al pedir un fichero, el directorio traduce su nombre al i-nodo, y el i-nodo te lleva a los datos.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <rect x="10" y="30" width="150" height="160" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="85" y="22" font-family="Playfair Display, serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">Directorio</text>
+        <text x="24" y="65" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none">fichero1.txt → 512</text>
+        <text x="24" y="95" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none">enlace.txt  → 512</text>
+        <text x="24" y="125" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none">otro.txt    → 780</text>
+
+        <rect x="220" y="55" width="120" height="70" fill="#FDFCFB" stroke="#1A1A1A"/>
+        <text x="280" y="47" font-family="Playfair Display, serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">i-nodo 512</text>
+        <text x="234" y="82" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">tamaño, dueño,</text>
+        <text x="234" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">tipo, permisos…</text>
+        <text x="234" y="114" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">→ bloques de datos</text>
+
+        <rect x="410" y="55" width="100" height="70" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="460" y="47" font-family="Playfair Display, serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">Datos</text>
+        <text x="460" y="95" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">contenido real</text>
+
+        <line x1="130" y1="61" x2="220" y2="80" stroke="#1A1A1A"/>
+        <line x1="130" y1="91" x2="220" y2="88" stroke="#1A1A1A"/>
+        <line x1="340" y1="90" x2="410" y2="90" stroke="#1A1A1A"/>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Dos nombres del directorio apuntan al mismo i-nodo 512: eso es un enlace duro.</figcaption>
+    </figure>
+
+    <p class="mt-4">Los <strong>enlaces</strong> juegan con esta estructura. Hay dos tipos: <strong>duros</strong> (hard) y <strong>simbólicos</strong> (soft).</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Enlaces duros (hard) con ln</h2>
+    <p class="mt-4">Un enlace duro es otro <strong>nombre</strong> para el mismo i-nodo, no una copia: ambos apuntan al mismísimo contenido. Fabrica primero un fichero con contenido (recuerda <a href="/Linux-course/lecciones/09-crear-y-copiar"><code>echo</code> con redirección</a>):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo hola &gt; fichero1.txt      # crea el fichero con el texto "hola"
+$ cat fichero1.txt              # comprueba el contenido
+hola
+$ ls -l fichero1.txt            # fíjate en el número de enlaces</code></pre>
+    <p class="mt-4">En <code>ls -l</code>, el número tras los permisos es el <strong>número de enlaces</strong>: ahora pone <code>1</code>. Un enlace duro se crea con <code>ln origen enlace</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ln fichero1.txt fichero1enlace.txt   # crea un enlace duro
+$ ls -l fichero1.txt                    # ahora el contador pone 2
+$ ls -l fichero1enlace.txt              # el enlace también pone 2</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>fichero1.txt</code>, míralo con <code>ls -l</code>, crea el enlace con <code>ln</code> y vuelve a mirar. <strong>Meta:</strong> ver cómo el contador de enlaces pasa de <code>1</code> a <code>2</code> en los dos nombres.</p>
+    </div>
+
+    <p class="mt-4">Para confirmar que apuntan al mismo sitio, usa <code>-i</code> en <code>ls</code>, que muestra el <strong>número de i-nodo</strong>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -li fichero1.txt fichero1enlace.txt   # mismo número de i-nodo = mismos datos</code></pre>
+    <p class="mt-4">Comparten i-nodo, así que comparten datos: si editas uno cambia el otro. Añade una línea con <code>&gt;&gt;</code> (<a href="/Linux-course/lecciones/12-ver-mas-y-explorar">doble mayor añade</a>, mayor simple sustituye):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo adios &gt;&gt; fichero1.txt      # añade texto por uno de los nombres
+$ cat fichero1enlace.txt          # ...y aparece también en el otro
+hola
+adios</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>ls -li</code> sobre los dos nombres y compara el número de i-nodo. Luego añade una línea con <code>echo … &gt;&gt;</code> a uno y léela con <code>cat</code> en el otro. <strong>Meta:</strong> comprobar que son el mismo fichero con dos nombres.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">La prueba clave: borrar el original</h2>
+    <p class="mt-4">Como todos los nombres apuntan al i-nodo, el fichero sigue vivo <strong>mientras quede al menos un nombre</strong>. Borra el original con <a href="/Linux-course/lecciones/10-mover-y-borrar"><code>rm</code></a> y no pierdes nada:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ rm fichero1.txt                 # borra el nombre original
+$ cat fichero1enlace.txt          # los datos siguen ahí
+hola
+adios</code></pre>
+    <p class="mt-4">El i-nodo solo se libera al borrar <strong>todos</strong> sus nombres: puedes tener 24 enlaces duros y, hasta borrar los 24, los datos no desaparecen.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Enlaces simbólicos (soft) con ln -s</h2>
+    <p class="mt-4">El enlace simbólico es el <strong>acceso directo</strong> clásico de Windows. No es otro nombre del i-nodo: es un fichero <strong>independiente</strong> que solo guarda un puntero al nombre del original. Se crea con <code>ln -s</code> (<code>-s</code> de <em>symbolic</em>). Usa el <code>ejemplo.txt</code> de lecciones anteriores:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ln -s ejemplo.txt ejemploenlace.txt   # crea un enlace simbólico
+$ ls -l                                  # míralo</code></pre>
+    <p class="mt-4">En <code>ls -l</code> se distingue a simple vista: el <strong>primer carácter</strong> (que en <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo">otros ficheros</a> era <code>-</code> o <code>d</code>) ahora es una <code>l</code> de <em>link</em>, con una flecha hacia el destino:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>lrwxrwxrwx  1 user user  11 … ejemploenlace.txt -&gt; ejemplo.txt</code></pre>
+    <p class="text-sm text-ink/60">El tamaño <code>11</code> son los caracteres del nombre al que apunta, no el archivo real: un enlace soft es solo un puntero.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea el enlace con <code>ln -s ejemplo.txt ejemploenlace.txt</code> y ejecuta <code>ls -l</code>. <strong>Meta:</strong> ver la <code>l</code> del primer carácter y la flecha <code>-&gt;</code> que señala al original.</p>
+    </div>
+
+    <p class="mt-4">La diferencia decisiva con el enlace duro: borra el <strong>original</strong> y mira qué le pasa al enlace:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ rm ejemplo.txt        # borra el original
+$ ls -l                 # el enlace aparece en rojo: está roto</code></pre>
+    <p class="mt-4">Queda <strong>inservible</strong> (muchas terminales lo muestran en rojo): apunta a un nombre que ya no existe, porque no guardaba los datos, solo la ruta. Bórralo con <code>rm ejemploenlace.txt</code>.</p>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">La diferencia en una línea</p>
+      <p class="!mt-2 text-cream/90">El enlace <strong>duro</strong> apunta al i-nodo, así que sobrevive aunque borres el original. El enlace <strong>simbólico</strong> apunta al nombre, así que se rompe si el original desaparece.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: hard contra soft</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Crea <code>echo hola &gt; fichero1.txt</code>, míralo con <code>ls -l</code> y anota el número de enlaces. Crea un enlace duro con <code>ln fichero1.txt fichero1enlace.txt</code> y vuelve a mirar: el contador debe subir a <code>2</code>.</li>
+        <li>Ejecuta <code>ls -li fichero1.txt fichero1enlace.txt</code> y confirma que comparten número de i-nodo. Añade una línea con <code>echo adios &gt;&gt; fichero1.txt</code> y léela con <code>cat fichero1enlace.txt</code>.</li>
+        <li>Borra el original con <code>rm fichero1.txt</code> y comprueba con <code>cat fichero1enlace.txt</code> que los datos <strong>siguen</strong> ahí.</li>
+        <li>Crea un enlace simbólico con <code>ln -s ejemplo.txt ejemploenlace.txt</code>, identifica la <code>l</code> y la flecha en <code>ls -l</code>, borra <code>ejemplo.txt</code> y observa cómo el enlace queda roto. <strong>Reto:</strong> explica con tus palabras por qué el hard aguantó y el soft no.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Linux guarda cada fichero en un <strong>i-nodo</strong> (metadatos + dirección de los datos) con un número; el <strong>nombre</strong> lo guarda el directorio como una pareja «nombre → i-nodo». Por eso un mismo i-nodo puede tener varios nombres.</p>
+      <p>Un <strong>enlace duro</strong> (<code>ln origen enlace</code>) es otro nombre del mismo i-nodo: comparte datos, sube el contador de enlaces de <code>ls -l</code> y sobrevive aunque borres el original. Con <code>ls -li</code> confirmas que comparten i-nodo.</p>
+      <p>Un <strong>enlace simbólico</strong> (<code>ln -s origen enlace</code>) es un acceso directo independiente que solo apunta al nombre: se distingue por la <code>l</code> en <code>ls -l</code> y queda roto si el archivo original desaparece.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Dónde guarda Linux el <strong>nombre</strong> de un fichero, si no es en el i-nodo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">En el <strong>directorio</strong>. El i-nodo guarda los metadatos y la dirección de los datos, pero no el nombre; el directorio mantiene una lista de parejas «nombre → número de i-nodo» que traduce cada nombre a su i-nodo.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Creas un enlace duro y borras el archivo original. ¿Pierdes los datos?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No. El enlace duro apunta al mismo i-nodo, y el i-nodo solo se libera cuando se borran <strong>todos</strong> sus nombres. Mientras quede un enlace duro, los datos siguen accesibles con <code>cat</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Cómo distingues un enlace simbólico en <code>ls -l</code> y qué le pasa si borras el original?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">El primer carácter de la línea es una <code>l</code> (de <em>link</em>) y aparece una flecha <code>-&gt;</code> con el nombre al que apunta. Como solo guarda ese nombre, si borras el original el enlace queda <strong>roto</strong> (suele mostrarse en rojo) e inservible.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/12-ver-mas-y-explorar" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/14-espacio-en-disco" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

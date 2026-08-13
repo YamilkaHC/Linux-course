@@ -1,0 +1,172 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 33. Fuente: transcripciones/video_26.md (segunda mitad: leer permisos en ls -l, rwx, usuario/grupo/otros, ficheros vs directorios)
+---
+
+<Layout titulo="Leer los permisos rwx en ls -l — Curso Linux" descripcion="Descifra la columna de permisos de ls -l: el tipo de fichero, los tres grupos (usuario, grupo, otros) y qué significan r, w y x en ficheros y en directorios.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 33</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Leer los permisos: r, w, x</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Ya sabes quién es cada <a href="/Linux-course/lecciones/32-usuarios-y-grupos">usuario y grupo</a>. Ahora, a leer esa cadena de letras al principio de <code>ls -l</code>: dice exactamente quién puede leer, escribir o ejecutar cada fichero.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A leer el <strong>primer carácter</strong> (tipo) y los tres bloques de permisos: <strong>usuario</strong>, <strong>grupo</strong> y <strong>otros</strong>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Qué significan <code>r</code> (leer), <code>w</code> (escribir/borrar) y <code>x</code> (ejecutar), y qué es un <code>-</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Por qué <code>r</code>, <code>w</code> y <code>x</code> significan cosas <strong>distintas</strong> en un fichero y en un directorio.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">La columna de permisos</h2>
+    <p class="mt-4">Haz <a href="/Linux-course/lecciones/07-navegar-ficheros"><code>ls -l</code></a> y mira la primera columna: 10 caracteres. El <strong>primero</strong> es el <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo">tipo</a> (<code>-</code> fichero, <code>d</code> directorio, <code>l</code> enlace, <code>b</code> bloque, <code>c</code> carácter). Los <strong>9 restantes</strong> van en tres grupos de tres:</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Anatomía de -rw-r--r--</text>
+        <rect x="40" y="45" width="60" height="45" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="70" y="73" font-family="Inter, sans-serif" font-size="16" fill="#1A1A1A" stroke="none" text-anchor="middle">-</text>
+        <rect x="110" y="45" width="120" height="45" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="170" y="73" font-family="Inter, sans-serif" font-size="16" fill="#1A1A1A" stroke="none" text-anchor="middle">rw-</text>
+        <rect x="240" y="45" width="120" height="45" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="300" y="73" font-family="Inter, sans-serif" font-size="16" fill="#1A1A1A" stroke="none" text-anchor="middle">r--</text>
+        <rect x="370" y="45" width="120" height="45" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="430" y="73" font-family="Inter, sans-serif" font-size="16" fill="#1A1A1A" stroke="none" text-anchor="middle">r--</text>
+        <text x="70" y="110" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">tipo</text>
+        <text x="170" y="110" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">usuario</text>
+        <text x="300" y="110" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">grupo</text>
+        <text x="430" y="110" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">otros</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Tipo + 3 bloques: permisos del dueño, de su grupo y de todos los demás.</figcaption>
+    </figure>
+
+    <ul class="list-disc pl-6 space-y-1 mt-4">
+      <li><strong>Usuario</strong> (primeros 3) — permisos del propietario del fichero.</li>
+      <li><strong>Grupo</strong> (siguientes 3) — permisos de quien pertenezca al grupo del fichero.</li>
+      <li><strong>Otros</strong> (últimos 3) — permisos de cualquier otro usuario.</li>
+    </ul>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Qué significan r, w y x</h2>
+    <p class="mt-4">En cada bloque, la <strong>letra activa</strong> el permiso y el <code>-</code> lo desactiva:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>r  (read)   leer: listar, copiar o ver el contenido (cat, ls...)
+w  (write)  escribir: modificar, borrar o cambiar el fichero
+x  (execute) ejecutar: correr el fichero (si es un programa)
+-           ese permiso está desactivado</code></pre>
+
+    <p class="mt-4">Ejemplo real: un fichero de texto <code>-rw-r--r--</code>. El dueño puede leer y escribir (<code>rw-</code>), el grupo solo leer (<code>r--</code>) y los demás solo leer (<code>r--</code>). No hay <code>x</code> porque es un fichero de texto, no un programa. En cambio, un binario como <code>ping</code> se ve <code>-rwxr-xr-x</code>: se puede ejecutar.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -l documento1.txt    # -rw-r--r--  → dueño lee/escribe, resto solo lee
+$ ls -l /bin/ping         # -rwxr-xr-x  → ejecutable por todos</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">La ausencia de x no siempre es «prohibido»</p>
+      <p class="!mt-2">Que un fichero de texto no tenga <code>x</code> no significa que «no te dejen» ejecutarlo: significa que <strong>no es un ejecutable</strong>. La <code>x</code> solo aparece en ficheros que tiene sentido correr.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Haz <code>ls -l</code> en <code>/var/log</code> y en <code>/bin</code>. <strong>Meta:</strong> encontrar un fichero <code>-rw-r--r--</code> (solo el dueño escribe) y un ejecutable <code>-rwxr-xr-x</code>, y leer en voz alta qué puede cada quién.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">En directorios cambia el significado</h2>
+    <p class="mt-4">Los directorios usan las mismas <code>r</code>, <code>w</code>, <code>x</code>, pero como son otra cosa, significan otra cosa:</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 155" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">r · w · x en un directorio</text>
+        <rect x="20" y="40" width="150" height="95" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="95" y="66" font-family="Inter, sans-serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">r</text>
+        <text x="95" y="90" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">listar su</text>
+        <text x="95" y="105" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">contenido (ls)</text>
+        <rect x="185" y="40" width="150" height="95" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="66" font-family="Inter, sans-serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">w</text>
+        <text x="260" y="90" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">crear/borrar</text>
+        <text x="260" y="105" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">ficheros dentro</text>
+        <rect x="350" y="40" width="150" height="95" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="425" y="66" font-family="Inter, sans-serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">x</text>
+        <text x="425" y="90" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">entrar en él</text>
+        <text x="425" y="105" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">(cd)</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">En un directorio: <code>r</code> lista, <code>w</code> crea/borra dentro, <code>x</code> permite entrar.</figcaption>
+    </figure>
+
+    <ul class="list-disc pl-6 space-y-1 mt-4">
+      <li><code>r</code> — puedes <strong>listar</strong> el contenido (hacer <code>ls</code> dentro).</li>
+      <li><code>w</code> — puedes <strong>crear, borrar o modificar</strong> ficheros dentro del directorio.</li>
+      <li><code>x</code> — puedes <strong>entrar</strong> en él (hacer <code>cd</code>) y acceder a lo que contiene.</li>
+    </ul>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">Dos niveles de permiso</p>
+      <p class="!mt-2 text-cream/90">La <code>w</code> de un directorio te deja crear o borrar ficheros dentro, pero cada fichero tiene <strong>sus propios</strong> permisos: puede que puedas borrar un fichero (por el permiso del directorio) y a la vez no puedas modificar su contenido (por el permiso del fichero). Son controles independientes.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Haz <code>ls -l</code> de un directorio (fíjate en la <code>d</code> inicial y sus <code>rwx</code>). <strong>Meta:</strong> deducir si podrías entrar (<code>x</code>), listar (<code>r</code>) y crear ficheros (<code>w</code>) dentro, según cada bloque.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: descifrar permisos</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Haz <code>ls -l</code> en tu home y, para tres entradas, di en voz alta: tipo, y qué pueden hacer usuario, grupo y otros.</li>
+        <li>Compara un fichero de texto (<code>-rw-r--r--</code>) con un binario de <code>/bin</code> (<code>-rwxr-xr-x</code>). Explica por qué uno tiene <code>x</code> y el otro no.</li>
+        <li>Mira <code>ls -l</code> de un directorio y traduce sus <code>rwx</code> al significado de directorio (listar / crear-borrar / entrar).</li>
+        <li><strong>Reto:</strong> en <code>/var/log</code>, busca un fichero donde «otros» no tengan ningún permiso (<code>-rw-r-----</code>) y explica quién podría leerlo y quién no.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>En <code>ls -l</code>, el primer carácter es el tipo y los 9 siguientes son tres bloques: permisos del <strong>usuario</strong> (dueño), del <strong>grupo</strong> y de <strong>otros</strong>. La letra activa el permiso; el <code>-</code> lo desactiva.</p>
+      <p>En ficheros: <code>r</code> leer, <code>w</code> escribir o borrar, <code>x</code> ejecutar. Que falte la <code>x</code> en un texto significa que no es ejecutable, no que esté «prohibido».</p>
+      <p>En directorios cambia el significado: <code>r</code> listar el contenido, <code>w</code> crear o borrar ficheros dentro, <code>x</code> entrar (<code>cd</code>). Los permisos del directorio y los de cada fichero que contiene son independientes.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. En <code>-rw-r--r--</code>, ¿qué puede hacer un usuario que no es el dueño ni está en el grupo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Le corresponde el último bloque, <code>r--</code>: solo puede leer el fichero. No puede modificarlo ni borrarlo (no hay <code>w</code>) ni ejecutarlo (no hay <code>x</code>).</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Un fichero de texto no tiene <code>x</code>. ¿Significa que no te dejan ejecutarlo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No: significa que no es un ejecutable. La <code>x</code> solo aparece en ficheros que tiene sentido correr (programas, scripts). Su ausencia en un texto es lo normal, no una prohibición.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. En un directorio, ¿qué permite la <code>x</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Entrar en el directorio (hacer <code>cd</code>) y acceder a lo que contiene. En directorios, <code>r</code> es listar el contenido y <code>w</code> es crear o borrar ficheros dentro; la <code>x</code> es el permiso de acceso.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/32-usuarios-y-grupos" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/34-cambiar-permisos-chmod" class="btn-primario">Siguiente: cambiar permisos con chmod</a>
+    </nav>
+
+  </article>
+</Layout>

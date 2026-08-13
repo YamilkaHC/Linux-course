@@ -1,0 +1,142 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 70. Fuente: transcripciones/video_51.md (segunda parte: script contar_ficheros.sh completo y depuración)
+---
+
+<Layout titulo="Un script útil: contar ficheros — Curso Linux" descripcion="Construye paso a paso un script que cuenta los ficheros del directorio actual, depura un error de sintaxis y ejecútalo desde cualquier carpeta.">
+  <article class="prose-editorial">
+
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 70</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">5 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Un script útil: contar ficheros</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Junta todo lo aprendido en un programa de doce líneas que funciona en cualquier directorio.
+    </p>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Montar un script combinando <a href="/Linux-course/lecciones/69-guardar-la-salida-de-un-comando">sustitución de comandos</a>, aritmética y <code>echo</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span><strong>Leer un error de sintaxis</strong> y localizar la línea culpable.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Comprobar que funciona <strong>en cualquier directorio</strong>.</span></li>
+      </ul>
+    </section>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El detalle: ls -l cuenta de más</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -l | wc -l
+2</code></pre>
+    <p class="mt-4">Solo hay un fichero pero cuenta 2: <code>ls -l</code> incluye la línea «total». Hay que restar uno.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El script completo</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>#!/bin/bash
+
+# este programa cuenta ficheros
+
+echo "Contar ficheros"
+echo "---------------"
+
+num_ficheros=$(ls -l | wc -l)
+num_ficheros=$(($num_ficheros-1))
+directorio=$(pwd)
+
+echo "En el directorio $directorio hay $num_ficheros ficheros"</code></pre>
+    <p class="mt-4">Piezas conocidas: <code>$(ls -l | wc -l)</code> cuenta, <code>$(( n-1 ))</code> resta la línea sobrante, <code>$(pwd)</code> captura directorio actual. Por eso funciona en cualquier carpeta.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Depurar el error</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ chmod +x contar_ficheros.sh
+$ contar_ficheros.sh
+/home/user001/scripts/contar_ficheros.sh: línea 17: error sintáctico</code></pre>
+    <p class="mt-4">El mensaje da tipo de error y número de línea. Abre con <code>vi</code>, ve a <code>:17</code> con <code>:set nu</code>. Fallo típico: comilla sin cerrar.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Errores de sintaxis</p>
+      <p class="!mt-0">Casi siempre son <strong>comillas, paréntesis o corchetes sin cerrar</strong>. El número de línea indica donde la shell <em>se dio cuenta</em>, que puede ser una o dos líneas después del fallo real.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">La prueba de fuego</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /tmp
+$ contar_ficheros.sh
+En el directorio /tmp hay 10 ficheros
+
+$ cd /usr/bin
+$ contar_ficheros.sh
+En el directorio /usr/bin hay 1905 ficheros</code></pre>
+    <p class="mt-4">Funciona en todas partes: está en el <a href="/Linux-course/lecciones/67-path-permanente-y-source">PATH</a> y usa <code>pwd</code>/<code>ls</code> sin rutas fijas.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">De comandos sueltos a programa</text>
+        <rect x="30" y="44" width="150" height="40" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="105" y="69" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">ls -l | wc -l</text>
+        <rect x="30" y="92" width="150" height="40" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="105" y="117" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">$(( n - 1 ))</text>
+        <rect x="30" y="140" width="150" height="40" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="105" y="165" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">$(pwd)</text>
+        <line x1="188" y1="112" x2="228" y2="112" stroke="#1A1A1A"/>
+        <path d="M228 112 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+        <rect x="234" y="80" width="140" height="64" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="304" y="106" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">contar_ficheros.sh</text>
+        <text x="304" y="126" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">chmod +x · en el PATH</text>
+        <line x1="382" y1="112" x2="422" y2="112" stroke="#1A1A1A"/>
+        <path d="M422 112 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+        <rect x="428" y="80" width="102" height="64" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="479" y="100" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">/tmp</text>
+        <text x="479" y="116" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">/var/lib</text>
+        <text x="479" y="132" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">/usr/bin</text>
+        <text x="280" y="194" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">sin rutas fijas dentro, el mismo script sirve en cualquier carpeta</text>
+      </svg>
+    </figure>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Escribe <code>contar_ficheros.sh</code>, dale permisos y ejecútalo. Si falla, localiza la línea con <code>:set nu</code>.</li>
+        <li>Ejecútalo en <code>/tmp</code>, <code>/etc</code> y tu home. Verifica uno a mano.</li>
+        <li><strong>Reto:</strong> amplíalo con <code>$(whoami)</code>, <code>$(date)</code> y <code>$(df -h / | tail -n 1)</code>.</li>
+      </ol>
+    </section>
+
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Combina <code>$(ls -l | wc -l)</code> para contar, <code>$(( n-1 ))</code> para restar la línea «total», y <code>$(pwd)</code> para saber dónde estás.</p>
+      <p>Errores de sintaxis: casi siempre comillas o paréntesis sin cerrar. <code>:set nu</code> y <code>:N</code> llevan directo al punto.</p>
+      <p>Script sin rutas fijas + en el PATH = funciona en cualquier directorio.</p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Por qué el script resta 1 al resultado de <code>ls -l | wc -l</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque <code>ls -l</code> imprime una línea «total» que <code>wc -l</code> también cuenta.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Tu script da «error sintáctico en la línea 17». ¿Sospechoso más probable?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Comilla, paréntesis o corchete sin cerrar, en esa línea o la anterior.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué hace que funcione en <code>/tmp</code> y en <code>/usr/bin</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Está en el PATH (lo encuentra desde cualquier sitio) y usa <code>pwd</code>/<code>ls</code> sin rutas fijas (trabaja sobre el directorio actual).</p>
+        </details>
+      </div>
+    </section>
+
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/69-guardar-la-salida-de-un-comando" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/71-codigo-de-retorno" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

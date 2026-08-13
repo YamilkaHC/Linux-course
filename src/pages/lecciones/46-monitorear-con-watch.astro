@@ -1,0 +1,180 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 46. Fuente: transcripciones/video_37.md (comando watch)
+---
+
+<Layout titulo="Monitorear en vivo con watch — Curso Linux" descripcion="watch repite un comando cada N segundos y deja el resultado en pantalla: monitoriza memoria, directorios y procesos, y aprende por qué las tuberías necesitan comillas.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 46</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+      <span class="etiqueta-saltar">Saltar</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Monitorear en vivo con watch</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Deja de pulsar la flecha arriba y Enter una y otra vez. Que lo repita Linux por ti.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A repetir cualquier comando cada N segundos con <code>watch -n N</code>, y a ver el resultado actualizándose solo en pantalla.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A montar tus propios monitores: vigilar un directorio mientras se llena, o los procesos que más memoria consumen.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Por qué <code>watch</code> se rompe con las <a href="/Linux-course/lecciones/21-tuberias-y-filtros">tuberías</a> si no pones comillas. Es el fallo con el que tropieza todo el mundo.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Una nueva sección: planificar trabajos</h2>
+    <p class="mt-4">Empiezas aquí un bloque nuevo del curso: lanzar comandos <strong>cuando tú decidas</strong>, no cuando estés delante del teclado. Piensa en el caso típico de un administrador: un backup de un directorio todas las noches a las 4 de la mañana, excepto los domingos que no se trabaja. Eso se resuelve con comandos de planificación que verás en las próximas lecciones.</p>
+    <p class="mt-4">Y se empieza por el más inmediato de todos: <code>watch</code>, que no planifica para mañana sino que <strong>repite ahora mismo</strong>, cada pocos segundos, y te deja verlo en directo.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El caso: vigilar la memoria</h2>
+    <p class="mt-4">Recuerda <code>free</code>, de <a href="/Linux-course/lecciones/05-primeros-comandos">tus primeros comandos</a>: te dice cuánta memoria hay libre, usada, compartida y cuánto <em>swap</em> queda. El problema es que te da una foto fija:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ free
+              total     usado     libre   compartido   búfer/caché
+Mem:        2043784    712456    843120        18244        488208
+Swap:        998396         0    998396</code></pre>
+    <p class="mt-4">Si quieres seguir la evolución, tendrías que ir lanzándolo a mano cada poco. O dejar que lo haga <code>watch</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ watch -n 2 free</code></pre>
+    <p class="mt-4">La pantalla ya no vuelve al prompt: se queda mostrando la salida de <code>free</code> y <strong>la refresca cada 2 segundos</strong>. Eso es la opción <code>-n</code>: los segundos entre repeticiones.</p>
+    <p class="mt-4">Para salir, <code>Ctrl+C</code>, igual que en <a href="/Linux-course/lecciones/12-ver-mas-y-explorar">tail -f</a> o en <a href="/Linux-course/lecciones/29-monitorear-con-top">top</a>.</p>
+    <p class="mt-4">¿Y cómo compruebas que de verdad se está actualizando? Abre una <strong>segunda terminal</strong> y lanza ahí cualquier programa que consuma memoria —un editor con <code>edit hola</code>, o directamente <code>firefox</code>—. Verás cómo cambian los números en la primera ventana mientras el programa arranca, y cómo vuelven atrás cuando lo cierras.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lanza <code>watch -n 2 free</code>, abre otra terminal y ejecuta ahí <code>firefox</code> (o el navegador que tengas). <strong>Meta:</strong> ver moverse las cifras de memoria en vivo y salir después con <code>Ctrl+C</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Vigilar un directorio que se llena</h2>
+    <p class="mt-4">Este es el uso que más te va a servir. Imagina que estás recibiendo una descarga o haciendo una copia y quieres ver aparecer los ficheros según llegan. Prepara el terreno:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ mkdir practicas
+$ cd practicas
+$ touch f1
+$ ls -l
+-rw-r--r-- 1 user001 user001 0 ago  4 16:02 f1</code></pre>
+    <p class="mt-4">Ahora pon el directorio bajo vigilancia, refrescando cada segundo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ watch -n 1 ls -l</code></pre>
+    <p class="mt-4">Abre una segunda terminal, ve a ese mismo directorio y empieza a trastear. Cada cosa que hagas aparece en la primera pantalla un segundo después:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ touch f2               # aparece un fichero nuevo
+$ touch f3               # y otro
+$ echo hola > f3         # f3 pasa de 0 a 5 bytes
+$ rm f1                  # f1 desaparece de la lista</code></pre>
+    <p class="mt-4">Fíjate en el detalle del <code>echo hola &gt; f3</code>: no solo ves aparecer y desaparecer ficheros, también ves cambiar la <strong>columna de tamaño</strong> cuando el contenido crece. Es la <a href="/Linux-course/lecciones/19-entrada-salida-y-redirecciones">redirección</a> de siempre, ahora en directo.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 190" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Dos terminales trabajando juntas</text>
+
+        <rect x="30" y="42" width="220" height="110" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="140" y="64" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">Terminal 1</text>
+        <line x1="55" y1="74" x2="225" y2="74" stroke="#E5E1D8"/>
+        <text x="140" y="94" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">watch -n 1 ls -l</text>
+        <text x="140" y="116" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">observa</text>
+        <text x="140" y="136" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">se refresca sola</text>
+
+        <rect x="310" y="42" width="220" height="110" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="420" y="64" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">Terminal 2</text>
+        <line x1="335" y1="74" x2="505" y2="74" stroke="#E5E1D8"/>
+        <text x="420" y="94" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">touch f2 · rm f1</text>
+        <text x="420" y="116" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">actúa</text>
+        <text x="420" y="136" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">tú escribes aquí</text>
+
+        <line x1="310" y1="97" x2="256" y2="97" stroke="#1A1A1A"/>
+        <path d="M256 97 l6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+
+        <text x="280" y="176" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">el cambio aparece en la terminal 1 al siguiente refresco</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">El patrón de siempre: una terminal mira, la otra toca.</figcaption>
+    </figure>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Monta el montaje completo: <code>watch -n 1 ls -l</code> en <code>practicas</code> y, desde otra terminal, <code>touch f2</code>, <code>echo hola &gt; f3</code> y <code>rm f1</code>. <strong>Meta:</strong> ver los tres tipos de cambio —alta, tamaño y baja— sin tocar la primera ventana.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El fallo de las tuberías</h2>
+    <p class="mt-4">Ahora algo más ambicioso: los procesos que más memoria consumen. Empieza montando el comando a mano, como aprendiste en <a href="/Linux-course/lecciones/21-tuberias-y-filtros">tuberías y filtros</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps -A --format %mem,comm | sort | tail -n 5
+ 1.8 gnome-shell
+ 2.4 Xorg
+ 3.1 gnome-software
+ 5.6 firefox
+ 8.2 systemd</code></pre>
+    <p class="mt-4">Tres piezas que ya conoces: <a href="/Linux-course/lecciones/26-procesos-y-ps">ps</a> saca los procesos con su porcentaje de memoria, <a href="/Linux-course/lecciones/24-ordenar-sort">sort</a> los ordena y <a href="/Linux-course/lecciones/12-ver-mas-y-explorar">tail -n 5</a> se queda con los cinco últimos, es decir, los que más consumen.</p>
+    <p class="mt-4">Ahora intenta ponerlo bajo <code>watch</code> tal cual:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ watch -n 2 ps -A --format %mem,comm | sort | tail -n 5</code></pre>
+    <p class="mt-4">Y no funciona: no aparece nada útil en pantalla.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">watch solo ve hasta la primera tubería</p>
+      <p class="!mt-0">Cuando escribes tuberías detrás de <code>watch</code>, la shell le entrega <strong>únicamente el primer comando</strong>, el que está a la izquierda de la primera <code>|</code>. El resto de la cadena se lo queda la shell y se pierde el efecto. La solución es <strong>encerrar todo el pipeline entre comillas</strong>.</p>
+    </div>
+
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ watch -n 2 "ps -A --format %mem,comm | sort | tail -n 5"</code></pre>
+    <p class="mt-4">Ahora sí: los cinco procesos más pesados, actualizándose cada dos segundos. Compruébalo abriendo <code>firefox</code> desde otra terminal y verás cómo se cuela en la lista, y cómo desaparece al cerrarlo. Lanza también <code>top</code> en esa segunda ventana y observa cómo entra él mismo en el ranking.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lanza el comando primero <strong>sin</strong> comillas y después <strong>con</strong> ellas. <strong>Meta:</strong> comprobar en tu propia pantalla la diferencia, para que la próxima vez que un <code>watch</code> con tuberías no haga nada sepas de inmediato qué le falta.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: monta tus propios monitores</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Lanza <code>watch -n 2 free</code> y, desde otra terminal, abre y cierra un programa. Anota qué columnas se mueven más.</li>
+        <li>Crea <code>practicas</code>, ponlo bajo <code>watch -n 1 ls -l</code> y provoca desde otra ventana un alta (<code>touch</code>), un cambio de tamaño (<code>echo hola &gt; f3</code>) y una baja (<code>rm</code>).</li>
+        <li>Construye el pipeline <code>ps -A --format %mem,comm | sort | tail -n 5</code> a mano, comprueba que funciona, y solo entonces envuélvelo en <code>watch -n 2 "..."</code>.</li>
+        <li><strong>Reto:</strong> monta un monitor del espacio en disco combinando lo que sabes: <code>watch -n 5 "df -h | grep /dev"</code>, usando <a href="/Linux-course/lecciones/14-espacio-en-disco">df</a> y <a href="/Linux-course/lecciones/23-buscar-texto-grep">grep</a>. Déjalo corriendo mientras creas y borras un fichero grande con <code>tar</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>watch -n N comando</code> repite el comando cada N segundos y deja el resultado en pantalla, refrescándose solo. Se sale con <code>Ctrl+C</code>. Es la forma rápida de convertir cualquier comando en un monitor en vivo.</p>
+      <p>Los usos típicos: <code>watch -n 2 free</code> para la memoria y <code>watch -n 1 ls -l</code> para ver un directorio mientras se llena. El patrón es siempre el mismo: una terminal observa y otra actúa.</p>
+      <p>Con tuberías hay que poner comillas: sin ellas, <code>watch</code> solo recibe el primer comando de la cadena. Lo correcto es <code>watch -n 2 "ps -A --format %mem,comm | sort | tail -n 5"</code>.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué hace exactamente el <code>-n 2</code> de <code>watch -n 2 free</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Fija el intervalo de refresco: repite <code>free</code> cada 2 segundos y actualiza la pantalla con el nuevo resultado. No tiene nada que ver con el número de repeticiones; <code>watch</code> sigue hasta que lo cortas con <code>Ctrl+C</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Lanzas <code>watch -n 2 ps -A --format %mem,comm | sort | tail -n 5</code> y no ves lo que esperabas. ¿Por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Faltan las comillas. <code>watch</code> solo recibe el primer comando, el que está antes de la primera tubería; el resto del pipeline se lo queda la shell. Hay que escribirlo como <code>watch -n 2 "ps -A --format %mem,comm | sort | tail -n 5"</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Estás copiando ficheros a un directorio y quieres verlos llegar. ¿Cómo lo montas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">En una terminal, <code>cd</code> al directorio y <code>watch -n 1 ls -l</code>. En otra terminal haces la copia. Cada segundo verás aparecer los ficheros nuevos y crecer la columna de tamaño de los que se están escribiendo.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/45-zip-y-tar-comprimido" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/47-planificar-con-cron" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

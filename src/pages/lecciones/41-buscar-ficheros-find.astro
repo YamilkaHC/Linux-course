@@ -1,0 +1,168 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 41. Fuente: transcripciones/video_33.md (segunda mitad: comando find)
+---
+
+<Layout titulo="Buscar de verdad con find — Curso Linux" descripcion="Domina find: directorio de inicio, opciones y término de búsqueda; usa -name con comodines, descarta con -not y combínalo con tuberías.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 41</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Buscar de verdad con find</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Más lento que locate, pero mira el sistema de ficheros de verdad. Y encuentra hasta lo que se creó hace un minuto.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>La estructura fija de <code>find</code>: <strong>dónde</strong> buscar, <strong>cómo</strong> buscar y <strong>qué</strong> buscar. Con eso ya cubres la mayoría de los casos.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A buscar con <code>-name</code> y comodines entre comillas, y a invertir la búsqueda con <code>-not</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Por qué <code>find /</code> puede tenerte esperando una eternidad, y por qué aun así <code>find</code> es imprescindible.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Tres piezas, siempre en el mismo orden</h2>
+    <p class="mt-4">Un <code>find</code> típico se lee de izquierda a derecha como una frase:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /bin
+$ find . -name "f*"
+./false
+./fgconsole
+./findmnt
+...</code></pre>
+    <p class="mt-4">Traducido: «a partir del <strong>directorio actual</strong> (<code>.</code>), busca <strong>por nombre</strong> (<code>-name</code>) todo lo que <strong>empiece por f</strong>». El punto es el mismo que aprendiste con las <a href="/Linux-course/lecciones/07-navegar-ficheros">rutas relativas</a>: el directorio donde estás.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 170" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Anatomía de find</text>
+
+        <text x="30" y="58" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none">find</text>
+
+        <rect x="80" y="42" width="120" height="34" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="140" y="63" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">.</text>
+
+        <rect x="212" y="42" width="140" height="34" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="282" y="63" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">-name</text>
+
+        <rect x="364" y="42" width="160" height="34" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="444" y="63" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">"f*"</text>
+
+        <text x="140" y="96" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">DÓNDE empezar</text>
+        <text x="282" y="96" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">CÓMO buscar</text>
+        <text x="444" y="96" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">QUÉ buscar</text>
+
+        <text x="140" y="114" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">directorio de inicio</text>
+        <text x="282" y="114" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">opciones</text>
+        <text x="444" y="114" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">término de búsqueda</text>
+
+        <line x1="30" y1="134" x2="530" y2="134" stroke="#E5E1D8"/>
+        <text x="280" y="154" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">find busca siempre hacia abajo, recorriendo los subdirectorios</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Dónde, cómo y qué: el orden nunca cambia.</figcaption>
+    </figure>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ve a <code>/bin</code> con <code>cd /bin</code> y ejecuta <code>find . -name "f*"</code>. <strong>Meta:</strong> identificar en tu propio comando cuál es el directorio de inicio, cuál la opción y cuál el término.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Comodines: ponlos entre comillas</h2>
+    <p class="mt-4">El término de búsqueda va entre comillas para que los <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo">comodines</a> lleguen intactos a <code>find</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ find . -name "f"        # exactamente el fichero llamado f
+$ find . -name "f*"       # los que EMPIEZAN por f
+$ find . -name "*f*"      # los que contienen una f en cualquier posición</code></pre>
+    <p class="mt-4">A estas alturas puede que pienses que esto es lo mismo que un <code>ls -l f*</code>. Casi, pero hay dos diferencias que importan: <code>find</code> <strong>desciende automáticamente por los subdirectorios</strong>, mientras que <code>ls</code> se queda donde está; y <code>ls</code> solo lista, mientras que <code>find</code> permite <strong>hacer cosas</strong> con los ficheros encontrados —borrarlos, cambiarles los permisos, lo que necesites— dentro del propio comando. Eso se ve más adelante.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Dónde empezar: la decisión importante</h2>
+    <p class="mt-4">Puedes arrancar la búsqueda en cualquier punto del árbol:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /etc
+$ find . -name "f*"        # desde /etc hacia abajo: rápido y acotado
+
+$ find / -name "f*"        # desde la raíz: TODO el sistema de ficheros</code></pre>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Cuidado con find /</p>
+      <p class="!mt-0">A diferencia de <a href="/Linux-course/lecciones/40-buscar-ficheros-locate">locate</a>, <code>find</code> <strong>sí recorre el sistema de ficheros de verdad</strong>, directorio a directorio. Lanzarlo desde la raíz con <code>/</code> puede tenerte esperando una cantidad enorme de tiempo. No es que no debas usarlo: úsalo cuando de verdad no encuentres el fichero de otra forma. Lo prudente es partir siempre de un directorio concreto.</p>
+    </div>
+
+    <p class="mt-4">Al buscar por directorios del sistema verás mensajes de <strong>permiso denegado</strong>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /var/log
+$ find . -name "f*"
+find: './apt': Permiso denegado
+find: './private': Permiso denegado</code></pre>
+    <p class="mt-4">No es un fallo de <code>find</code>. Es lo que aprendiste en <a href="/Linux-course/lecciones/33-permisos-rwx">permisos rwx</a>: sin permiso de entrada en un directorio, ningún comando puede leerlo. Linux prohíbe el acceso independientemente de qué comando lo pida. Recuerda que puedes silenciar esos errores mandándolos a la papelera con <code>2&gt; /dev/null</code>, como viste en <a href="/Linux-course/lecciones/20-redirecciones-entrada-y-error">redirigir errores</a>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>find . -name "f*"</code> primero en <code>/etc</code> y después en <code>/var/log</code>. <strong>Meta:</strong> ver aparecer los «permiso denegado» y comprobar que desaparecen con <code>find . -name "f*" 2&gt; /dev/null</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Buscar lo contrario: -not</h2>
+    <p class="mt-4">A veces lo útil es todo <em>menos</em> un patrón. Se antepone <code>-not</code> a la condición:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ find . -not -name "*f*"      # todo lo que NO contenga una f</code></pre>
+    <p class="mt-4">Y como <code>find</code> escribe su resultado en la salida estándar, encaja con las <a href="/Linux-course/lecciones/21-tuberias-y-filtros">tuberías</a> sin ningún esfuerzo. Cuéntalos con <a href="/Linux-course/lecciones/22-contar-y-tee">wc -l</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ find . -not -name "*f*" | wc -l
+1652</code></pre>
+    <p class="mt-4">Un apunte de historia: en versiones antiguas de Linux era obligatorio terminar el comando con <code>-print</code> para que los resultados salieran por pantalla. Desde hace muchas versiones no hace falta, pero si ves un <code>find ... -print</code> en un manual viejo, ya sabes de dónde viene.</p>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: buscar donde locate no llega</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Desde <code>/bin</code>, lanza <code>find . -name "f*"</code> y luego <code>ls -l f*</code>. Compara las dos salidas y localiza qué encuentra uno y no el otro.</li>
+        <li>Repite la búsqueda en <code>/etc</code> con los tres patrones: <code>"f*"</code>, <code>"*f*"</code> y <code>"*conf*"</code>. Fíjate en cuántos resultados devuelve cada uno.</li>
+        <li>Vete a <code>/var/log</code> y comprueba los mensajes de permiso denegado. Vuelve a lanzarlo añadiendo <code>2&gt; /dev/null</code> al final.</li>
+        <li><strong>Reto:</strong> desde tu home, crea <code>touch prueba_find.txt</code> y compruébalo con las dos herramientas: <code>locate prueba_find</code> (no lo encontrará) y <code>find . -name "prueba*"</code> (sí). Después cuenta cuántos ficheros de tu home NO contienen la letra e con <code>find . -not -name "*e*" | wc -l</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>find</code> se escribe siempre igual: directorio de inicio, opciones y término de búsqueda. <code>find . -name "f*"</code> busca desde donde estás hacia abajo, recorriendo los subdirectorios.</p>
+      <p>El término va entre comillas para que los comodines funcionen: <code>"f*"</code> empieza por f, <code>"*f*"</code> la contiene. <code>-not</code> invierte la condición y el resultado se puede encadenar con tuberías, por ejemplo hacia <code>wc -l</code>.</p>
+      <p>A diferencia de <code>locate</code>, <code>find</code> recorre el sistema de ficheros de verdad: encuentra lo recién creado, pero <code>find /</code> es lentísimo y avisa con «permiso denegado» en los directorios a los que tu usuario no puede entrar.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Has creado un fichero hace un minuto y necesitas localizarlo. ¿<code>locate</code> o <code>find</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>find</code>. <code>locate</code> consulta una base de datos que se actualiza una vez al día, así que aún no conoce el fichero. <code>find</code> recorre el sistema de ficheros en ese momento, por eso es más lento pero siempre está al día.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué diferencia hay entre <code>find . -name "f*"</code> y <code>ls f*</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>find</code> desciende automáticamente por todos los subdirectorios; <code>ls</code> se limita al directorio actual. Además <code>find</code> permite operar sobre los ficheros encontrados dentro del propio comando, mientras que <code>ls</code> solo los lista.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Quieres contar todos los ficheros de <code>/etc</code> que NO contengan «conf» en el nombre. ¿Cómo lo escribes?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>cd /etc</code> y después <code>find . -not -name "*conf*" | wc -l</code>. El <code>-not</code> invierte la condición y la tubería manda la lista a <code>wc -l</code>, que cuenta las líneas. Añade <code>2&gt; /dev/null</code> si quieres quitar de en medio los avisos de permiso denegado.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/40-buscar-ficheros-locate" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/42-find-tipo-fecha-y-tamano" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

@@ -1,0 +1,150 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 19. Fuente: transcripciones/video_16.md (stdin/stdout/stderr, tr, redirección > y >>)
+---
+
+<Layout titulo="Entrada, salida y redirecciones: stdin, stdout, > y >> — Curso Linux" descripcion="Entiende los tres flujos de Linux (stdin 0, stdout 1, stderr 2), usa tr para sustituir caracteres y redirige la salida a ficheros con > (crea/sobrescribe) y >> (añade).">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 19</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Entrada, salida y las primeras redirecciones</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Todo comando lee de algún sitio y escribe en otro. Entender esos tres flujos —entrada, salida y error— es la base para redirigir resultados a ficheros, algo que usarás sin parar en Linux.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Los tres flujos estándar: <strong>entrada</strong> (<code>stdin</code>, código 0), <strong>salida</strong> (<code>stdout</code>, 1) y <strong>error</strong> (<code>stderr</code>, 2).</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A ver la entrada estándar en acción con <code>cat</code> sin fichero y con <strong><code>tr</code></strong>, que sustituye unos caracteres por otros.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A redirigir la salida a un fichero con <strong><code>&gt;</code></strong> (crea o sobrescribe) y con <strong><code>&gt;&gt;</code></strong> (añade al final).</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Para Linux, todo es un fichero</h2>
+    <p class="mt-4">El teclado, la pantalla, una impresora… Linux los ve a todos como ficheros (recuerda el directorio especial <a href="/Linux-course/lecciones/06-usuarios-y-ficheros"><code>/dev</code></a>, donde viven los dispositivos). Por eso cada proceso tiene tres «ficheros» abiertos de serie, con un número asociado:</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 175" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Los tres flujos estándar</text>
+        <rect x="20" y="45" width="150" height="105" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="95" y="72" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">stdin — 0</text>
+        <text x="95" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">entrada estándar</text>
+        <text x="95" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">(teclado)</text>
+        <rect x="185" y="45" width="150" height="105" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="72" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">stdout — 1</text>
+        <text x="260" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">salida estándar</text>
+        <text x="260" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">(pantalla)</text>
+        <rect x="350" y="45" width="150" height="105" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="425" y="72" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">stderr — 2</text>
+        <text x="425" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">error estándar</text>
+        <text x="425" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">(pantalla)</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Grábate los códigos: 0 entrada, 1 salida, 2 error. Se usan para redirigir.</figcaption>
+    </figure>
+
+    <p class="mt-4">Un ejemplo del ciclo completo: <a href="/Linux-course/lecciones/09-crear-y-copiar"><code>echo</code></a> recibe texto por la entrada y lo manda a la salida. Y un error típico va al flujo de error (que también acaba en pantalla):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo hola             # entra por stdin, sale por stdout → "hola"
+$ cat noexiste          # el error sale por stderr → "no existe el fichero"</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">La entrada estándar en vivo: cat y tr</h2>
+    <p class="mt-4">Muchos comandos que normalmente leen un fichero también aceptan la entrada estándar. Si ejecutas <a href="/Linux-course/lecciones/11-ver-contenido-cat"><code>cat</code></a> <strong>sin</strong> fichero, el cursor se queda esperando: lo que escribas por teclado es su «fichero» de entrada, y lo repite. Sales con <kbd>Ctrl+D</kbd>.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat                   # sin fichero: lee del teclado (stdin)
+hola                    # lo que escribes...
+hola                    # ...lo repite
+<kbd>Ctrl+D</kbd>                  # termina la entrada</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>cat</code> a secas, escribe dos líneas y observa que las repite. Sal con <kbd>Ctrl+D</kbd>. <strong>Meta:</strong> ver que el teclado hace de fichero de entrada.</p>
+    </div>
+
+    <p class="mt-4">El comando <code>tr</code> (<em>translate</em>) sustituye unos caracteres por otros. Sin fichero, también lee del teclado. Por ejemplo, cambiar toda <code>a</code> por <code>o</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ tr 'a' 'o'            # lee del teclado; cambia cada 'a' por 'o'
+hola                    # escribes esto...
+holo                    # ...y lo devuelve traducido
+<kbd>Ctrl+D</kbd></code></pre>
+    <p class="text-sm text-ink/60">No es habitual usar <code>tr</code> tecleando a mano; su sitio natural es dentro de scripts, que verás más adelante. Aquí sirve para <em>ver</em> la entrada estándar en acción.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Redirigir la salida: &gt; y &gt;&gt;</h2>
+    <p class="mt-4">Una <strong>redirección</strong> desvía la salida de un comando: en vez de ir a la pantalla, va a un fichero. El operador es <code>&gt;</code> (el signo «mayor que»). Ya lo viste al <a href="/Linux-course/lecciones/09-crear-y-copiar">crear ficheros con echo</a>; ahora ponle nombre:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo hola > f1.txt    # NO imprime "hola": lo guarda en f1.txt
+$ cat f1.txt            # → hola</code></pre>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">&gt; sobrescribe, &gt;&gt; añade</p>
+      <p class="!mt-2 text-cream/90">Con <code>&gt;</code>, si el fichero no existe lo crea, y si existe <strong>borra su contenido</strong> y lo reemplaza. Con <code>&gt;&gt;</code> (doble), <strong>añade</strong> al final sin borrar lo que había. Confundirlos puede costarte datos.</p>
+    </div>
+
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo adios > f1.txt   # sobrescribe: f1.txt ahora solo tiene "adios"
+$ echo hola >> f1.txt   # añade: ahora tiene "adios" y "hola"
+$ date >> f1.txt        # añade la fecha al final del fichero
+$ cat /etc/passwd >> f1.txt   # añade los usuarios del sistema al final</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>f1.txt</code> con <code>echo hola &gt; f1.txt</code>, míralo con <code>cat</code>, y luego ejecuta <code>echo adios &gt; f1.txt</code> otra vez. <strong>Meta:</strong> comprobar que <code>&gt;</code> borró lo anterior. Repite con <code>&gt;&gt;</code> y verás que ahora se acumula.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: flujos y redirección</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Ejecuta <code>cat</code> sin fichero, escribe algo y sal con <kbd>Ctrl+D</kbd>. Luego prueba <code>tr 'a' 'o'</code> escribiendo <code>banana</code> y observa la traducción.</li>
+        <li>Provoca un error con <code>cat noexiste</code> y recuerda que ese mensaje viaja por <code>stderr</code> (código 2), no por <code>stdout</code>.</li>
+        <li>Guarda un texto con <code>echo hola &gt; f1.txt</code> y compruébalo con <code>cat f1.txt</code>. Vuelve a lanzar <code>echo adios &gt; f1.txt</code> y confirma que sobrescribió.</li>
+        <li>Usa <code>&gt;&gt;</code> para ir acumulando en <code>f1.txt</code>: primero <code>echo hola &gt;&gt; f1.txt</code>, luego <code>date &gt;&gt; f1.txt</code>. <strong>Reto:</strong> añade <code>cat /etc/passwd &gt;&gt; f1.txt</code> y revisa el fichero final con <code>cat -n f1.txt</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Para Linux todo es un fichero, incluidos teclado y pantalla. Cada proceso tiene tres flujos: <strong>stdin</strong> (0, entrada, normalmente el teclado), <strong>stdout</strong> (1, salida, la pantalla) y <strong>stderr</strong> (2, errores, también la pantalla). Esos códigos 0, 1 y 2 son la clave para redirigir.</p>
+      <p><code>cat</code> sin fichero y <code>tr</code> leen del teclado (stdin) y muestran el resultado, útil para <em>ver</em> la entrada estándar; se sale con <kbd>Ctrl+D</kbd>. <code>tr</code> además sustituye unos caracteres por otros.</p>
+      <p>Redirigir la salida manda el resultado a un fichero: <code>&gt;</code> lo crea o lo sobrescribe (borrando lo anterior) y <code>&gt;&gt;</code> añade al final. Es una de las herramientas más usadas del día a día en Linux.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué códigos tienen la entrada, la salida y el error estándar?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Entrada estándar (<code>stdin</code>) = 0, salida estándar (<code>stdout</code>) = 1 y error estándar (<code>stderr</code>) = 2. Por defecto la entrada es el teclado y la salida y el error, la pantalla.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Tienes datos en <code>f1.txt</code> y ejecutas <code>echo nuevo &gt; f1.txt</code>. ¿Qué pasa con lo anterior?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Se pierde: <code>&gt;</code> sobrescribe, borra el contenido previo y deja solo «nuevo». Para conservar lo que había y añadir al final, hay que usar <code>&gt;&gt;</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Por qué <code>cat</code> sin ningún fichero se queda esperando?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque al no darle un fichero, <code>cat</code> lee de la entrada estándar, que es el teclado. Repite lo que escribes hasta que le indicas fin de entrada con <kbd>Ctrl+D</kbd>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/18-fecha-y-tiempo-activo" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/20-redirecciones-entrada-y-error" class="btn-primario">Siguiente: redirigir entrada y errores</a>
+    </nav>
+
+  </article>
+</Layout>

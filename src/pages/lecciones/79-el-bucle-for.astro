@@ -1,0 +1,136 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 79. Fuente: transcripciones/video_56.md (primera parte: bucle for)
+---
+
+<Layout titulo="El bucle for — Curso Linux" descripcion="Repite comandos sobre listas de palabras, rangos {a..g}, ficheros con glob y salidas de comandos usando for/in/do/done.">
+  <article class="prose-editorial">
+
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 79</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">4 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">El bucle for</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Hasta ahora repites copiando líneas. Con <code>for</code> lo escribes una vez y se ejecuta para cada elemento.
+    </p>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Sintaxis: <code>for variable in lista; do comandos; done</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Rangos con <code>&#123;a..g&#125;</code> y <code>&#123;1..10&#125;</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Listas de ficheros (glob) y de salida de comandos.</span></li>
+      </ul>
+    </section>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Sintaxis básica</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>for color in rojo verde azul
+do
+    echo "Color: $color"
+done</code></pre>
+    <p class="mt-4">La variable toma cada valor de la lista. <code>do</code> abre el bloque, <code>done</code> lo cierra.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Rangos</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>for letra in &#123;a..g&#125;
+do
+    echo $letra
+done
+# a b c d e f g
+
+for num in &#123;1..5&#125;
+do
+    echo $num
+done
+# 1 2 3 4 5</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Ficheros con glob</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>for f in /etc/*.conf
+do
+    echo "Fichero: $f"
+done</code></pre>
+    <p class="mt-4">La shell expande <code>*.conf</code> a la lista de ficheros reales. Cada uno pasa por la variable <code>f</code>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Salida de comando como lista</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>for usuario in $(cat /etc/passwd | cut -d: -f1)
+do
+    echo "Usuario: $usuario"
+done</code></pre>
+    <p class="mt-4"><code>$(comando)</code> genera la lista. Cada línea/palabra se convierte en un elemento del bucle.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 190" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Fuentes de listas para for</text>
+        <rect x="20" y="44" width="120" height="50" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="80" y="64" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">Palabras</text>
+        <text x="80" y="82" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">a b c</text>
+        <rect x="155" y="44" width="120" height="50" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="215" y="64" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">Rangos</text>
+        <text x="215" y="82" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">&#123;1..10&#125;</text>
+        <rect x="290" y="44" width="120" height="50" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="350" y="64" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">Glob</text>
+        <text x="350" y="82" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">*.conf</text>
+        <rect x="425" y="44" width="120" height="50" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="485" y="64" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">Comando</text>
+        <text x="485" y="82" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">$(cmd)</text>
+        <line x1="80" y1="100" x2="280" y2="130" stroke="#E5E1D8"/>
+        <line x1="215" y1="100" x2="280" y2="130" stroke="#E5E1D8"/>
+        <line x1="350" y1="100" x2="280" y2="130" stroke="#E5E1D8"/>
+        <line x1="485" y1="100" x2="280" y2="130" stroke="#E5E1D8"/>
+        <rect x="200" y="126" width="160" height="40" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="280" y="150" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">for var in LISTA</text>
+        <text x="280" y="185" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">la variable toma cada elemento, uno por iteración</text>
+      </svg>
+    </figure>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Prueba <code>for</code> con lista de palabras, con rango <code>&#123;1..5&#125;</code> y con <code>/etc/*.conf</code>.</li>
+        <li>Escribe <code>crear_dirs.sh</code> que cree <code>dir_&#123;a..e&#125;</code> con <code>mkdir</code> dentro de un <code>for</code>.</li>
+        <li><strong>Reto:</strong> escribe un <code>for</code> que recorra <code>$(ls /home)</code> y compruebe con <code>if [ -d ]</code> si cada entrada es directorio.</li>
+      </ol>
+    </section>
+
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>for var in lista; do comandos; done</code>. La variable toma cada elemento por turno.</p>
+      <p>Listas: palabras sueltas, rangos <code>&#123;a..z&#125;</code>, globs <code>*.txt</code>, o salida de comandos <code>$(cmd)</code>.</p>
+      <p>Es la base de la automatización: lo que haría a mano 100 veces, un <code>for</code> lo hace en 3 líneas.</p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué palabra cierra un bucle <code>for</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>done</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. <code>for f in *.sh</code> — ¿de dónde sale la lista?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">La shell expande el glob <code>*.sh</code> a todos los ficheros <code>.sh</code> del directorio actual.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Cómo generar la lista &#123;1..100&#125; sin escribir 100 números?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Con la expansión de rango de bash: <code>&#123;1..100&#125;</code>. La shell genera los 100 números automáticamente.</p>
+        </details>
+      </div>
+    </section>
+
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/78-patrones-en-case" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/80-el-bucle-while" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

@@ -1,0 +1,122 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 71. Fuente: transcripciones/video_52.md (primera parte: el código de retorno $?)
+---
+
+<Layout titulo="El código de retorno $? — Curso Linux" descripcion="Todo comando devuelve un número entre 0 y 255: 0 si fue bien y otro valor si hubo error. Consúltalo con echo $? y guárdalo para usarlo en tus scripts.">
+  <article class="prose-editorial">
+
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 71</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">4 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">El código de retorno: $?</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Cada comando deja un número detrás. Con él, tu script sabe si algo salió bien.
+    </p>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Todo comando devuelve 0-255. <strong>0 = todo bien</strong>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Consultarlo con <code>echo $?</code> — siempre se refiere al <strong>comando anterior</strong>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Guardarlo en una variable para usarlo después.</span></li>
+      </ul>
+    </section>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Consultarlo: echo $?</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls
+contar_ficheros.sh  s1.sh
+$ echo $?
+0                       ← correcto
+
+$ ls linux
+ls: no se puede acceder a 'linux': No existe el fichero o el directorio
+$ echo $?
+2                       ← error</code></pre>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">$? se refiere SIEMPRE al comando anterior</p>
+      <p class="!mt-0">Si consultas <code>$?</code> dos veces seguidas, la segunda da 0 (resultado del propio <code>echo</code>). Míralo justo después, o guárdalo.</p>
+    </div>
+
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls linux          # falla
+$ echo $?
+2                   ← código del ls
+$ echo $?
+0                   ← código del echo anterior</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Guardarlo para después</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ contar_ficheros.sh
+$ resultado=$?
+$ echo $resultado
+0</code></pre>
+    <p class="mt-4">Ahora ese valor es tuyo y no lo borra el siguiente comando. Utilidad real: <strong>un script lanza un comando, comprueba si funcionó y decide qué hacer</strong>.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 175" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Lo que deja cada comando</text>
+        <rect x="40" y="46" width="180" height="56" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="130" y="70" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">salida en pantalla</text>
+        <text x="130" y="88" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">lo que sí ves</text>
+        <rect x="340" y="46" width="180" height="56" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="430" y="70" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">código de retorno</text>
+        <text x="430" y="88" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">lo que consultas con $?</text>
+        <text x="280" y="78" font-family="Inter, sans-serif" font-size="16" fill="#1A1A1A" stroke="none" text-anchor="middle">+</text>
+        <line x1="40" y1="126" x2="520" y2="126" stroke="#E5E1D8"/>
+        <text x="280" y="148" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">0 = correcto &nbsp;·&nbsp; cualquier otro número = algo falló</text>
+        <text x="280" y="166" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">es la base de las condiciones que verás a continuación</text>
+      </svg>
+    </figure>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Comprueba <code>$?</code> de tres comandos correctos (<code>ls</code>, <code>pwd</code>, <code>date</code>) y tres que fallen.</li>
+        <li>Ejecuta <code>echo $?</code> dos veces seguidas tras un error y explica por qué la segunda da 0.</li>
+        <li><strong>Reto:</strong> script que ejecute <code>ls /tmp</code>, guarde <code>resultado=$?</code> y cuente ficheros con <code>$(ls /tmp | wc -l)</code>. Muestre ambos datos.</li>
+      </ol>
+    </section>
+
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Todo comando devuelve 0-255. <strong>0 = correcto</strong>, otro valor = error.</p>
+      <p><code>echo $?</code> consulta el código del último comando ejecutado, incluido el propio <code>echo</code>.</p>
+      <p>Para conservarlo: <code>resultado=$?</code> justo después del comando.</p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. <code>echo $?</code> devuelve 0. ¿Bueno o malo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Bueno: 0 = éxito. En Linux es al revés que en otros lenguajes.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Un comando falla, consultas <code>$?</code>, y al repetir da 0. ¿Se arregló solo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No. El segundo <code>$?</code> refleja el <code>echo</code> anterior, que fue bien. Consulta inmediatamente o guarda en variable.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Cómo conservar el código para usarlo después?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>resultado=$?</code> justo después del comando. El valor se mantiene aunque ejecutes más cosas.</p>
+        </details>
+      </div>
+    </section>
+
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/70-script-contar-ficheros" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/72-condicionales-if-else" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

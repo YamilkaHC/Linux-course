@@ -1,0 +1,141 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 28. Fuente: transcripciones/video_24.md (primera mitad: prioridad, nice, sleep, renice)
+---
+
+<Layout titulo="Prioridad de procesos: nice, renice y sleep — Curso Linux" descripcion="Entiende la prioridad (nice) de los procesos, del -20 al +19; usa sleep para pruebas y cambia la prioridad de un proceso en marcha con renice.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 28</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">La prioridad de los procesos: nice y renice</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Linux reparte el tiempo de CPU entre muchos <a href="/Linux-course/lecciones/26-procesos-y-ps">procesos</a> a la vez. La <strong>prioridad</strong> decide a quién le da más turno. Aquí aprendes a leerla y a cambiarla.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Qué es la prioridad (<strong>nice</strong>) de un proceso: del <code>-20</code> (máxima) al <code>+19</code> (mínima), con <code>0</code> por defecto.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A crear un proceso de prueba con <strong><code>sleep</code></strong> y a ver su prioridad con <code>ps -l</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A cambiar la prioridad de un proceso en marcha con <strong><code>renice</code></strong>, y por qué un usuario normal solo puede bajarla.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Tiempo compartido y prioridad</h2>
+    <p class="mt-4">Como Linux es multitarea, va dando a cada proceso una <strong>cuota de tiempo</strong>: ejecuta uno, lo duerme, pasa al siguiente… tan rápido que parece simultáneo. La prioridad determina cuánto tiempo recibe cada uno. Se mide con un número llamado <strong>nice</strong>:</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">La escala de prioridad (nice)</text>
+        <line x1="40" y1="70" x2="480" y2="70"/>
+        <path d="M473 65 L480 70 L473 75" fill="none"/>
+        <rect x="40" y="55" width="90" height="30" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="85" y="74" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">-20</text>
+        <rect x="215" y="55" width="90" height="30" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="74" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">0</text>
+        <rect x="390" y="55" width="90" height="30" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="435" y="74" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">+19</text>
+        <text x="85" y="105" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">MÁS prioridad</text>
+        <text x="260" y="105" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">por defecto</text>
+        <text x="435" y="105" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">MENOS prioridad</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Contraintuitivo: cuanto más <strong>bajo</strong> el número, <strong>mayor</strong> la prioridad. El -20 manda.</figcaption>
+    </figure>
+
+    <p class="mt-4">Ojo con la lógica invertida: <code>-20</code> es la <strong>mayor</strong> prioridad (más tiempo de CPU) y <code>+19</code> la <strong>menor</strong>. Los procesos normales arrancan en <code>0</code> (prioridad media). Puedes ver la columna <strong>NI</strong> (nice) con <a href="/Linux-course/lecciones/26-procesos-y-ps"><code>ps -l</code></a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps -efl | less        # mira la columna NI: verás muchos 0, y -20 en procesos del sistema</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Un proceso de prueba: sleep</h2>
+    <p class="mt-4">Para experimentar necesitamos un proceso que dure. <code>sleep N</code> «duerme» N segundos sin hacer nada; es muy útil en scripts cuando quieres esperar antes de continuar. Lánzalo largo en otra pestaña de terminal:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sleep 1000            # ocupa la terminal 1000 segundos (déjalo corriendo)</code></pre>
+    <p class="mt-4">En tu terminal principal, localízalo con <a href="/Linux-course/lecciones/23-buscar-texto-grep"><code>grep</code></a> y anota su PID y su nice (0):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps -efl | grep sleep  # busca el proceso sleep: PID y NI (=0)</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>sleep 30</code> y observa cómo la terminal queda ocupada 30 segundos. Luego lanza <code>sleep 1000</code> en otra pestaña y encuéntralo con <code>ps -efl | grep sleep</code>. <strong>Meta:</strong> tener un proceso identificado con su PID.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cambiar la prioridad: renice</h2>
+    <p class="mt-4">Imagina que un cálculo pesado consume demasiado y quieres que vaya más lento <strong>sin pararlo</strong>. Con <code>renice</code> cambias el nice de un proceso ya en marcha: le das el nuevo valor y su PID.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ renice 10 6437        # baja la prioridad del PID 6437 a nice +10
+# → "6437 (process ID) old priority 0, new priority 10"
+$ ps -efl | grep sleep  # confirma: ahora NI vale 10</code></pre>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">Un usuario normal solo baja la prioridad</p>
+      <p class="!mt-2 text-cream/90">Puedes subir el número (bajar prioridad: 0 → 10), pero si intentas ponerlo negativo (<code>renice -5 6437</code>) Linux responde «permiso denegado». Subir la prioridad de un proceso está reservado a root.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Cuidado dónde tocas</p>
+      <p class="!mt-2">No cambies la prioridad de procesos del sistema: puede dar errores o afectar la estabilidad. Practica solo con procesos tuyos, como el <code>sleep</code> de prueba.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Con el PID de tu <code>sleep</code>, ejecuta <code>renice 10 TU_PID</code> y verifica el cambio con <code>ps -efl | grep sleep</code>. Luego intenta <code>renice -1 TU_PID</code>. <strong>Meta:</strong> ver que puedes bajar la prioridad pero no subirla siendo usuario normal.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: jugar con la prioridad</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Explora las prioridades del sistema con <code>ps -efl | less</code> y localiza la columna NI: apunta algún <code>0</code> y algún <code>-20</code>.</li>
+        <li>Lanza <code>sleep 1000</code> en una pestaña nueva y encuéntralo con <code>ps -efl | grep sleep</code>. Anota su PID y su nice.</li>
+        <li>Baja su prioridad con <code>renice 10 TU_PID</code> y confirma con <code>ps -efl | grep sleep</code> que NI pasó a 10.</li>
+        <li>Intenta subirla con <code>renice -5 TU_PID</code>. <strong>Reto:</strong> explica por qué te da «permiso denegado» y qué usuario sí podría hacerlo.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>La prioridad (<strong>nice</strong>) va del <code>-20</code> (máxima) al <code>+19</code> (mínima), con <code>0</code> por defecto. Cuanto más bajo el número, más tiempo de CPU recibe el proceso. La ves en la columna NI de <code>ps -l</code> o <code>ps -efl</code>.</p>
+      <p><code>sleep N</code> crea un proceso que dura N segundos, ideal para pruebas y para esperar en scripts.</p>
+      <p><code>renice valor PID</code> cambia la prioridad de un proceso en marcha. Un usuario normal solo puede <strong>bajarla</strong> (subir el número); poner un nice negativo requiere root. No toques la prioridad de procesos del sistema.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué proceso tiene más prioridad, uno con nice <code>-20</code> o uno con <code>+19</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">El de <code>-20</code>. La escala es invertida: cuanto más bajo (más negativo) el nice, mayor la prioridad y más tiempo de CPU recibe. El <code>+19</code> es la prioridad más baja.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Para qué sirve <code>sleep 1000</code> en estos ejemplos?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Crea un proceso que dura 1000 segundos sin hacer nada, así tienes un proceso propio, fácil de identificar por su PID, con el que practicar <code>renice</code> sin riesgo. En scripts sirve para esperar cierto tiempo antes de continuar.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Haces <code>renice -5 TU_PID</code> y sale «permiso denegado». ¿Por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque un usuario normal solo puede bajar la prioridad (subir el número nice), no aumentarla. Poner un nice negativo (más prioridad) está reservado al usuario root.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/27-arbol-de-procesos-pstree" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/29-monitorear-con-top" class="btn-primario">Siguiente: monitorear con top</a>
+    </nav>
+
+  </article>
+</Layout>

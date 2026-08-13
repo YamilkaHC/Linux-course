@@ -1,0 +1,144 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 12. Fuente: transcripciones/video 9.md (tail, head, tail -f, less, tree, who)
+---
+
+<Layout titulo="Ver partes y explorar el sistema — Curso Linux" descripcion="Lee solo el principio o el final de un archivo con head y tail, monitorea en vivo con tail -f, recorre archivos con less, dibuja el árbol de directorios con tree y ve quién está conectado con who.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 12</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">5 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Ver partes y explorar el sistema</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      A veces no quieres leer todo un archivo, solo su final. Y a veces no quieres ver un archivo, sino el mapa de tus carpetas.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A leer solo el final de un archivo con <code>tail</code> y solo el principio con <code>head</code>, útil en ficheros enormes donde <code>cat</code> se queda corto.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A monitorear un archivo <strong>en vivo</strong> con <code>tail -f</code>, la técnica que usan los administradores para vigilar logs de un servidor.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A explorar con <code>less</code>, dibujar el árbol de carpetas con <code>tree</code> y ver quién está conectado con <code>who</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <p class="mt-8 text-ink/70">Ya sabes volcar un archivo entero con <a href="/Linux-course/lecciones/11-ver-contenido-cat"><code>cat</code></a>, pero un log puede tener miles de líneas. Estos comandos te dejan mirar solo el trozo que necesitas. Reutiliza el <code>ejemplo.txt</code> de la lección anterior (<code>man ls &gt; ejemplo.txt</code>).</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">tail: las últimas líneas</h2>
+    <p class="mt-4"><code>tail</code> («cola») muestra las <strong>últimas 10 líneas</strong> de un archivo. Con <code>-n</code> eliges cuántas:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ tail ejemplo.txt          # las últimas 10 líneas
+$ tail -n 20 ejemplo.txt     # las últimas 20 líneas</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>tail ejemplo.txt</code> y luego <code>tail -n 20 ejemplo.txt</code>. <strong>Meta:</strong> ver cómo <code>-n</code> cambia cuántas líneas del final te muestra.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">head: las primeras líneas</h2>
+    <p class="mt-4"><code>head</code> («cabeza») es el opuesto: las <strong>primeras 10 líneas</strong>, ideal para orientarte en un archivo desconocido. <code>-n</code> funciona igual:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ head ejemplo.txt          # las primeras 10 líneas
+$ head -n 20 ejemplo.txt     # las primeras 20 líneas</code></pre>
+    <p class="text-sm text-ink/60">Mnemotecnia: <code>head</code> = arriba, <code>tail</code> = abajo.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Compara <code>head ejemplo.txt</code> con <code>tail ejemplo.txt</code>. <strong>Meta:</strong> comprobar que uno lee el principio y el otro el final del mismo archivo.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">tail -f: monitorear en vivo</h2>
+    <p class="mt-4">La opción <code>-f</code> (<em>follow</em>) no cierra el comando: lo deja <strong>esperando</strong> y muestra cada línea nueva del archivo en tiempo real. Así se vigila un log mientras el sistema trabaja. Necesitas <strong>dos terminales</strong>. En la primera, quédate pegado al archivo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code># Terminal 1 — se queda esperando, no vuelve al prompt
+$ tail -f ejemplo.txt</code></pre>
+    <p class="mt-4">En la segunda, añade texto con <code>&gt;&gt;</code> (doble mayor <strong>añade</strong> al final; <code>&gt;</code> simple sustituye todo):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code># Terminal 2
+$ echo hola &gt;&gt; ejemplo.txt
+$ echo esto es una prueba &gt;&gt; ejemplo.txt</code></pre>
+    <p class="mt-4">En la primera terminal las palabras aparecen solas. Para salir de <code>tail -f</code> pulsa <kbd>Ctrl</kbd>+<kbd>C</kbd>. Esto es justo lo que hace un administrador para ver en directo qué le pasa a un servidor.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Deja <code>tail -f ejemplo.txt</code> en una pestaña y, en otra, lanza <code>echo prueba &gt;&gt; ejemplo.txt</code>. <strong>Meta:</strong> ver la línea aparecer en vivo; después sal con <kbd>Ctrl</kbd>+<kbd>C</kbd>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">less: recorrer un archivo como el manual</h2>
+    <p class="mt-4"><code>less</code> abre una vista navegable en lugar de volcar todo de golpe, como el <a href="/Linux-course/lecciones/07-navegar-ficheros"><code>man</code></a> que ya conoces. Bajas con las flechas y sales con <kbd>q</kbd>. Más cómodo que <code>cat</code> en archivos largos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ less ejemplo.txt          # navega con las flechas; sal con q</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">tree: el árbol de carpetas</h2>
+    <p class="mt-4"><code>tree</code> dibuja la <strong>jerarquía de directorios</strong> con sus subcarpetas anidadas, como el explorador de archivos pero en terminal. Si no está instalado (<code>orden no encontrada</code>), instálalo como <a href="/Linux-course/lecciones/06-usuarios-y-ficheros">root</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ su -                       # entra como administrador (pide la clave de root)
+# apt-get install tree       # instala el paquete
+# exit                       # vuelve a tu usuario normal
+$ tree                       # dibuja el árbol desde donde estás</code></pre>
+    <p class="text-sm text-ink/60">Ejecuta <code>tree</code> con tu <strong>usuario normal</strong>: como root verías las carpetas del sistema, no las tuyas.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Instala <code>tree</code> y ejecútalo en tu directorio home. <strong>Meta:</strong> ver el árbol de tus carpetas dibujado con líneas.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">who: quién está conectado</h2>
+    <p class="mt-4"><code>who</code> muestra los usuarios conectados, con el tipo de conexión y la fecha y hora en que iniciaron sesión:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ who                        # tu usuario, tu conexión y cuándo entraste</code></pre>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: mira solo lo que necesitas</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Regenera el archivo largo (<code>man ls &gt; ejemplo.txt</code>) y mira su final con <code>tail</code> y su principio con <code>head</code>. Luego pide 15 líneas de cada uno con <code>-n 15</code>.</li>
+        <li>Abre dos pestañas: en una deja <code>tail -f ejemplo.txt</code> y en la otra lanza <code>echo linea nueva &gt;&gt; ejemplo.txt</code>. Observa cómo aparece en vivo y sal con <kbd>Ctrl</kbd>+<kbd>C</kbd>.</li>
+        <li>Recorre el mismo archivo con <code>less ejemplo.txt</code>, baja unas líneas con las flechas y sal con <kbd>q</kbd>.</li>
+        <li><strong>Reto extra:</strong> instala <code>tree</code>, dibuja tu home y luego ejecuta <code>who</code>. Piensa en qué se parecen a lo que verías en un explorador gráfico y en el panel de usuarios de otro sistema.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>tail</code> muestra el final de un archivo y <code>head</code> el principio; ambos aceptan <code>-n</code> para elegir cuántas líneas, útil en ficheros enormes donde no quieres leer todo.</p>
+      <p><code>tail -f</code> deja el comando siguiendo el archivo y te enseña en vivo cada línea nueva: la técnica clásica para vigilar logs de un servidor. Sales con <kbd>Ctrl</kbd>+<kbd>C</kbd>.</p>
+      <p><code>less</code> navega un archivo como <code>man</code>, <code>tree</code> dibuja el árbol de directorios (instálalo con <code>apt-get install tree</code>) y <code>who</code> lista los usuarios conectados.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué diferencia hay entre <code>head</code> y <code>tail</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>head</code> muestra las <strong>primeras</strong> 10 líneas de un archivo y <code>tail</code> las <strong>últimas</strong> 10. Los dos aceptan <code>-n</code> para cambiar cuántas líneas quieres ver.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Para qué sirve <code>tail -f</code> y cómo se sale?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Deja el comando «siguiendo» el archivo y muestra en <strong>tiempo real</strong> cada línea nueva que se le añade; se usa para monitorear logs de un servidor en vivo. Para salir se pulsa <kbd>Ctrl</kbd>+<kbd>C</kbd>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué hace <code>tree</code> y por qué conviene ejecutarlo como usuario normal?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>tree</code> dibuja de forma gráfica el árbol de directorios. Conviene lanzarlo con tu <strong>usuario normal</strong> porque como root verías las carpetas del sistema en lugar de las tuyas. Si no está instalado, se añade con <code>apt-get install tree</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/11-ver-contenido-cat" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/13-enlaces" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

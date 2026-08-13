@@ -1,0 +1,207 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 39. Fuente: transcripciones/video_32.md (personalizar PS1 y ficheros que cargan las variables)
+---
+
+<Layout titulo="Personalizar el prompt (PS1) y ficheros de arranque — Curso Linux" descripcion="Cambia tu prompt con la variable PS1 y sus códigos de control, y descubre qué ficheros (profile y bashrc) cargan las variables al entrar en el sistema.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 39</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+      <span class="etiqueta-arribita">Por arribita</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Personalizar el prompt y los ficheros de arranque</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Ya sabes crear variables. Ahora modificas una del sistema para cambiar tu prompt, y descubres de dónde salen todas las demás.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A cambiar tu prompt asignando texto a <code>PS1</code>: es el ejemplo más visible de para qué sirve modificar una variable de entorno.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Los códigos de control (<code>\u</code>, <code>\t</code>, <code>\w</code>) que hacen que el prompt sea <strong>dinámico</strong> en vez de un texto fijo.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Qué ficheros se ejecutan al entrar en el sistema y crean las variables: <code>/etc/profile</code>, <code>/etc/bash.bashrc</code>, <code>~/.profile</code> y <code>~/.bashrc</code>. Sin esto, todo lo anterior se pierde al cerrar la terminal.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Mira qué hay dentro de PS1</h2>
+    <p class="mt-4">La variable que controla el prompt (ese texto que aparece antes de cada comando) es <code>PS1</code>. Léela como cualquier otra, tal y como viste en <a href="/Linux-course/lecciones/37-variables-de-entorno">variables de entorno</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo $PS1
+\u@\h:\w\$</code></pre>
+    <p class="mt-4">Lo que veas en tu pantalla puede ser distinto: <code>PS1</code> viene preparada de forma diferente en Debian, Ubuntu, Fedora, Red Hat u openSUSE. Esa cadena aparentemente ilegible dice, en realidad, algo muy sencillo: <strong>pon el nombre del usuario, el directorio en el que estamos, y termina con una almohadilla si somos root o con un dólar si somos un usuario normal</strong>.</p>
+    <p class="mt-4">Parte de esa cadena es ya shell scripting, que se ve más adelante en el curso. No hace falta entenderla entera para cambiarla.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cambiarlo por un texto fijo</h2>
+    <p class="mt-4">Es una asignación normal, exactamente como las de <a href="/Linux-course/lecciones/38-crear-variables-y-modificar-path">la lección anterior</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ PS1="mi prompt: "
+mi prompt: ls -l          # el prompt cambió, y todo sigue funcionando igual
+
+mi prompt: PS1="usuarios linux: "
+usuarios linux: </code></pre>
+    <p class="mt-4">El prompt se queda con lo que le pongas. Fíjate en dos detalles: las <strong>comillas</strong> son necesarias porque el valor lleva espacios, y conviene dejar un espacio final antes de cerrarlas para que tus comandos no queden pegados al texto.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Guarda tu prompt actual con <code>original=$PS1</code>, cámbialo con <code>PS1="mi prompt: "</code> y ejecuta un <code>ls -l</code>. <strong>Meta:</strong> comprobar que el prompt es solo texto y no afecta a los comandos. Recupéralo con <code>PS1=$original</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Códigos de control: un prompt dinámico</h2>
+    <p class="mt-4">Un texto fijo es poco útil. Lo interesante son los códigos que empiezan por barra invertida, porque Linux los sustituye por información real en cada momento:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ PS1="usuario \u: "
+usuario user001:
+
+$ PS1="usuario \u \t: "
+usuario user001 09:41:23:
+
+$ PS1="usuario \u \t \w: "
+usuario user001 09:41:55 ~:
+
+$ cd /tmp
+usuario user001 09:42:10 /tmp: </code></pre>
+    <table class="w-full text-sm my-6 border border-line">
+      <thead class="bg-sand">
+        <tr>
+          <th class="text-left p-3 border-b border-line">Código</th>
+          <th class="text-left p-3 border-b border-line">Qué muestra</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="p-3 border-b border-line"><code>\u</code></td><td class="p-3 border-b border-line">Nombre real del usuario conectado</td></tr>
+        <tr><td class="p-3 border-b border-line"><code>\t</code></td><td class="p-3 border-b border-line">Hora en formato de 24 horas</td></tr>
+        <tr><td class="p-3 border-b border-line"><code>\w</code></td><td class="p-3 border-b border-line">Directorio de trabajo actual</td></tr>
+        <tr><td class="p-3 border-b border-line"><code>\$</code></td><td class="p-3 border-b border-line">Almohadilla si eres root, dólar si eres usuario normal</td></tr>
+        <tr><td class="p-3"><code>\[</code></td><td class="p-3">Inicio de secuencia de caracteres no imprimibles (colores, por ejemplo)</td></tr>
+      </tbody>
+    </table>
+    <p class="mt-4">Ahí está la diferencia clave: con <code>\u</code> el prompt no dice «user001» porque tú lo escribieras, sino porque <strong>lee quién está conectado</strong>. Si ese prompt fuera el de todo el sistema, cada usuario vería su propio nombre.</p>
+    <p class="mt-4">Con <code>\w</code> pasa algo parecido. En tu home verás una virgulilla (<code>~</code>), el atajo de Linux para «el directorio home»; al hacer <code>cd /tmp</code> la virgulilla desaparece y aparece la ruta real. Es la misma idea de <code>$HOME</code> y <code>$PWD</code> que viste en <a href="/Linux-course/lecciones/37-variables-de-entorno">la lección 37</a>.</p>
+    <p class="mt-4">La lista completa varía entre distribuciones: algunas tienen más códigos y otras cambian alguno. Consulta la documentación de la tuya si quieres afinar.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Monta el prompt por partes: <code>PS1="\u: "</code>, luego <code>PS1="\u \t: "</code> y por último <code>PS1="\u \t \w: "</code>. Haz <code>cd /tmp</code> y vuelve con <code>cd</code>. <strong>Meta:</strong> ver con tus ojos que <code>\w</code> cambia solo, sin que tú toques nada.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">¿De dónde salen todas estas variables?</h2>
+    <p class="mt-4">Pregunta obligada: si nadie escribe <code>HOME</code>, <code>PATH</code> o <code>PS1</code> a mano, ¿de dónde aparecen cuando haces login? No salen de la nada: al entrar un usuario, Linux <strong>ejecuta una serie de ficheros</strong> que las crean.</p>
+    <p class="mt-4">Hay dos niveles. Los <strong>globales</strong> viven en <code>/etc</code>, el directorio de configuración del sistema, y valen para todos los usuarios:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat /etc/profile | less      # variables del login: las más importantes y globales
+$ cat /etc/bash.bashrc | less  # variables propias de la shell bash</code></pre>
+    <p class="mt-4">Al mirar <code>/etc/profile</code> verás que es un pequeño script: configura <code>PS1</code>, prepara otros datos y, al final, <strong>llama a <code>bash.bashrc</code></strong> si existe. Ese es el orden: primero <code>profile</code>, después el fichero de la shell.</p>
+    <p class="mt-4">Cuidado con el nombre: en otras distribuciones el segundo fichero puede llamarse de otra forma. Si no lo encuentras, mira directamente el contenido de <code>/etc</code> o la documentación de tu distribución.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Los ficheros de cada usuario</h2>
+    <p class="mt-4">El segundo nivel es el <strong>personal</strong>: dos ficheros dentro de tu home que solo afectan a tu usuario. Empiezan por punto, así que son <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo">ficheros ocultos</a> y no salen con un <code>ls</code> normal:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd
+$ ls                # no aparecen
+$ ls -a             # ahora sí
+.  ..  .bashrc  .profile  Descargas  Documentos ...
+
+$ cat .profile
+PATH="$HOME/bin:$PATH"    # creación de variables, como en la lección 38
+
+$ cat .bashrc | less      # alias y otras variables de la shell</code></pre>
+    <p class="mt-4">Ahí tienes, en tu propio home, el patrón <code>PATH="$HOME/bin:$PATH"</code> que aprendiste a escribir en la lección anterior: conserva lo que había y añade un directorio nuevo.</p>
+    <p class="mt-4">La diferencia importante entre los dos:</p>
+    <ul class="list-disc pl-6 space-y-2 mt-4">
+      <li><code>.profile</code> se ejecuta <strong>una sola vez</strong>, cuando entras en el sistema.</li>
+      <li><code>.bashrc</code> se ejecuta <strong>cada vez que arrancas una shell bash</strong>, tantas veces como abras una.</li>
+    </ul>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 230" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Quién carga tus variables</text>
+
+        <text x="150" y="46" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">Al entrar (una vez)</text>
+        <text x="410" y="46" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">Cada shell (varias veces)</text>
+
+        <text x="26" y="90" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">Global</text>
+        <rect x="80" y="62" width="150" height="46" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="155" y="82" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">/etc/profile</text>
+        <text x="155" y="99" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">todos los usuarios</text>
+
+        <rect x="340" y="62" width="150" height="46" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="415" y="82" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">/etc/bash.bashrc</text>
+        <text x="415" y="99" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">todos los usuarios</text>
+
+        <line x1="230" y1="85" x2="336" y2="85" stroke="#1A1A1A"/>
+        <path d="M330 81 L338 85 L330 89" stroke="#1A1A1A"/>
+        <text x="283" y="78" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">llama a</text>
+
+        <text x="26" y="158" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">Usuario</text>
+        <rect x="80" y="130" width="150" height="46" fill="#FDFCFB" stroke="#E5E1D8"/>
+        <text x="155" y="150" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">~/.profile</text>
+        <text x="155" y="167" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">solo tu usuario</text>
+
+        <rect x="340" y="130" width="150" height="46" fill="#FDFCFB" stroke="#E5E1D8"/>
+        <text x="415" y="150" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">~/.bashrc</text>
+        <text x="415" y="167" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">solo tu usuario</text>
+
+        <line x1="30" y1="196" x2="530" y2="196" stroke="#E5E1D8"/>
+        <text x="280" y="216" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">Los que empiezan por punto son ficheros ocultos: se ven con ls -a</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Global frente a personal, login frente a cada shell.</figcaption>
+    </figure>
+
+    <p class="mt-4">La regla para decidir dónde poner una variable es directa: si la quieres <strong>para todo el mundo</strong>, va en <code>/etc/profile</code>; si la quieres <strong>solo para ti</strong>, va en tu <code>.profile</code> o en tu <code>.bashrc</code>. Editar esos ficheros se hace en la sección de shell scripting; por ahora basta con saber quién es quién.</p>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: tu prompt y tus ficheros de arranque</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Guarda tu prompt con <code>original=$PS1</code> y míralo con <code>echo $PS1</code>. Cámbialo a <code>PS1="mi prompt: "</code>, ejecuta un par de comandos y recupéralo con <code>PS1=$original</code>.</li>
+        <li>Construye un prompt dinámico con <code>PS1="\u \t \w: "</code>. Muévete con <code>cd /tmp</code>, luego <code>cd /etc</code> y vuelve con <code>cd</code>. Observa cuándo aparece la virgulilla.</li>
+        <li>Localiza los ficheros globales: <code>ls -l /etc/profile</code> y <code>cat /etc/profile | less</code>. Busca dentro la línea que configura <code>PS1</code> y la que llama al fichero de bash.</li>
+        <li><strong>Reto:</strong> vete a tu home con <code>cd</code>, compara <code>ls</code> con <code>ls -a</code> y cuenta cuántos ficheros ocultos tienes con <code>ls -a | grep "^\." | wc -l</code>. Después abre <code>cat .profile</code> y localiza la línea que modifica el <code>PATH</code>: ya sabes exactamente qué hace.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>El prompt lo controla la variable <code>PS1</code>, y se cambia con una asignación normal entre comillas. Su valor por defecto varía según la distribución.</p>
+      <p>Los códigos de control lo hacen dinámico: <code>\u</code> el usuario conectado, <code>\t</code> la hora en 24 horas, <code>\w</code> el directorio actual y <code>\$</code> la almohadilla de root o el dólar de usuario normal.</p>
+      <p>Las variables las cargan cuatro ficheros: <code>/etc/profile</code> y <code>/etc/bash.bashrc</code> para todos los usuarios, y <code>~/.profile</code> y <code>~/.bashrc</code> para el tuyo. Los <code>profile</code> se ejecutan una vez al entrar; los <code>bashrc</code>, cada vez que arranca una shell.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué diferencia hay entre <code>PS1="user001: "</code> y <code>PS1="\u: "</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">La primera escribe un texto fijo: pondrá «user001» aunque se conecte otro usuario. La segunda usa un código de control, así que Linux lo sustituye por el <strong>nombre real del usuario conectado</strong> en cada momento. Por eso el segundo prompt sirve para todo el sistema y el primero no.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Has hecho <code>cat .profile</code> pero antes <code>ls</code> no te mostraba ese fichero. ¿Por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque empieza por punto y en Linux eso significa fichero <strong>oculto</strong>: <code>ls</code> no lo lista. Se ve con <code>ls -a</code>, que muestra todos los ficheros incluidos los ocultos.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Quieres una variable que exista para <strong>todos</strong> los usuarios del equipo. ¿En qué fichero la creas y por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">En <code>/etc/profile</code>, porque los ficheros de <code>/etc</code> son globales: se ejecutan para cualquier usuario que entre en el sistema. Los que empiezan por punto dentro de un home (<code>~/.profile</code>, <code>~/.bashrc</code>) solo afectan a ese usuario concreto.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/38-crear-variables-y-modificar-path" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/40-buscar-ficheros-locate" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

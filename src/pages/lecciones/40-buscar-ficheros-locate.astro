@@ -1,0 +1,177 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 40. Fuente: transcripciones/video_33.md (primera mitad: comando locate)
+---
+
+<Layout titulo="Buscar ficheros rápido con locate — Curso Linux" descripcion="Localiza ficheros en un instante con locate: cómo funciona su base de datos mlocate.db, cómo actualizarla con updatedb y las opciones -b y -c.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 40</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">6 min de lectura</span>
+      <span class="etiqueta-saltar">Saltar</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Buscar ficheros rápido con locate</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      El comando que encuentra cualquier fichero del sistema casi al instante. El truco: no busca en el disco.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A localizar cualquier fichero con <code>locate</code>, el comando que resuelve el 99&nbsp;% de las búsquedas del día a día.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Por qué es tan rápido: consulta una <strong>base de datos</strong>, no el sistema de ficheros. Y cuál es el precio de ese atajo.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A afinar los resultados con <code>-b</code> (solo el nombre del fichero) y <code>-c</code> (contar coincidencias).</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Búscalo y verás la velocidad</h2>
+    <p class="mt-4">Antes de la teoría, el resultado. Pídele a Linux que encuentre <code>mkdir</code> en todo el sistema:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ locate mkdir
+/bin/mkdir
+/usr/share/man/man1/mkdir.1.gz
+/usr/share/man/man2/mkdir.2.gz
+...</code></pre>
+    <p class="mt-4">Respuesta inmediata, y con más resultados de los que esperabas: <code>locate</code> no busca solo el fichero llamado <code>mkdir</code>, sino <strong>todo lo que cumpla ese patrón</strong>, aunque la palabra aparezca en mitad de la ruta o como parte de un nombre de directorio.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>locate mkdir</code> y después <code>locate passwd</code>. <strong>Meta:</strong> notar que la respuesta es instantánea y que salen rutas donde el patrón está en el directorio, no solo en el nombre del fichero.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El truco: una base de datos</h2>
+    <p class="mt-4">Esa velocidad tiene explicación. Cuando le pides un fichero, <code>locate</code> <strong>no recorre el sistema de directorios</strong>: consulta una base de datos que ya tiene el mapa hecho. Está aquí, en el mismo sitio en cualquier distribución:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /var/lib/mlocate
+$ ls -l
+-rw-r----- 1 root mlocate ... mlocate.db</code></pre>
+    <p class="mt-4">Linux tiene un <strong>proceso planificado</strong> (lo verás a fondo más adelante, con cron) que cada día recorre todo el sistema de ficheros y guarda el resultado en ese <code>mlocate.db</code>. Cuando lanzas <code>locate</code>, la consulta va contra ese fichero y no contra el disco entero.</p>
+    <p class="mt-4">Aquí está el inconveniente, y conviene tenerlo claro: <strong>si acabas de crear un fichero y la base de datos todavía no se ha actualizado, <code>locate</code> no lo encontrará</strong>. Si la sincronización es cada 24 horas, todo lo creado hoy es invisible para él. Para esos casos existe <code>find</code>, que verás en <a href="/Linux-course/lecciones/41-buscar-ficheros-find">la siguiente lección</a>.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Por qué locate es rápido</text>
+
+        <rect x="30" y="46" width="110" height="40" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="85" y="70" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">locate java</text>
+
+        <line x1="140" y1="66" x2="216" y2="66" stroke="#1A1A1A"/>
+        <path d="M210 62 L218 66 L210 70" stroke="#1A1A1A"/>
+
+        <rect x="220" y="46" width="150" height="40" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="295" y="63" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">/var/lib/mlocate</text>
+        <text x="295" y="78" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">mlocate.db</text>
+
+        <line x1="370" y1="66" x2="446" y2="66" stroke="#1A1A1A"/>
+        <path d="M440 62 L448 66 L440 70" stroke="#1A1A1A"/>
+        <text x="500" y="70" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">instantáneo</text>
+
+        <line x1="30" y1="106" x2="530" y2="106" stroke="#E5E1D8"/>
+
+        <rect x="30" y="126" width="110" height="40" fill="#FDFCFB" stroke="#E5E1D8"/>
+        <text x="85" y="150" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">find / -name</text>
+
+        <line x1="140" y1="146" x2="216" y2="146" stroke="#E5E1D8"/>
+        <path d="M210 142 L218 146 L210 150" stroke="#E5E1D8"/>
+
+        <rect x="220" y="126" width="150" height="40" fill="#FDFCFB" stroke="#E5E1D8"/>
+        <text x="295" y="143" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">todo el sistema</text>
+        <text x="295" y="158" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">de ficheros, directorio a directorio</text>
+
+        <line x1="370" y1="146" x2="446" y2="146" stroke="#E5E1D8"/>
+        <path d="M440 142 L448 146 L440 150" stroke="#E5E1D8"/>
+        <text x="500" y="150" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">lento</text>
+
+        <text x="280" y="196" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">Uno pregunta a un índice ya hecho; el otro va a mirar de verdad.</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">La base de datos es toda la diferencia: velocidad a cambio de estar un poco desactualizada.</figcaption>
+    </figure>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Si no lo tienes, instálalo y actualiza la base</h2>
+    <p class="mt-4">Si tu sistema te dice que el directorio o el comando no existen, instálalo como <a href="/Linux-course/lecciones/36-cambiar-propietario-chown-chgrp">administrador</a> (necesitas conexión a internet):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo su
+# apt-get install mlocate</code></pre>
+    <p class="mt-4">Y si el directorio existe pero no aparece el fichero <code>mlocate.db</code>, o quieres que los ficheros nuevos se vean ya, fuerza la actualización:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo updatedb</code></pre>
+    <p class="mt-4">Este comando solo lo pueden ejecutar los administradores —de ahí el <code>sudo</code>—, porque recorre el sistema entero. Si no eres tú quien administra la máquina, puedes pedir que la sincronización se haga cada hora en lugar de cada día: dependerá de la importancia que tenga en tu trabajo que los ficheros nuevos aparezcan de inmediato.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Afinar la búsqueda: -b y -c</h2>
+    <p class="mt-4">Que <code>locate</code> busque el patrón en toda la ruta es potente, pero devuelve mucho ruido. Míralo con <code>java</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ locate java
+/usr/share/java/...
+/usr/share/javascript/...      # aparece porque "java" está dentro de "javascript"
+
+$ locate -b java
+/usr/share/java                # solo cuando el nombre final es java</code></pre>
+    <p class="mt-4">La opción <code>-b</code> busca únicamente en el <strong>nombre del fichero</strong>, no en el resto de la ruta. Es la forma más rápida de quitarte de encima resultados que no querías.</p>
+    <p class="mt-4">Y para saber cuántos hay sin leerlos todos, <code>-c</code> los cuenta:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ locate -c java
+212
+
+$ locate -bc java
+140</code></pre>
+    <p class="mt-4">La diferencia entre 212 y 140 es exactamente el ruido que <code>-b</code> ha eliminado. Las opciones se combinan, igual que hacías con <a href="/Linux-course/lecciones/23-buscar-texto-grep">grep</a>. Y si te quedas corto, <code>man locate</code> tiene bastantes más: admite incluso expresiones regulares para patrones complejos.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Compara <code>locate -c java</code> con <code>locate -bc java</code>. Luego mira los resultados completos de <code>locate java | less</code> y busca alguna línea con «javascript». <strong>Meta:</strong> ver de dónde sale la diferencia entre los dos números.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: localiza y mide</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Comprueba que tienes la base de datos: <code>cd /var/lib/mlocate</code> y <code>ls -l</code>. Si falta el paquete, instálalo con <code>sudo su</code> y <code>apt-get install mlocate</code>.</li>
+        <li>Busca <code>locate mkdir</code> y <code>locate passwd</code>. Pásalo por <code>less</code> si la lista es larga.</li>
+        <li>Cuenta los resultados de <code>java</code> de las dos formas, <code>locate -c java</code> y <code>locate -bc java</code>, y explica la diferencia con tus palabras.</li>
+        <li><strong>Reto:</strong> crea un fichero nuevo en tu home con <code>touch recien_creado.txt</code> y búscalo con <code>locate recien_creado</code>: no aparecerá. Ejecuta <code>sudo updatedb</code>, repite la búsqueda y comprueba que ahora sí sale. Mide cuánto tarda la actualización con <code>time sudo updatedb</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>locate patrón</code> encuentra ficheros y directorios en todo el sistema casi al instante, porque consulta la base de datos <code>/var/lib/mlocate/mlocate.db</code> en lugar de recorrer el disco.</p>
+      <p>Un proceso planificado actualiza esa base una vez al día, así que los ficheros recién creados no aparecen hasta la siguiente sincronización. Puedes forzarla con <code>sudo updatedb</code>, comando reservado a administradores.</p>
+      <p>El patrón se busca en toda la ruta, no solo en el nombre. <code>-b</code> limita la coincidencia al nombre del fichero y <code>-c</code> cuenta los resultados en vez de listarlos; ambas se combinan.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Por qué <code>locate</code> responde tan rápido comparado con recorrer el sistema de ficheros?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque no recorre nada: consulta la base de datos <code>mlocate.db</code>, en <code>/var/lib/mlocate</code>, que un proceso planificado rellena a diario con el mapa completo del sistema de ficheros.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Acabas de crear <code>informe.txt</code> y <code>locate informe</code> no lo encuentra. ¿Está roto el comando?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No. El fichero todavía no está en la base de datos, que se actualiza una vez al día. Ejecuta <code>sudo updatedb</code> para forzar la sincronización, o usa <code>find</code>, que sí mira el sistema de ficheros de verdad.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. <code>locate java</code> te devuelve rutas con «javascript» que no te interesan. ¿Cómo las quitas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Con <code>locate -b java</code>: la opción <code>-b</code> busca el patrón solo en el nombre del fichero y no en el resto de la ruta, así que descarta las coincidencias que están dentro de nombres de directorio o de otras palabras.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/39-prompt-ps1-y-ficheros-de-arranque" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/41-buscar-ficheros-find" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

@@ -1,0 +1,144 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 31. Fuente: transcripciones/video_25.md (segunda mitad: background &, jobs, fg, redirigir salida y errores)
+---
+
+<Layout titulo="Procesos en segundo plano: &, jobs y fg — Curso Linux" descripcion="Lanza procesos en segundo plano con &, lístalos con jobs, tráelos al primer plano con fg y redirige salida y errores a ficheros para que no ensucien la terminal.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 31</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Procesos en segundo plano: &amp;, jobs y fg</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Un proceso largo bloquea tu terminal hasta que acaba. Con el <strong>segundo plano</strong> lo lanzas y sigues trabajando mientras corre por debajo. Aquí aprendes a gestionarlo.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A lanzar un proceso en <strong>segundo plano</strong> con <code>&amp;</code> y a listar los trabajos con <strong><code>jobs</code></strong>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A traer un trabajo al <strong>primer plano</strong> con <strong><code>fg</code></strong> y a matarlo con <a href="/Linux-course/lecciones/30-senales-y-kill"><code>kill</code></a>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A <a href="/Linux-course/lecciones/20-redirecciones-entrada-y-error">redirigir</a> salida y errores a ficheros para que un proceso en segundo plano no ensucie la terminal.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">El problema: la terminal bloqueada</h2>
+    <p class="mt-4">Si lanzas <code>sleep 1000</code>, la terminal se queda ocupada 1000 segundos: no puedes escribir nada hasta que termine (o lo pares con <kbd>Ctrl+C</kbd>). Eso es el <strong>primer plano</strong> (<em>foreground</em>). Para procesos largos, incómodo.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Lanzar en segundo plano: &amp;</h2>
+    <p class="mt-4">Añade <code>&amp;</code> (ampersand, suele ser <kbd>Shift</kbd>+<kbd>7</kbd>) al final del comando: el proceso arranca en <strong>segundo plano</strong> y te devuelve el control. Linux te muestra el número de trabajo entre corchetes y el PID:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sleep 1000 &          # arranca en segundo plano
+[1] 6815                # [job] PID → sigues pudiendo escribir
+$ ps -ef | grep sleep   # ahí está, corriendo por debajo</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Ver los trabajos: jobs</h2>
+    <p class="mt-4">El comando <code>jobs</code> lista los trabajos en segundo plano de <strong>esta</strong> terminal. Con <code>-l</code> añade el PID, así no necesitas <code>ps</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sleep 500 &           # otro más
+[2] 6821
+$ jobs                  # lista: [1] y [2] corriendo
+$ jobs -l               # igual, mostrando también el PID de cada uno</code></pre>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 130" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Primer plano y segundo plano</text>
+        <rect x="40" y="45" width="180" height="60" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="130" y="70" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">primer plano</text>
+        <text x="130" y="90" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">ocupa la terminal</text>
+        <text x="243" y="70" font-family="Inter, sans-serif" font-size="18" fill="#1A1A1A" stroke="none" text-anchor="middle">&#8644;</text>
+        <text x="243" y="88" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">&amp; / fg</text>
+        <rect x="300" y="45" width="180" height="60" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="390" y="70" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">segundo plano</text>
+        <text x="390" y="90" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">corre por debajo</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2"><code>&amp;</code> manda al segundo plano; <code>fg</code> lo trae de vuelta al primero.</figcaption>
+    </figure>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Matar un trabajo</p>
+      <p class="!mt-2">Con el PID que te da <code>jobs -l</code>, lo matas como cualquier proceso: <code>kill -9 PID</code>. Al listar de nuevo con <code>jobs</code>, verás que ese trabajo aparece como «Terminado». <code>jobs</code> solo ve los trabajos de su propia terminal.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Traer al primer plano: fg</h2>
+    <p class="mt-4"><code>fg</code> (<em>foreground</em>) devuelve un trabajo al primer plano. Se le pasa el <strong>número de trabajo</strong> (el de los corchetes), no el PID:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ fg 1                  # trae el trabajo [1] al primer plano
+# ...ahora vuelve a ocupar la terminal; Ctrl+C para pararlo</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lanza <code>sleep 500 &amp;</code> dos veces, míralos con <code>jobs -l</code>, mata uno con <code>kill -9 PID</code> y trae el otro al frente con <code>fg 1</code>. <strong>Meta:</strong> mover procesos entre segundo y primer plano con soltura.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El truco: redirigir salida y errores</h2>
+    <p class="mt-4">Con <code>sleep</code> no hay problema porque no imprime nada. Pero un proceso que <strong>escribe en pantalla</strong> en segundo plano lo ensucia todo: su salida se entremezcla con lo que teclees. Prueba <code>du -am /</code> (que tarda y saca mucho):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ du -am / &            # MAL: sigue escribiendo en pantalla, no puedes trabajar</code></pre>
+    <p class="mt-4">La solución es mandar la salida a un fichero con <code>&gt;</code>. Pero cuidado: eso solo desvía la <strong>salida estándar</strong>; los <strong>errores</strong> (permiso denegado, etc.) siguen apareciendo. Hay que redirigir también el flujo <code>2</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ du -am / > /tmp/disco.txt &                     # salida al fichero, PERO los errores salen aún
+$ du -am / > /tmp/disco.txt 2> /tmp/errores.txt & # salida Y errores a ficheros: terminal limpia</code></pre>
+    <p class="mt-4">Ahora el proceso corre por debajo sin molestar: la salida va a <code>disco.txt</code> y los errores a <code>errores.txt</code>. Revisa después con <code>ls -ltr /tmp</code> y <a href="/Linux-course/lecciones/11-ver-contenido-cat"><code>cat</code></a>.</p>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">Regla del segundo plano</p>
+      <p class="!mt-2 text-cream/90">Si un proceso que mandas al segundo plano saca cosas por pantalla, no te dejará trabajar. Redirige <strong>siempre</strong> su salida estándar (<code>&gt;</code>) <strong>y</strong> su salida de error (<code>2&gt;</code>) a ficheros antes del <code>&amp;</code>.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: trabajar en segundo plano</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Lanza <code>sleep 1000 &amp;</code> y comprueba que sigues pudiendo escribir. Míralo con <code>jobs</code> y con <code>jobs -l</code> (para ver su PID).</li>
+        <li>Lanza un segundo <code>sleep 500 &amp;</code>. Mata uno con <code>kill -9 PID</code> y confirma con <code>jobs</code> que solo queda uno.</li>
+        <li>Trae el trabajo restante al primer plano con <code>fg 1</code> y párralo con <kbd>Ctrl+C</kbd>.</li>
+        <li><strong>Reto:</strong> lanza <code>du -am / > /tmp/disco.txt 2> /tmp/errores.txt &amp;</code>, sigue trabajando, y al acabar revisa ambos ficheros con <code>ls -ltr /tmp</code> y <code>cat</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Añadir <code>&amp;</code> al final de un comando lo lanza en segundo plano y te devuelve el control; Linux muestra <code>[número de trabajo] PID</code>. <code>jobs</code> lista los trabajos de esa terminal y <code>jobs -l</code> añade el PID.</p>
+      <p><code>fg número</code> trae un trabajo al primer plano (usa el número entre corchetes, no el PID). Y matas un trabajo con <code>kill -9 PID</code> como cualquier proceso.</p>
+      <p>Si el proceso en segundo plano escribe en pantalla, redirige su salida (<code>&gt;</code>) y sus errores (<code>2&gt;</code>) a ficheros antes del <code>&amp;</code>; si no, ensuciará la terminal y no podrás trabajar.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué hace añadir <code>&amp;</code> al final de un comando?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Lanza el comando en segundo plano: corre por debajo mientras tú sigues usando la terminal. Linux te devuelve el número de trabajo entre corchetes y el PID del proceso.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. <code>fg</code> ¿usa el PID o el número de trabajo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">El número de trabajo (el que aparece entre corchetes, p. ej. <code>[1]</code>), no el PID. Así, <code>fg 1</code> trae el trabajo 1 al primer plano.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Mandas <code>du -am / &gt; salida.txt &amp;</code> y aún ves mensajes en pantalla. ¿Por qué y cómo lo arreglas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque <code>&gt;</code> solo redirige la salida estándar; los errores viajan por el flujo 2 y siguen saliendo. Se arregla añadiendo <code>2&gt; errores.txt</code>: <code>du -am / &gt; salida.txt 2&gt; errores.txt &amp;</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/30-senales-y-kill" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/32-usuarios-y-grupos" class="btn-primario">Siguiente: usuarios y grupos</a>
+    </nav>
+
+  </article>
+</Layout>

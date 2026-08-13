@@ -1,0 +1,147 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 14. Fuente: transcripciones/video 11.md (medir tamaño con du y espacio libre con df)
+---
+
+<Layout titulo="Medir espacio en disco: du y df — Curso Linux" descripcion="Aprende a medir el tamaño exacto de ficheros y directorios con du (-b, -k, -m, -a) y a ver el espacio libre y ocupado de tus discos con df (-h, -m, -T).">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 14</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">4 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Medir espacio en disco: du y df</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Con <a href="/Linux-course/lecciones/07-navegar-ficheros"><code>ls -l</code></a> ves el tamaño de un fichero, pero para el peso real de un directorio entero —o para saber cuánto disco te queda libre— hacen falta dos comandos: <code>du</code> y <code>df</code>.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A medir el tamaño de un fichero, un directorio o un árbol completo con <strong><code>du</code></strong> (<em>disk usage</em>) en las unidades que quieras.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A elegir la unidad con <code>-b</code> (bytes), <code>-k</code> (kilobytes) y <code>-m</code> (megabytes), y a listar cada fichero con <code>-a</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A consultar el espacio total, ocupado y libre de tus discos con <strong><code>df</code></strong> (<em>disk free</em>) y sus opciones <code>-h</code>, <code>-m</code> y <code>-T</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">du: cuánto pesa esto</h2>
+    <p class="mt-4">Ponte en tu directorio de trabajo y escribe <code>du</code> a secas: Linux recorre todo lo que hay desde donde estás —incluidos los <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo">ficheros ocultos</a>— y muestra el tamaño de cada directorio a la izquierda. Como esa lista puede ser larga, casi siempre le pasas el nombre de <strong>un</strong> directorio concreto:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ du                    # tamaño de todo el árbol desde aquí
+$ du carpeta01          # solo el tamaño de un directorio concreto</code></pre>
+    <p class="mt-4">Puedes pedir el resultado en la unidad que prefieras. Consulta el manual con <a href="/Linux-course/lecciones/07-navegar-ficheros"><code>man du</code></a> y verás estas tres:</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Elegir la unidad de du</text>
+        <rect x="20" y="45" width="140" height="70" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="90" y="72" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">du -b</text>
+        <text x="90" y="95" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">bytes</text>
+        <rect x="190" y="45" width="140" height="70" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="72" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">du -k</text>
+        <text x="260" y="95" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">kilobytes</text>
+        <rect x="360" y="45" width="140" height="70" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="430" y="72" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">du -m</text>
+        <text x="430" y="95" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">megabytes</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">La misma medida, tres escalas: bytes, kilobytes o megabytes.</figcaption>
+    </figure>
+
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ du -m carpeta01       # tamaño en megabytes
+$ du -k carpeta01       # tamaño en kilobytes
+$ du -b carpeta01       # tamaño en bytes (el detalle más fino)</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Mide un directorio tuyo con <code>du -m</code>, luego con <code>du -k</code> y por último con <code>du -b</code>. <strong>Meta:</strong> ver cómo el mismo directorio cambia de número según la unidad, pero es el mismo tamaño.</p>
+    </div>
+
+    <p class="mt-4">Por defecto <code>du</code> solo suma <strong>directorios</strong>. Para el tamaño de <strong>cada fichero</strong> por separado, añade <code>-a</code> (de <em>all</em>). Combinada con una unidad queda, por ejemplo, <code>du -a -m</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ du -a -m              # tamaño en megas de TODOS los ficheros, no solo directorios
+$ du -m /usr/bin        # también funciona con rutas absolutas
+$ du -m /etc            # como /etc tiene subdirectorios, du los recorre todos</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Permiso denegado: es normal</p>
+      <p class="!mt-2">Si al medir <code>/etc</code> ves «no se puede leer: permiso denegado», no es un fallo: tu <a href="/Linux-course/lecciones/06-usuarios-y-ficheros">usuario normal</a> no está autorizado a leer ciertos directorios del sistema. Los permisos llegan más adelante en el curso.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">df: cuánto disco me queda</h2>
+    <p class="mt-4">Mientras <code>du</code> mide lo que ocupa una carpeta, <code>df</code> (<em>disk free</em>) mira el panorama completo: cuánto espacio hay, cuánto está usado y cuánto libre en cada <strong>sistema de archivos montado</strong>. Sin opciones lo da en bloques de <strong>1 KB</strong>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ df                    # espacio de todas las unidades, en bloques de 1 KB</code></pre>
+    <p class="mt-4">Esos bloques de 1 KB se leen fatal. La opción estrella es <code>-h</code> (<em>human</em>): traduce cada tamaño a su escala natural —gigas, megas o kilos— y añade el <strong>porcentaje de uso</strong> y la <strong>ruta</strong> donde está montada cada unidad:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ df -h                 # legible para humanos: tamaños reales + % de uso + punto de montaje</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>df</code> y luego <code>df -h</code>. <strong>Meta:</strong> comparar la columna de tamaño en bruto (bloques de 1 KB) con la versión legible, y localizar la columna de <code>%</code> de uso.</p>
+    </div>
+
+    <p class="mt-4">Para fijar la unidad en megabytes usa <code>-m</code>, igual que con <code>du</code>. Y para saber <strong>qué tipo</strong> de sistema de archivos usa cada unidad (ext4, tmpfs…), añade <code>-T</code> en <strong>mayúscula</strong>: agrega una columna con el tipo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ df -m                 # espacio en bloques de 1 MB
+$ df -T                 # añade una columna con el tipo de sistema de archivos</code></pre>
+    <p class="text-sm text-ink/60">Ojo: la <code>-T</code> es mayúscula. La minúscula <code>-t</code> significa otra cosa y pediría un argumento.</p>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">du contra df en una línea</p>
+      <p class="!mt-2 text-cream/90"><strong>du</strong> mide lo que pesa un fichero o directorio concreto. <strong>df</strong> mide el espacio libre y ocupado de los discos enteros. Uno mira hacia dentro de una carpeta; el otro, hacia el disco completo.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: pesar y medir</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Mide un directorio tuyo con <code>du carpeta01</code>, luego con <code>du -m carpeta01</code> y con <code>du -b carpeta01</code>. Anota cómo cambia el número con cada unidad.</li>
+        <li>Ejecuta <code>du -a -m</code> en tu directorio y observa que ahora aparece cada fichero por separado, no solo los directorios.</li>
+        <li>Lanza <code>du -m /etc</code>. Si ves «permiso denegado», explica por qué (pista: <a href="/Linux-course/lecciones/06-usuarios-y-ficheros">usuario normal</a>).</li>
+        <li>Compara <code>df</code> con <code>df -h</code> y localiza la columna de <code>%</code> de uso y el punto de montaje. <strong>Reto:</strong> ejecuta <code>df -T</code> y averigua qué tipo de sistema de archivos usa tu partición principal.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>du</code> (<em>disk usage</em>) mide el tamaño de un fichero, un directorio o todo un árbol. Eliges la unidad con <code>-b</code> (bytes), <code>-k</code> (kilobytes) o <code>-m</code> (megabytes), y con <code>-a</code> listas cada fichero por separado en vez de solo los directorios.</p>
+      <p><code>df</code> (<em>disk free</em>) muestra el espacio total, ocupado y libre de cada unidad montada. Por defecto usa bloques de 1 KB; con <code>-h</code> lo hace legible (tamaños reales, % de uso y punto de montaje) y con <code>-m</code> lo fija en megabytes.</p>
+      <p>Con <code>df -T</code> (mayúscula) añades una columna con el tipo de sistema de archivos. En resumen: <code>du</code> pesa carpetas, <code>df</code> administra el espacio de los discos.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Quieres el tamaño de <code>carpeta01</code> expresado en megabytes. ¿Qué escribes?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>du -m carpeta01</code>. La opción <code>-m</code> fija la unidad en megabytes; con <code>-k</code> los verías en kilobytes y con <code>-b</code> en bytes.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿En qué se diferencian <code>du</code> y <code>df</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>du</code> mide lo que ocupa un fichero o directorio concreto; <code>df</code> informa del espacio total, usado y libre de los sistemas de archivos montados (los discos enteros). Uno mira dentro de una carpeta, el otro el disco completo.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué hace <code>df -h</code> frente a <code>df</code> a secas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>df</code> muestra los tamaños en bloques de 1 KB, difíciles de leer. <code>df -h</code> (<em>human</em>) los traduce a su escala natural (gigas, megas o kilos) y muestra el porcentaje de uso y el punto de montaje de cada unidad.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/13-enlaces" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/15-autocompletado-e-historial" class="btn-primario">Siguiente: autocompletado e historial</a>
+    </nav>
+
+  </article>
+</Layout>

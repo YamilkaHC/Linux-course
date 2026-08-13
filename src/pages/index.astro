@@ -1,0 +1,643 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Indice de lecciones. Se ira poblando conforme se procese el texto fuente.
+const lecciones = [
+  {
+    slug: '01-que-es-linux',
+    titulo: 'Qué es Linux',
+    resumen: 'Qué es Linux, sus cuatro ventajas técnicas y qué es una distribución.',
+    minutos: 9,
+  },
+  {
+    slug: '02-instalacion',
+    titulo: 'El kernel y tu entorno de trabajo',
+    resumen: 'Qué es el kernel y cómo montar VirtualBox y una máquina virtual lista para instalar Debian.',
+    minutos: 8,
+  },
+  {
+    slug: '03-instalar-debian',
+    titulo: 'Instalar Debian paso a paso',
+    resumen: 'Instalación guiada de Debian: idioma, usuarios, particionado, escritorio GNOME y GRUB.',
+    minutos: 9,
+  },
+  {
+    slug: '04-explorar-escritorio',
+    titulo: 'Explorar el escritorio de Debian',
+    resumen: 'Recorre GNOME: pantalla completa, Actividades, Configuración y deja lista tu terminal.',
+    minutos: 7,
+  },
+  {
+    slug: '05-primeros-comandos',
+    titulo: 'Primeros comandos en la terminal',
+    resumen: 'El shell y tus primeros comandos: df, who, date, ls, cd, su -, free, top e instalar con apt.',
+    minutos: 9,
+  },
+  {
+    slug: '06-usuarios-y-ficheros',
+    titulo: 'Usuarios y el sistema de archivos',
+    resumen: 'Los tres tipos de usuario, el directorio home y la única raíz / frente a las letras de Windows.',
+    minutos: 8,
+  },
+  {
+    slug: '07-navegar-ficheros',
+    titulo: 'Navegar por archivos: pwd, ls, cd y man',
+    resumen: 'Ubicarte, listar y moverte por el sistema con rutas absolutas y relativas, y leer el manual con man.',
+    minutos: 9,
+  },
+  {
+    slug: '08-comodines-y-tipos-de-archivo',
+    titulo: 'Comodines y tipos de archivo',
+    resumen: 'Filtra archivos con *, ? y []; lee la primera letra de ls -l e identifica tipos con file.',
+    minutos: 9,
+  },
+  {
+    slug: '09-crear-y-copiar',
+    titulo: 'Crear y copiar archivos',
+    resumen: 'Crea directorios con mkdir (-p, -v), archivos con touch y echo, míralos con cat y cópialos con cp (-i, -r).',
+    minutos: 9,
+  },
+  {
+    slug: '10-mover-y-borrar',
+    titulo: 'Mover, renombrar y borrar',
+    resumen: 'Mueve y renombra con mv, borra archivos con rm (-i) y directorios con rmdir y el peligroso rm -r.',
+    minutos: 8,
+  },
+  {
+    slug: '11-ver-contenido-cat',
+    titulo: 'Ver el contenido con cat',
+    resumen: 'Lee archivos con cat, numera líneas con -n y explora ficheros del sistema como /etc/passwd y /etc/group.',
+    minutos: 6,
+  },
+  {
+    slug: '12-ver-mas-y-explorar',
+    titulo: 'Ver partes y explorar el sistema',
+    resumen: 'Lee el final y el principio con tail y head, monitorea en vivo con tail -f, y explora con less, tree y who.',
+    minutos: 7,
+  },
+  {
+    slug: '13-enlaces',
+    titulo: 'Enlaces en Linux: hard y soft',
+    resumen: 'Entiende el i-nodo y crea enlaces duros con ln y simbólicos con ln -s; descubre por qué uno sobrevive al borrado y el otro se rompe.',
+    minutos: 8,
+  },
+  {
+    slug: '14-espacio-en-disco',
+    titulo: 'Medir espacio en disco: du y df',
+    resumen: 'Mide el tamaño de directorios con du (-b, -k, -m, -a) y consulta el espacio libre de tus discos con df (-h, -m, -T).',
+    minutos: 6,
+  },
+  {
+    slug: '15-autocompletado-e-historial',
+    titulo: 'Autocompletado, historial y sesiones',
+    resumen: 'Escribe más rápido con TAB, reutiliza comandos con history, !! y !N, y abre varias sesiones con Ctrl+Alt+Fn.',
+    minutos: 7,
+  },
+  {
+    slug: '16-editar-y-localizar-comandos',
+    titulo: 'Editar texto y localizar comandos',
+    resumen: 'Crea ficheros con edit, distingue comandos internos y externos con type y help, y localízalos con which y whereis.',
+    minutos: 8,
+  },
+  {
+    slug: '17-alias-time-y-calendario',
+    titulo: 'Alias, time y calendario',
+    resumen: 'Crea tus propios comandos con alias, mide procesos con time y consulta el calendario con cal y ncal.',
+    minutos: 7,
+  },
+  {
+    slug: '18-fecha-y-tiempo-activo',
+    titulo: 'Fecha del sistema y tiempo activo',
+    resumen: 'Consulta y formatea la fecha con date (%d, %m, %B…) y mira cuánto lleva encendido el equipo con uptime (-p, -s).',
+    minutos: 6,
+  },
+  {
+    slug: '19-entrada-salida-y-redirecciones',
+    titulo: 'Entrada, salida y redirecciones',
+    resumen: 'Los tres flujos (stdin, stdout, stderr), traduce con tr y redirige a ficheros con > (sobrescribe) y >> (añade).',
+    minutos: 8,
+  },
+  {
+    slug: '20-redirecciones-entrada-y-error',
+    titulo: 'Redirigir entrada y errores',
+    resumen: 'Alimenta comandos desde ficheros con <, cuenta líneas con wc -l, usa el here-doc << y captura errores con 2> y /dev/null.',
+    minutos: 8,
+  },
+  {
+    slug: '21-tuberias-y-filtros',
+    titulo: 'Tuberías y filtros',
+    resumen: 'Encadena comandos con la tubería |, conoce los filtros (wc, grep, sort, cut) y elimina líneas repetidas con uniq (-c, -d).',
+    minutos: 8,
+  },
+  {
+    slug: '22-contar-y-tee',
+    titulo: 'Contar con wc y duplicar con tee',
+    resumen: 'Cuenta líneas, palabras y caracteres con wc (-l, -w, -c, -m, -L) y muestra y guarda la salida a la vez con tee.',
+    minutos: 7,
+  },
+  {
+    slug: '23-buscar-texto-grep',
+    titulo: 'Buscar texto con grep',
+    resumen: 'Busca texto en ficheros y salidas con grep (-s, -l, -c, -i) y úsalo como filtro tras una tubería.',
+    minutos: 8,
+  },
+  {
+    slug: '24-ordenar-sort',
+    titulo: 'Ordenar resultados con sort',
+    resumen: 'Ordena líneas con sort, invierte con -r, guarda con -o y ordena por número con -n.',
+    minutos: 6,
+  },
+  {
+    slug: '25-cortar-campos-cut',
+    titulo: 'Cortar campos y columnas con cut',
+    resumen: 'Extrae columnas con cut: campos por tabulador con -f, cambia separador con -d y corta por posición con -c.',
+    minutos: 8,
+  },
+  {
+    slug: '26-procesos-y-ps',
+    titulo: 'Procesos en Linux y el comando ps',
+    resumen: 'Qué es un proceso, la jerarquía padre-hijo (PID, PPID, systemd) y los estados; lístalos con ps, ps -f, ps -l y ps -ef.',
+    minutos: 8,
+  },
+  {
+    slug: '27-arbol-de-procesos-pstree',
+    titulo: 'El árbol de procesos: ps xf y pstree',
+    resumen: 'Rastrea el padre de un proceso con ps -ef | grep, mira tus procesos con ps x y ps xf, y dibuja el árbol con pstree (-p, -s).',
+    minutos: 7,
+  },
+  {
+    slug: '28-prioridad-nice-renice',
+    titulo: 'La prioridad de los procesos: nice y renice',
+    resumen: 'Entiende el nice (-20 a +19), crea procesos de prueba con sleep y cambia la prioridad en marcha con renice.',
+    minutos: 7,
+  },
+  {
+    slug: '29-monitorear-con-top',
+    titulo: 'Monitorear el sistema en vivo con top',
+    resumen: 'Lee la cabecera de top (uptime, tareas, CPU, memoria, swap), ordena por CPU o memoria, filtra por usuario y guarda tu vista.',
+    minutos: 8,
+  },
+  {
+    slug: '30-senales-y-kill',
+    titulo: 'Señales y matar procesos con kill',
+    resumen: 'Envía señales con kill: lístalas con kill -l, para ordenadamente con -15 (SIGTERM) y fuerza con -9 (SIGKILL).',
+    minutos: 7,
+  },
+  {
+    slug: '31-procesos-en-segundo-plano',
+    titulo: 'Procesos en segundo plano: &, jobs y fg',
+    resumen: 'Lanza procesos en segundo plano con &, lístalos con jobs, tráelos al frente con fg y redirige salida y errores a ficheros.',
+    minutos: 8,
+  },
+  {
+    slug: '32-usuarios-y-grupos',
+    titulo: 'Usuarios y grupos en Linux',
+    resumen: 'Lee /etc/passwd (UID, GID, home, shell) y /etc/group, distingue usuario de grupo y consulta tus grupos con id.',
+    minutos: 7,
+  },
+  {
+    slug: '33-permisos-rwx',
+    titulo: 'Leer los permisos: r, w, x',
+    resumen: 'Descifra la columna de ls -l: tipo y los bloques usuario/grupo/otros; qué significan r, w y x en ficheros y directorios.',
+    minutos: 8,
+  },
+  {
+    slug: '34-cambiar-permisos-chmod',
+    titulo: 'Cambiar permisos con chmod (simbólico)',
+    resumen: 'Comprueba por qué se deniegan permisos y cámbialos con chmod: u/g/o/a, + y -, r/w/x y combinaciones con comas.',
+    minutos: 8,
+  },
+  {
+    slug: '35-permisos-octal-y-umask',
+    titulo: 'Permisos octales y umask',
+    resumen: 'Domina chmod octal (r=4, w=2, x=1), blinda con 000 y controla los permisos por defecto con umask (666/777 menos umask).',
+    minutos: 9,
+  },
+  {
+    slug: '36-cambiar-propietario-chown-chgrp',
+    titulo: 'Cambiar propietario y grupo: chown y chgrp',
+    resumen: 'Pasa un fichero a otro usuario con chown y cambia su grupo con chgrp; comprueba por qué hace falta sudo y cómo afecta a los permisos.',
+    minutos: 8,
+  },
+  {
+    slug: '37-variables-de-entorno',
+    titulo: 'Variables de entorno: printenv, set y $VAR',
+    resumen: 'Lista tus variables con printenv y set, léelas con echo $VAR y conoce HOME, PWD, PATH, TERM, DISPLAY, SHELL, LANG y USER.',
+    minutos: 8,
+  },
+  {
+    slug: '38-crear-variables-y-modificar-path',
+    titulo: 'Crear variables y modificar el PATH',
+    resumen: 'Crea y cambia variables con nombre=valor, haz ejecutable tu propio script con chmod +x y añádelo al PATH sin borrar los directorios anteriores.',
+    minutos: 9,
+  },
+  {
+    slug: '39-prompt-ps1-y-ficheros-de-arranque',
+    titulo: 'Personalizar el prompt y los ficheros de arranque',
+    resumen: 'Cambia tu prompt con PS1 y sus códigos \\u, \\t y \\w, y descubre qué ficheros (profile y bashrc) cargan las variables al entrar.',
+    minutos: 8,
+  },
+  {
+    slug: '40-buscar-ficheros-locate',
+    titulo: 'Buscar ficheros rápido con locate',
+    resumen: 'Localiza ficheros al instante con locate, entiende su base de datos mlocate.db, actualízala con updatedb y afina con -b y -c.',
+    minutos: 6,
+  },
+  {
+    slug: '41-buscar-ficheros-find',
+    titulo: 'Buscar de verdad con find',
+    resumen: 'La estructura de find (dónde, cómo, qué), búsquedas con -name y comodines, descartes con -not y combinación con tuberías.',
+    minutos: 7,
+  },
+  {
+    slug: '42-find-tipo-fecha-y-tamano',
+    titulo: 'find por tipo, fecha y tamaño',
+    resumen: 'Filtra con -type (f, d, l, c, b), busca por fecha con -atime, -mtime y -ctime, y caza archivos grandes con -size.',
+    minutos: 8,
+  },
+  {
+    slug: '43-empaquetar-con-tar',
+    titulo: 'Empaquetar con tar',
+    resumen: 'tar empaqueta pero no comprime: crea backups con c, lístalos con t, extráelos con x y restaura donde quieras.',
+    minutos: 7,
+  },
+  {
+    slug: '44-comprimir-gzip-y-bzip2',
+    titulo: 'Comprimir con gzip y bzip2',
+    resumen: 'Comprime ficheros sueltos, conserva el original con -k, mira las estadísticas con -l y descomprime con gunzip y bunzip2.',
+    minutos: 7,
+  },
+  {
+    slug: '45-zip-y-tar-comprimido',
+    titulo: 'zip, unzip y tar comprimido',
+    resumen: 'Comprime directorios enteros con zip -r, extrae con unzip y empaqueta y comprime de una vez con tar czvf.',
+    minutos: 7,
+  },
+  {
+    slug: '46-monitorear-con-watch',
+    titulo: 'Monitorear en vivo con watch',
+    resumen: 'Repite cualquier comando cada N segundos con watch -n, vigila directorios y procesos, y usa comillas con tuberías.',
+    minutos: 7,
+  },
+  {
+    slug: '47-planificar-con-cron',
+    titulo: 'Planificar tareas con cron',
+    resumen: 'Qué es cron, qué hay en /etc/crontab y cómo leer los cinco campos de tiempo: minuto, hora, día, mes y día de la semana.',
+    minutos: 7,
+  },
+  {
+    slug: '48-tu-propio-crontab',
+    titulo: 'Tu propio crontab',
+    resumen: 'Crea, lista y borra trabajos con crontab -e, -l y -r; redirige siempre la salida y afina el cuándo con comas e intervalos.',
+    minutos: 8,
+  },
+  {
+    slug: '49-shadow-y-caducidad-de-claves',
+    titulo: 'El fichero shadow y la caducidad de claves',
+    resumen: 'Los tres ficheros de usuarios, los nueve campos de /etc/shadow y cómo leer la caducidad de una contraseña con chage -l.',
+    minutos: 8,
+  },
+  {
+    slug: '50-grupos-y-groupadd',
+    titulo: 'Grupos y groupadd',
+    resumen: 'Los campos de /etc/group, tus grupos con id y la creación de grupos con groupadd, eligiendo tú el GID con -g.',
+    minutos: 7,
+  },
+  {
+    slug: '51-crear-usuarios-useradd',
+    titulo: 'Crear usuarios con useradd',
+    resumen: 'Cada opción rellena un campo de /etc/passwd: -u el UID, -d el home, -g el grupo, -s la shell y -c el comentario.',
+    minutos: 7,
+  },
+  {
+    slug: '52-modificar-usuarios-y-grupos',
+    titulo: 'Modificar usuarios y grupos',
+    resumen: 'usermod -g y -G para grupo principal y secundarios, y groupmod -n y -g para renombrar y renumerar grupos.',
+    minutos: 7,
+  },
+  {
+    slug: '53-contrasenas-con-passwd',
+    titulo: 'Contraseñas con passwd',
+    resumen: 'Cambia tu clave, interpreta los errores y usa las opciones de administrador: -S estado, -l y -u bloqueo, -x caducidad.',
+    minutos: 7,
+  },
+  {
+    slug: '54-borrar-usuarios-y-grupos',
+    titulo: 'Borrar usuarios y grupos',
+    resumen: 'userdel con -r y -f, groupdel con -f, y por qué el orden correcto es siempre usuarios antes que grupos.',
+    minutos: 7,
+  },
+  {
+    slug: '55-sudo-y-el-grupo-sudo',
+    titulo: 'sudo y el grupo sudo',
+    resumen: 'Por qué root está protegido, qué hace sudo en realidad, cuánto dura su autorización y dónde se decide quién puede usarlo.',
+    minutos: 6,
+  },
+  {
+    slug: '56-cambiar-de-usuario-con-su',
+    titulo: 'Cambiar de usuario con su',
+    resumen: 'Conviértete en otro usuario con su y su -, distingue id de logname y vuelve a tu sesión con exit.',
+    minutos: 6,
+  },
+  {
+    slug: '57-editor-vi-primeros-pasos',
+    titulo: 'El editor vi: primeros pasos',
+    resumen: 'Por qué vi está en todos los servidores, sus dos modos de trabajo y cómo moverte con w, b, $ y ^.',
+    minutos: 7,
+  },
+  {
+    slug: '58-insertar-texto-en-vi',
+    titulo: 'Insertar texto en vi',
+    resumen: 'Las seis teclas que abren el modo edición (i, I, a, A, o, O) y el uso de Esc para volver al modo comando.',
+    minutos: 6,
+  },
+  {
+    slug: '59-borrar-texto-en-vi',
+    titulo: 'Borrar texto en vi',
+    resumen: 'Borra caracteres con x y X, palabras con dw, líneas con dd, y multiplica cualquier comando con un número delante.',
+    minutos: 7,
+  },
+  {
+    slug: '60-copiar-y-pegar-en-vi',
+    titulo: 'Copiar y pegar en vi',
+    resumen: 'Copia con yy, yw, y$ y y0, pega con p y P, y descubre que cortar es simplemente borrar con d y pegar después.',
+    minutos: 7,
+  },
+  {
+    slug: '61-buscar-en-vi',
+    titulo: 'Buscar en vi',
+    resumen: 'Busca hacia delante con / y hacia atrás con ?, salta entre coincidencias con n y N y entiende las coincidencias parciales.',
+    minutos: 6,
+  },
+  {
+    slug: '62-buscar-y-reemplazar-en-vi',
+    titulo: 'Buscar y reemplazar en vi',
+    resumen: 'El modo ex y la sustitución :s/busca/cambia/, ampliada con g a toda la línea y con % a todo el fichero. Deshacer con u.',
+    minutos: 7,
+  },
+  {
+    slug: '63-guardar-y-salir-de-vi',
+    titulo: 'Guardar y salir de vi',
+    resumen: 'Guarda con :w, sal con :q, descarta cambios con :q!, combina con :wq o :x y guarda con otro nombre con :w nombre.',
+    minutos: 6,
+  },
+  {
+    slug: '64-recuperar-un-fichero-en-vi',
+    titulo: 'Recuperar un fichero en vi',
+    resumen: 'Qué son los ficheros .swp, cómo leer el aviso tras una caída, recuperar el trabajo con :recover y limpiar el swap después.',
+    minutos: 7,
+  },
+  {
+    slug: '65-trucos-de-vi',
+    titulo: 'Trucos de vi que ahorran tiempo',
+    resumen: 'Numera líneas con :set nu, salta con :N y G, une líneas con J, repite el último comando con el punto y cambia el caso con ~.',
+    minutos: 6,
+  },
+  {
+    slug: '66-tu-primer-script',
+    titulo: 'Tu primer script en bash',
+    resumen: 'Qué es un script, el shebang #!/bin/bash y los tres pasos: crear, dar permisos con chmod +x y ejecutar.',
+    minutos: 8,
+  },
+  {
+    slug: '67-path-permanente-y-source',
+    titulo: 'PATH permanente y recargar el perfil',
+    resumen: 'Deja tu carpeta de scripts en el PATH editando ~/.profile y recarga los cambios sin reiniciar con el comando punto.',
+    minutos: 7,
+  },
+  {
+    slug: '68-variables-y-aritmetica-en-scripts',
+    titulo: 'Variables y aritmética en scripts',
+    resumen: 'Por qué tus scripts no ven las variables sin export, y las tres formas de hacer cuentas: expr, $(( )) y let.',
+    minutos: 8,
+  },
+  {
+    slug: '69-guardar-la-salida-de-un-comando',
+    titulo: 'Guardar la salida de un comando',
+    resumen: 'Sustitución de comandos: mete el resultado de cualquier comando o pipeline en una variable con $( ) o acentos graves.',
+    minutos: 6,
+  },
+  {
+    slug: '70-script-contar-ficheros',
+    titulo: 'Un script útil: contar ficheros',
+    resumen: 'Construye un script completo con sustitución, aritmética y pwd, depura un error de sintaxis y ejecútalo en cualquier carpeta.',
+    minutos: 8,
+  },
+  {
+    slug: '71-codigo-de-retorno',
+    titulo: 'El código de retorno: $?',
+    resumen: 'Todo comando devuelve 0 si fue bien y otro número si falló. Consúltalo con echo $? y guárdalo para usarlo después.',
+    minutos: 6,
+  },
+  {
+    slug: '72-condicionales-if-else',
+    titulo: 'Condicionales: if, else y test',
+    resumen: 'La estructura if/then/else/fi y los tests de fichero -d, -e, -f, -r, -w y -x, probados antes con el comando test.',
+    minutos: 8,
+  },
+  {
+    slug: '73-comparar-cadenas-y-numeros',
+    titulo: 'Comparar cadenas y números',
+    resumen: 'Tests de cadenas (=, !=, -z, -n) y de enteros (-eq, -ne, -gt), y por qué no se pueden mezclar unos con otros.',
+    minutos: 7,
+  },
+  {
+    slug: '74-pedir-datos-con-read',
+    titulo: 'Pedir datos por teclado: read',
+    resumen: 'Scripts interactivos con read: captura lo que escribe el usuario, ahorra líneas con -p y recoge varios datos a la vez.',
+    minutos: 7,
+  },
+  {
+    slug: '75-proyecto-menu-monitor',
+    titulo: 'Proyecto: un menú de monitorización',
+    resumen: 'Un script con menú que junta echo, read -p y la cadena if/elif/else/fi para consultar fecha, usuarios y uptime.',
+    minutos: 8,
+  },
+  {
+    slug: '76-operadores-logicos',
+    titulo: 'Operadores lógicos: Y, O y negación',
+    resumen: 'Combina condiciones con && y ||, niégalas con !, y valida la entrada saliendo con tu propio código mediante exit.',
+    minutos: 7,
+  },
+  {
+    slug: '77-la-clausula-case',
+    titulo: 'La cláusula case',
+    resumen: 'Sustituye la cadena de if/elif por case: sintaxis con in, ;; y esac, y el comodín * como opción por defecto.',
+    minutos: 7,
+  },
+  {
+    slug: '78-patrones-en-case',
+    titulo: 'Patrones en case',
+    resumen: 'Rangos [a-c] y [0-9], comodines como *a y alternativas con x|X, más el método para depurar errores por número de línea.',
+    minutos: 7,
+  },
+  {
+    slug: '79-el-bucle-for',
+    titulo: 'El bucle for',
+    resumen: 'Repite sobre una lista: valores sueltos, rangos con llaves, ficheros con comodines y la salida de un comando.',
+    minutos: 7,
+  },
+  {
+    slug: '80-el-bucle-while',
+    titulo: 'El bucle while',
+    resumen: 'Repite mientras se cumpla una condición: contador, incremento, bucles infinitos y cuándo elegirlo frente a for.',
+    minutos: 7,
+  },
+];
+---
+
+<Layout titulo="Curso Linux — Inicio">
+  <section class="mb-16">
+    <h1 class="font-display text-5xl md:text-6xl font-bold  leading-tight">
+      Aprende Linux
+    </h1>
+   
+    <div class="mt-10 flex gap-4 flex-wrap">
+      <a href="#lecciones" class="btn-primario">Empezar</a>
+      <a href="/Linux-course/practicas" class="btn-secundario">Prácticas de campo</a>
+    </div>
+  </section>
+
+  <section class="bg-sand border-l-2 border-ink p-6 mb-16">
+    <p class="text-xs uppercase font-bold tracking-[0.15em] text-ink/60">Fuente del curso</p>
+    <p class="mt-3 text-sm text-ink/80 leading-relaxed">
+      El temario de estas lecciones está basado en el curso
+      <a
+        href="https://www.youtube.com/playlist?list=PL2Z95CSZ1N4FKsZQKqCmbylDqssYFJX5A"
+        target="_blank"
+        rel="noopener noreferrer"
+      >«Curso de Linux desde cero para principiantes»</a>
+      del canal
+      <a
+        href="https://www.youtube.com/@informaticonfig333"
+        target="_blank"
+        rel="noopener noreferrer"
+      >INFORMATICONFIG</a>.
+      Aquí solo está reescrito en formato de lectura. Si te sirve, mira los vídeos
+      originales y apoya al canal: es donde está el trabajo de verdad. Este sitio no
+      tiene afiliación ni respaldo del autor original.
+    </p>
+  </section>
+
+
+
+  <section id="lecciones">
+    <div class="flex items-end justify-between flex-wrap gap-4 mb-8">
+      <h2 class="font-display text-3xl font-bold">Lecciones</h2>
+      <div class="text-right">
+        <p class="text-xs uppercase font-bold tracking-[0.15em] text-ink/60">
+          <span id="progreso-num">0</span> / {lecciones.length} completadas
+        </p>
+        <div class="mt-2 w-48 h-1 bg-line rounded-full overflow-hidden">
+          <div id="progreso-barra" class="h-full bg-ink transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <ul class="border-t border-line grid md:grid-cols-2 md:gap-x-10">
+      {lecciones.map((l, i) => (
+        <li class="leccion-item border-b border-line" data-slug={l.slug}>
+          <div class="flex items-center gap-3 py-3">
+            <input
+              type="checkbox"
+              class="leccion-check shrink-0 w-5 h-5 accent-[#1A1A1A] cursor-pointer"
+              data-slug={l.slug}
+              aria-label={`Marcar "${l.titulo}" como completada`}
+            />
+            <span class="num font-display text-sm text-ink/40 w-6 shrink-0 tabular-nums">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <a href={`/Linux-course/lecciones/${l.slug}`} class="leccion-titulo flex-1 min-w-0 font-bold hover:underline truncate" title={l.resumen}>
+              {l.titulo}
+            </a>
+            <span class="text-xs text-ink/40 shrink-0 tabular-nums">{l.minutos}m</span>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+
+    <section class="tarjeta my-16">
+    <span class="etiqueta">Prácticas de campo</span>
+    <h2 class="font-display text-2xl font-bold mt-4">Linux en tu día a día</h2>
+    <p class="mt-3 text-ink/70">
+      Nueve misiones con laboratorio incluido, enfocadas solo en lo que se usa en un
+      servidor de producción: leer logs, cazar un pedido, ver si el binario está
+      arriba, liberar disco y editar un config con vi.
+    </p>
+    <a href="/Linux-course/practicas" class="btn-primario mt-6">Ir a las prácticas</a>
+  </section>
+
+  <section class="tarjeta mb-16">
+    <span class="etiqueta">Autoevaluación</span>
+    <h2 class="font-display text-2xl font-bold mt-4">Ponte a prueba</h2>
+    <p class="mt-3 text-ink/70">
+      45 retos con las respuestas ocultas: situaciones de guardia que resuelves tú,
+      salidas de terminal que hay que interpretar y comandos con errores que debes
+      encontrar. Para comprobar si de verdad te acuerdas.
+    </p>
+    <a href="/Linux-course/retos" class="btn-primario mt-6">Empezar los retos</a>
+  </section>
+</Layout>
+
+<style>
+  .leccion-item.completada .leccion-titulo {
+    color: rgba(26, 26, 26, 0.35);
+    text-decoration: line-through;
+  }
+  .leccion-item.completada .num {
+    color: rgba(26, 26, 26, 0.25);
+  }
+</style>
+
+<script>
+  const KEY = 'linux-curso-completadas';
+
+  function leer(): string[] {
+    try {
+      return JSON.parse(localStorage.getItem(KEY) || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function guardar(slugs: string[]) {
+    localStorage.setItem(KEY, JSON.stringify(slugs));
+  }
+
+  function actualizarProgreso() {
+    const total = document.querySelectorAll('.leccion-check').length;
+    const hechas = document.querySelectorAll('.leccion-check:checked').length;
+    const num = document.getElementById('progreso-num');
+    const barra = document.getElementById('progreso-barra');
+    if (num) num.textContent = String(hechas);
+    if (barra) barra.style.width = total ? `${(hechas / total) * 100}%` : '0%';
+  }
+
+  const completadas = leer();
+
+  document.querySelectorAll<HTMLInputElement>('.leccion-check').forEach((chk) => {
+    const slug = chk.dataset.slug!;
+    const item = chk.closest('.leccion-item');
+    if (completadas.includes(slug)) {
+      chk.checked = true;
+      item?.classList.add('completada');
+    }
+    chk.addEventListener('change', () => {
+      const actual = leer();
+      if (chk.checked) {
+        if (!actual.includes(slug)) actual.push(slug);
+        item?.classList.add('completada');
+      } else {
+        const idx = actual.indexOf(slug);
+        if (idx > -1) actual.splice(idx, 1);
+        item?.classList.remove('completada');
+      }
+      guardar(actual);
+      actualizarProgreso();
+    });
+  });
+
+  actualizarProgreso();
+</script>

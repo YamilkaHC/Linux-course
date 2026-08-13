@@ -1,0 +1,170 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 58. Fuente: transcripciones/video_45.md (primera parte: modo edición, i I a A o O)
+---
+
+<Layout titulo="Insertar texto en vi — Curso Linux" descripcion="Pasa al modo edición de vi con las seis teclas que importan: i, I, a, A, o y O, y vuelve al modo comando con Esc.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 58</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">6 min de lectura</span>
+      <span class="etiqueta-arribita">Por arribita</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Insertar texto en vi</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Seis teclas para entrar en modo edición. La que elijas decide dónde aparece el cursor.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A pasar de <a href="/Linux-course/lecciones/57-editor-vi-primeros-pasos">modo comando</a> a modo edición con <code>i</code>, y a volver siempre con <code>Esc</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Las seis teclas de inserción y en qué punto exacto te deja cada una: <code>i I a A o O</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Por qué conviene moverse en modo comando y solo entonces insertar, en lugar de intentar navegar mientras escribes.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">La tecla que lo desbloquea todo</h2>
+    <p class="mt-4">Abre tu fichero de prácticas, colócate en una línea en blanco e intenta escribir: no pasa nada, sigues en modo comando. Ahora pulsa <code>i</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>i          → entras en modo edición
+hola qué tal
+Esc        → vuelves a modo comando</code></pre>
+    <p class="mt-4">Con la <code>i</code> pulsada, el teclado se comporta como en cualquier editor normal: las letras son letras, <code>Enter</code> salta de línea. Prueba a escribir <code>jkl</code> y verás que ahora sí aparecen como texto, en lugar de mover el cursor.</p>
+    <p class="mt-4">Y para salir, <strong><code>Esc</code></strong>. Esa tecla es tu ancla: <strong>ante la duda, pulsa <code>Esc</code></strong> y sabrás con certeza que estás en modo comando. Compruébalo pulsando <code>j</code> y <code>k</code> después: si el cursor se mueve, has vuelto.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Abre <code>vi loren.txt</code>, pulsa <code>i</code>, escribe una frase, pulsa <code>Esc</code> y muévete con <code>j</code> y <code>k</code>. <strong>Meta:</strong> hacer el ciclo comando → edición → comando tres veces seguidas hasta que salga sin pensar.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Insertas donde estás</h2>
+    <p class="mt-4">Detalle clave: <code>i</code> empieza a escribir <strong>justo en la posición del cursor</strong>. Si te colocas en mitad de una palabra y pulsas <code>i</code>, el texto nuevo se cuela ahí en medio.</p>
+    <p class="mt-4">De ahí la forma correcta de trabajar en <code>vi</code>: <strong>primero te mueves en modo comando</strong> —con las flechas o con <code>w</code>, <code>b</code>, <code>$</code>—, colocas el cursor donde toca, <strong>y solo entonces</strong> pulsas <code>i</code>.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">No navegues en modo edición</p>
+      <p class="!mt-0">En el <code>vi</code> original, las flechas <strong>quedan inutilizadas mientras escribes</strong>: en vez de mover el cursor, insertan caracteres sueltos en el texto. Si ves aparecer letras raras al intentar desplazarte, es eso. La costumbre sana: <code>Esc</code>, te mueves, y vuelves a insertar.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Las seis teclas</h2>
+    <p class="mt-4">La <code>i</code> no es la única puerta de entrada. Cada una te deja en un sitio distinto, y elegir bien te ahorra media docena de pulsaciones:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Tecla</th>
+            <th class="text-left p-3 border-b border-line font-bold">Empieza a escribir</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>i</code></td><td class="p-3 border-b border-line">En la posición del cursor</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>I</code> (mayúscula)</td><td class="p-3 border-b border-line">Al <strong>principio de la línea</strong></td></tr>
+          <tr><td class="p-3 border-b border-line"><code>a</code></td><td class="p-3 border-b border-line">Justo <strong>después</strong> del cursor</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>A</code> (mayúscula)</td><td class="p-3 border-b border-line">Al <strong>final de la línea</strong></td></tr>
+          <tr><td class="p-3 border-b border-line"><code>o</code></td><td class="p-3 border-b border-line">En una <strong>línea nueva debajo</strong> de la actual</td></tr>
+          <tr><td class="p-3"><code>O</code> (mayúscula)</td><td class="p-3">En una <strong>línea nueva encima</strong> de la actual</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">Las mayúsculas se escriben con <code>Shift</code>: <code>Shift+I</code>, <code>Shift+A</code>, <code>Shift+O</code>.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Dónde te deja cada tecla</text>
+
+        <text x="60" y="56" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">O</text>
+        <line x1="90" y1="52" x2="500" y2="52" stroke="#E5E1D8" stroke-dasharray="4 3"/>
+        <text x="295" y="48" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">línea nueva encima</text>
+
+        <rect x="90" y="70" width="410" height="34" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="295" y="92" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">esta es la línea actual</text>
+
+        <text x="60" y="92" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">I</text>
+        <line x1="76" y1="87" x2="88" y2="87" stroke="#1A1A1A"/>
+        <text x="516" y="92" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">A</text>
+        <line x1="502" y1="87" x2="514" y2="87" stroke="#1A1A1A"/>
+
+        <line x1="280" y1="66" x2="280" y2="108" stroke="#1A1A1A"/>
+        <text x="252" y="126" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">i</text>
+        <text x="308" y="126" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">a</text>
+        <text x="280" y="140" font-family="Inter, sans-serif" font-size="8" fill="#1A1A1A" stroke="none" text-anchor="middle">cursor</text>
+
+        <text x="60" y="164" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">o</text>
+        <line x1="90" y1="160" x2="500" y2="160" stroke="#E5E1D8" stroke-dasharray="4 3"/>
+        <text x="295" y="176" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">línea nueva debajo</text>
+
+        <text x="280" y="196" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">minúscula cerca del cursor · mayúscula al extremo de la línea</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Seis puertas de entrada al mismo modo.</figcaption>
+    </figure>
+
+    <p class="mt-4">Un caso típico: estás en mitad de una línea y quieres añadir algo al final. En lugar de pulsar <code>$</code> y luego <code>a</code>, pulsas directamente <code>A</code> y ya estás escribiendo allí.</p>
+    <p class="mt-4">Y otro: quieres meter una línea nueva entre dos párrafos. Con <code>o</code> se abre en blanco justo debajo y entras en modo edición de una sola vez, sin tener que ir al final y pulsar <code>Enter</code>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Colócate en mitad de una línea larga y prueba las seis en orden, pulsando <code>Esc</code> entre una y otra: <code>i</code>, <code>I</code>, <code>a</code>, <code>A</code>, <code>o</code>, <code>O</code>. Escribe una marca corta con cada una. <strong>Meta:</strong> ver en el texto resultante dónde te dejó cada tecla.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: escribir sin pelearte con el editor</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Abre tu fichero y añade una línea de título al principio del documento usando <code>O</code> desde la primera línea.</li>
+        <li>Colócate en cualquier punto de un párrafo y añade la palabra <code>FIN</code> al final de esa línea con una sola tecla de inserción. (Pista: no necesitas <code>$</code>.)</li>
+        <li>Practica el ciclo: muévete con <code>w</code> hasta la tercera palabra de una línea, pulsa <code>i</code>, escribe algo, <code>Esc</code>, y sigue moviéndote. Repítelo cinco veces.</li>
+        <li><strong>Reto:</strong> escribe desde cero un pequeño fichero. Sal de vi sin guardar con <code>:q!</code>, crea <code>vi notas.txt</code> y redacta tres líneas: usa <code>i</code> para la primera, <code>o</code> para abrir la segunda y <code>A</code> para añadir un punto final a la tercera. Sal otra vez con <code>:q!</code> (guardar viene en la próxima lección).</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>i</code> pasa de modo comando a modo edición y empieza a escribir en la posición del cursor. <code>Esc</code> devuelve siempre al modo comando: ante la duda, púlsala.</p>
+      <p>Hay seis puertas de entrada: <code>i</code> en el cursor, <code>I</code> al principio de la línea, <code>a</code> después del cursor, <code>A</code> al final de la línea, <code>o</code> abre línea debajo y <code>O</code> encima. Elegir la adecuada ahorra desplazamientos.</p>
+      <p>La forma sana de trabajar es moverse en modo comando y solo entonces insertar. En el <code>vi</code> original las flechas no navegan mientras escribes: insertan caracteres.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Estás escribiendo y ya no sabes en qué modo estás. ¿Qué haces?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Pulsar <code>Esc</code>. Desde modo edición te devuelve a modo comando, y desde modo comando no hace daño. Compruébalo moviéndote con <code>j</code> o <code>k</code>: si el cursor se desplaza, estás en comando.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Quieres añadir texto al final de la línea donde estás. ¿Cuál es la forma más corta?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>A</code> (<code>Shift+A</code>): salta al final de la línea y entra en modo edición de una vez. La alternativa larga sería <code>$</code> y luego <code>a</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué diferencia hay entre <code>o</code> y <code>O</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Las dos abren una línea nueva en blanco y entran en modo edición, pero <code>o</code> minúscula la abre <strong>debajo</strong> de la línea actual y <code>O</code> mayúscula <strong>encima</strong>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/57-editor-vi-primeros-pasos" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/59-borrar-texto-en-vi" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

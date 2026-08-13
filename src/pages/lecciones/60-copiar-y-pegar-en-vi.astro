@@ -1,0 +1,181 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 60. Fuente: transcripciones/video_46.md (primera parte: yy, p, P, yw, yb, y$, y0 y cortar con d)
+---
+
+<Layout titulo="Copiar y pegar en vi — Curso Linux" descripcion="Copia con yy, yw, y$ y y0, pega con p y P, y descubre que cortar en vi es simplemente borrar con d y pegar después.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 60</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+      <span class="etiqueta-saltar">Saltar</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Copiar y pegar en vi</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Sin ratón y sin Ctrl+C. Y con una sorpresa: cortar no es un comando nuevo, ya lo sabes hacer.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A copiar líneas con <code>yy</code> y pegarlas con <code>p</code> o <code>P</code>, según quieras que caigan debajo o encima.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Que la <code>y</code> se combina con los mismos movimientos que la <code>d</code>: <code>yw</code>, <code>yb</code>, <code>y$</code>, <code>y0</code>. Una sola lógica para todo.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Que <strong>cortar es borrar y pegar</strong>: lo que eliminas con <code>d</code> queda en el búfer y se recupera con <code>p</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Copiar una línea: yy</h2>
+    <p class="mt-4">En modo comando, sitúate en la línea que quieras duplicar —el título de tu texto, por ejemplo— y pulsa dos veces la <code>y</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>yy    → copia la línea actual
+p     → la pega debajo de donde esté el cursor</code></pre>
+    <p class="mt-4">Colócate ahora unas líneas más abajo y pulsa <code>p</code>: ahí aparece la copia. Pulsa <code>p</code> otra vez y aparece otra. Lo copiado <strong>se queda en un búfer</strong> y puedes pegarlo tantas veces como quieras.</p>
+    <p class="mt-4">La <code>y</code> viene de <em>yank</em>, «tirar de algo», y la <code>p</code> de <em>paste</em> o <em>put</em>. Es el equivalente exacto de tu Ctrl+C y Ctrl+V de toda la vida.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Copia la primera línea de tu fichero con <code>yy</code>, baja unas cuantas líneas y pega dos veces seguidas con <code>p</code>. <strong>Meta:</strong> comprobar que el búfer no se vacía al pegar.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Varias líneas y el multiplicador</h2>
+    <p class="mt-4">El truco numérico de <a href="/Linux-course/lecciones/59-borrar-texto-en-vi">la lección anterior</a> funciona igual aquí:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>3yy   → copia tres líneas desde la actual
+2yy   → copia dos líneas</code></pre>
+    <p class="mt-4">Al hacerlo, el propio editor te confirma la operación abajo con un mensaje del estilo «3 líneas copiadas». Después, un <code>p</code> las suelta todas juntas donde estés.</p>
+    <p class="mt-4">Si al pegar te parece que aparecen más líneas de las que copiaste, mira el ancho de la ventana: <strong>una línea larga se muestra partida en varias</strong> cuando la terminal es estrecha. El contenido es el mismo.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Pegar arriba o abajo: p y P</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>p     → pega DEBAJO de la línea del cursor
+P     → pega ENCIMA de la línea del cursor</code></pre>
+    <p class="mt-4">Misma lógica de mayúsculas que ya viste con <code>o</code> y <code>O</code> al <a href="/Linux-course/lecciones/58-insertar-texto-en-vi">insertar</a>: la minúscula trabaja hacia abajo, la mayúscula hacia arriba. Se escribe con <code>Shift+P</code>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Copiar trozos: la y se combina</h2>
+    <p class="mt-4">Aquí está la idea que hace de <code>vi</code> algo coherente en lugar de una lista de teclas sueltas: <strong>la <code>y</code> acepta los mismos movimientos que la <code>d</code></strong>.</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Comando</th>
+            <th class="text-left p-3 border-b border-line font-bold">Copia</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>yw</code></td><td class="p-3 border-b border-line">Desde el cursor hasta el <strong>final</strong> de la palabra</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>yb</code></td><td class="p-3 border-b border-line">Desde el cursor hacia atrás, hasta el <strong>principio</strong> de la palabra</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>y$</code></td><td class="p-3 border-b border-line">Desde el cursor hasta el <strong>final de la línea</strong></td></tr>
+          <tr><td class="p-3"><code>y0</code></td><td class="p-3">Desde el cursor hasta el <strong>principio de la línea</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">Un ejemplo concreto. En la palabra <code>planeta</code>, con el cursor sobre la primera <code>e</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>planeta   →  yw  →  copia "neta"   (de la mitad al final)
+planeta   →  yb  →  copia "plan"   (del principio a la mitad)</code></pre>
+    <p class="mt-4">Y con una frase larga, colocándote en su mitad, <code>y$</code> se queda con la segunda parte y <code>y0</code> con la primera. Fíjate en que <code>w</code>, <code>b</code>, <code>$</code> y <code>0</code> significan siempre lo mismo, los uses para moverte, para borrar o para copiar. Memorizas cuatro movimientos y los reutilizas con todo.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 190" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Una gramática, no una lista</text>
+
+        <rect x="40" y="46" width="120" height="46" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="100" y="66" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">acción</text>
+        <text x="100" y="84" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">y  ·  d</text>
+
+        <text x="185" y="72" font-family="Inter, sans-serif" font-size="16" fill="#1A1A1A" stroke="none" text-anchor="middle">+</text>
+
+        <rect x="210" y="46" width="180" height="46" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="300" y="66" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">movimiento</text>
+        <text x="300" y="84" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">w  ·  b  ·  $  ·  0</text>
+
+        <text x="415" y="72" font-family="Inter, sans-serif" font-size="16" fill="#1A1A1A" stroke="none" text-anchor="middle">=</text>
+
+        <rect x="440" y="46" width="90" height="46" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="485" y="74" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">yw · d$</text>
+
+        <line x1="40" y1="116" x2="530" y2="116" stroke="#E5E1D8"/>
+        <text x="280" y="140" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">y copia · d borra · p pega · un número delante lo repite</text>
+        <text x="280" y="164" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">yy y dd (letra doble) actúan sobre la línea entera</text>
+        <text x="280" y="182" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">aprendes los movimientos una vez y sirven para todo</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Acción más movimiento: así se combinan los comandos.</figcaption>
+    </figure>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Colócate en mitad de una palabra larga y prueba <code>yw</code> seguido de <code>p</code> en otra línea; después <code>yb</code> y <code>p</code>. <strong>Meta:</strong> ver que copias exactamente el trozo que esperabas según hacia dónde apunte el movimiento.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cortar: ya sabes hacerlo</h2>
+    <p class="mt-4">Aquí viene la sorpresa. Para cortar no hay un comando nuevo: <strong>todo lo que borras con <code>d</code> queda guardado en el búfer</strong>, así que basta con pegarlo después.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>dw  luego  p      → mueve una palabra a otro sitio
+dd  luego  p      → mueve una línea entera
+d$  luego  p      → mueve el final de una línea
+d0  luego  p      → mueve el principio de una línea</code></pre>
+    <p class="mt-4">Es decir: <strong>cortar = borrar + pegar</strong>. Sitúate al principio de la palabra <code>planeta</code>, pulsa <code>dw</code> —desaparece—, baja a donde la quieras y pulsa <code>p</code>. Ya está movida.</p>
+    <p class="mt-4">Lo mismo con líneas: <code>dd</code> se lleva la línea, <code>p</code> la deja donde tú digas. Y como es el mismo búfer de siempre, funciona con el multiplicador: <code>3dd</code> y luego <code>p</code> mueve tres líneas de golpe.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Mueve el título de tu documento al final: <code>dd</code> sobre la primera línea, baja hasta el final y <code>p</code>. Después devuélvelo arriba con <code>dd</code> y <code>P</code>. <strong>Meta:</strong> hacer un corta-y-pega completo sin tocar el ratón.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: reordenar un texto</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Duplica la primera línea del fichero tres veces usando <code>yy</code> y tres <code>p</code> seguidos.</li>
+        <li>Copia un bloque de tres líneas con <code>3yy</code> y pégalo al final del documento. Comprueba el mensaje que muestra el editor al copiar.</li>
+        <li>Prueba las cuatro combinaciones de trozo sobre una misma frase: <code>yw</code>, <code>yb</code>, <code>y$</code> y <code>y0</code>, pegando cada resultado en una línea nueva abierta con <code>o</code>.</li>
+        <li><strong>Reto:</strong> invierte el orden de los dos primeros párrafos usando solo <code>dd</code>/<code>3dd</code> y <code>p</code>. Cuando lo consigas, sal sin guardar con <code>:q!</code> y repítelo intentando usar menos pulsaciones.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>yy</code> copia la línea actual y <code>p</code> la pega debajo del cursor; <code>P</code> la pega encima. Lo copiado se guarda en un búfer y puede pegarse varias veces. Con multiplicador: <code>3yy</code> copia tres líneas.</p>
+      <p>La <code>y</code> se combina con los movimientos que ya conoces: <code>yw</code> hasta el final de la palabra, <code>yb</code> hacia atrás, <code>y$</code> hasta el final de la línea y <code>y0</code> hasta su principio. Los mismos movimientos que usa <code>d</code>.</p>
+      <p>Cortar no necesita comando propio: lo borrado con <code>dw</code>, <code>dd</code>, <code>d$</code> o <code>d0</code> queda en el búfer, así que un <code>p</code> después lo mueve al sitio nuevo.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Quieres mover una línea del principio del fichero al final. ¿Qué comandos usas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>dd</code> sobre esa línea para borrarla —queda en el búfer—, bajas hasta el final y pulsas <code>p</code>. Cortar en <code>vi</code> es exactamente eso: borrar y pegar.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Con el cursor sobre la <code>e</code> de «planeta», pulsas <code>yw</code> y luego <code>p</code>. ¿Qué se pega?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>neta</code>. <code>yw</code> copia desde la posición del cursor hasta el final de la palabra, igual que <code>dw</code> borra desde ahí. Para copiar la parte anterior habría que usar <code>yb</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué diferencia hay entre <code>p</code> y <code>P</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>p</code> pega debajo de la línea del cursor y <code>P</code> encima. Es la misma lógica de mayúsculas que <code>o</code> y <code>O</code>: la minúscula trabaja hacia abajo.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/59-borrar-texto-en-vi" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/61-buscar-en-vi" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

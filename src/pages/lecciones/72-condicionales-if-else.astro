@@ -1,0 +1,150 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 72. Fuente: transcripciones/video_52.md (segunda parte: if/then/else/fi y tests de fichero)
+---
+
+<Layout titulo="Condicionales: if, else y test — Curso Linux" descripcion="Escribe condiciones en bash con if, then, else y fi, y comprueba ficheros y directorios con los tests -d, -e, -f, -r, -w y -x.">
+  <article class="prose-editorial">
+
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 72</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">5 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Condicionales: if, else y test</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Hasta ahora tus scripts hacían siempre lo mismo. Con esto empiezan a decidir.
+    </p>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Estructura: <code>if</code>, <code>then</code>, <code>else</code> y <code>fi</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Tests de fichero: <code>-d</code>, <code>-e</code>, <code>-f</code>, <code>-r</code>, <code>-w</code>, <code>-x</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Probar condiciones sueltas con <code>test</code> en la terminal.</span></li>
+      </ul>
+    </section>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Sintaxis</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>if [ condición ]
+then
+    comando
+fi</code></pre>
+    <p class="mt-4">Corchetes con <strong>espacios a ambos lados</strong> obligatorios. <code>fi</code> (<code>if</code> al revés) cierra el bloque.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Tests de fichero</h2>
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Test</th>
+            <th class="text-left p-3 border-b border-line font-bold">Cierto si…</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>-d</code></td><td class="p-3 border-b border-line">Es un <strong>directorio</strong></td></tr>
+          <tr><td class="p-3 border-b border-line"><code>-e</code></td><td class="p-3 border-b border-line">Existe</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>-f</code></td><td class="p-3 border-b border-line">Es un <strong>fichero normal</strong></td></tr>
+          <tr><td class="p-3 border-b border-line"><code>-r</code></td><td class="p-3 border-b border-line">Se puede leer</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>-w</code></td><td class="p-3 border-b border-line">Se puede escribir</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>-x</code></td><td class="p-3 border-b border-line">Es ejecutable</td></tr>
+          <tr><td class="p-3"><code>-L</code></td><td class="p-3">Es un enlace simbólico</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Probar sueltos con test</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ test -d /home/user001
+$ echo $?
+0                       ← existe y es directorio
+
+$ test -d /home/inventado
+$ echo $?
+1                       ← no</code></pre>
+    <p class="mt-4"><strong>0 = verdadero</strong> en la shell (al revés que en otros lenguajes). <code>if</code> ejecuta su bloque cuando la condición devuelve 0.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Script con if/else y variable</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>#!/bin/bash
+
+directorio=/home/user001
+
+if [ -d $directorio ]
+then
+    echo "El directorio $directorio existe"
+else
+    echo "El directorio $directorio no existe"
+fi</code></pre>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 215" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Las dos ramas</text>
+        <rect x="200" y="40" width="160" height="40" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="280" y="65" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">if [ -d ruta ]</text>
+        <line x1="240" y1="82" x2="150" y2="112" stroke="#1A1A1A"/>
+        <path d="M150 112 l7 -2 l-4 -6 z" fill="#1A1A1A" stroke="none"/>
+        <text x="176" y="102" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">0</text>
+        <line x1="320" y1="82" x2="410" y2="112" stroke="#1A1A1A"/>
+        <path d="M410 112 l-7 -2 l4 -6 z" fill="#1A1A1A" stroke="none"/>
+        <text x="386" y="102" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">1</text>
+        <rect x="40" y="118" width="180" height="52" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="130" y="140" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">then</text>
+        <text x="130" y="158" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">"El directorio existe"</text>
+        <rect x="340" y="118" width="180" height="52" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="430" y="140" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">else</text>
+        <text x="430" y="158" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">"El directorio no existe"</text>
+        <line x1="130" y1="176" x2="280" y2="190" stroke="#E5E1D8"/>
+        <line x1="430" y1="176" x2="280" y2="190" stroke="#E5E1D8"/>
+        <text x="280" y="206" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">fi</text>
+      </svg>
+    </figure>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Prueba cinco tests sueltos con <code>test</code> y <code>echo $?</code>.</li>
+        <li>Escribe <code>comprobar_dir.sh</code> con <code>if</code>/<code>else</code> y una variable. Prueba con ruta válida e inventada.</li>
+        <li><strong>Reto:</strong> escribe <code>revisar.sh</code> que compruebe un fichero con <code>-e</code>, <code>-f</code> y <code>-x</code>, cada uno con su <code>if</code>/<code>else</code>.</li>
+      </ol>
+    </section>
+
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>if [ condición ]</code>, <code>then</code>, comandos, <code>fi</code>. Corchetes con <strong>espacios</strong>. <code>else</code> añade rama alternativa.</p>
+      <p>Tests de fichero: <code>-d</code> directorio, <code>-e</code> existe, <code>-f</code> fichero, <code>-r</code>/<code>-w</code>/<code>-x</code> permisos, <code>-L</code> enlace.</p>
+      <p>Se prueban sueltos con <code>test</code> + <code>echo $?</code>. <strong>0 = cierto</strong>, cualquier otro = falso.</p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. <code>if [-d /home]</code> falla. ¿Qué le pasa?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Faltan espacios. Correcto: <code>if [ -d /home ]</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Tu script no imprime nada cuando la condición no se cumple. ¿Está roto?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No: sin <code>else</code>, cuando la condición es falsa no hace nada.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. <code>test -d /home/user001</code> devuelve 0. ¿Verdadero o falso?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Verdadero. En la shell, 0 = cierto.</p>
+        </details>
+      </div>
+    </section>
+
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/71-codigo-de-retorno" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/73-comparar-cadenas-y-numeros" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

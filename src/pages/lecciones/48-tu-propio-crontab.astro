@@ -1,0 +1,164 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 48. Fuente: transcripciones/video_38.md (segunda mitad: crontab -l / -e / -r, subir un fichero, comas e intervalos)
+---
+
+<Layout titulo="Tu propio crontab — Curso Linux" descripcion="Crea, lista y borra tus trabajos planificados con crontab -e, -l y -r; redirige siempre la salida y combina minutos con comas e intervalos con guiones.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 48</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">5 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Tu propio crontab</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Ya sabes leer planificaciones. Toca escribir la tuya y verla ejecutarse sola.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Las tres opciones clave: <code>crontab -l</code> listar, <code>crontab -e</code> editar, <code>crontab -r</code> borrar.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Por qué la <strong>redirección es obligatoria</strong> en cron: nadie mira la pantalla.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Afinar tiempos con <strong>comas</strong> (valores sueltos) y <strong>guiones</strong> (intervalos).</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Tu punto de partida</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ crontab -l
+no crontab for user001</code></pre>
+    <p class="mt-4">Nada planificado. Diferencia clave con <a href="/Linux-course/lecciones/47-planificar-con-cron">/etc/crontab</a>: ese es del sistema y solo lo toca root; <code>crontab -l</code> muestra <strong>el tuyo</strong>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Crear un trabajo</h2>
+    <p class="mt-4">Puedes usar <code>crontab -e</code> (abre un editor) o escribir un fichero y subirlo. Segundo método:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ edit mi_crontab</code></pre>
+    <p class="mt-4">Escribe dentro:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>* * * * * date &gt;&gt; /tmp/fecha</code></pre>
+    <p class="mt-4">Cinco asteriscos = <strong>cada minuto</strong>. Ejecuta <a href="/Linux-course/lecciones/18-fecha-y-tiempo-activo">date</a> y añade el resultado a <code>/tmp/fecha</code> con <code>&gt;&gt;</code> (<a href="/Linux-course/lecciones/19-entrada-salida-y-redirecciones">redirecciones</a>). Súbelo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ crontab mi_crontab
+$ crontab -l
+* * * * * date &gt;&gt; /tmp/fecha</code></pre>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Redirige siempre la salida</p>
+      <p class="!mt-0">Cron ejecuta sin shell ni pantalla. Sin redirección, el resultado se pierde. Forma completa con errores:</p>
+      <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4 !mb-0"><code>* * * * * date &gt;&gt; /tmp/fecha 2&gt;&gt; /tmp/errores</code></pre>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>mi_crontab</code>, súbelo con <code>crontab mi_crontab</code> y verifica con <code>crontab -l</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Verlo en acción</h2>
+    <p class="mt-4">Espera un minuto y usa <a href="/Linux-course/lecciones/46-monitorear-con-watch">watch</a> para observar:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ watch -n 30 cat /tmp/fecha
+vie 04 ago 2026 16:41:01 CEST
+vie 04 ago 2026 16:42:01 CEST
+vie 04 ago 2026 16:43:01 CEST</code></pre>
+    <p class="mt-4">Cada minuto aparece una línea nueva, sin tocar nada. Cron no garantiza el segundo exacto; en sistemas cargados puede retrasarse unos segundos (como viste en <a href="/Linux-course/lecciones/28-prioridad-nice-renice">prioridades</a>).</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Borrar: crontab -r</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ crontab -ri
+crontab: really delete user001's crontab? y
+
+$ crontab -l
+no crontab for user001</code></pre>
+    <p class="mt-4"><code>-r</code> borra todo tu crontab. La <code>i</code> pide confirmación (igual que <code>rm -i</code> de <a href="/Linux-course/lecciones/10-mover-y-borrar">mover y borrar</a>). Tu fichero <code>mi_crontab</code> sigue en el home: edítalo y vuélvelo a subir cuando quieras.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Comas y guiones: afinar el cuándo</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>1,5,10 6-9 * * * date &gt;&gt; /tmp/fecha</code></pre>
+    <ul class="mt-4 space-y-2">
+      <li><strong>Comas</strong> — valores sueltos: <code>1,5,10</code> = «en el minuto 1, 5 y 10».</li>
+      <li><strong>Guion</strong> — intervalo: <code>6-9</code> = «de las 6 a las 9».</li>
+    </ul>
+    <p class="mt-4">Resultado: 12 ejecuciones al día (3 minutos × 4 horas).</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 175" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Tres formas de rellenar un campo</text>
+
+        <rect x="30" y="42" width="150" height="80" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="105" y="68" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">*</text>
+        <line x1="55" y1="80" x2="155" y2="80" stroke="#E5E1D8"/>
+        <text x="105" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">cualquier valor</text>
+
+        <rect x="205" y="42" width="150" height="80" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="280" y="68" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">1,5,10</text>
+        <line x1="230" y1="80" x2="330" y2="80" stroke="#E5E1D8"/>
+        <text x="280" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">valores sueltos</text>
+
+        <rect x="380" y="42" width="150" height="80" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="455" y="68" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">6-9</text>
+        <line x1="405" y1="80" x2="505" y2="80" stroke="#E5E1D8"/>
+        <text x="455" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">intervalo</text>
+
+        <line x1="30" y1="140" x2="530" y2="140" stroke="#E5E1D8"/>
+        <text x="280" y="162" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">1,5,10 6-9 * * *  →  doce ejecuciones al día</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Sirven igual en los cinco campos.</figcaption>
+    </figure>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Escribe un backup a las 4 a.m. <strong>todos los días menos domingo</strong>: <code>0 4 * * 1-6</code>.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: planifica, comprueba y limpia</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Sube <code>* * * * * date &gt;&gt; /tmp/fecha 2&gt;&gt; /tmp/errores</code> con <code>crontab mi_crontab</code> y confirma con <code>crontab -l</code>.</li>
+        <li>Déjalo 3 minutos con <code>watch -n 30 cat /tmp/fecha</code>, luego cuenta con <code>wc -l /tmp/fecha</code>.</li>
+        <li>Borra con <code>crontab -ri</code>, edita para minutos <code>1,5,10</code> horas <code>6-9</code>, sube de nuevo y verifica.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>crontab -l</code> lista, <code>crontab -e</code> edita, <code>crontab fichero</code> sube, <code>crontab -r</code> borra (<code>-ri</code> con confirmación).</p>
+      <p>Cron ejecuta sin pantalla: redirige siempre con <code>&gt;&gt;</code> y <code>2&gt;&gt;</code>, o pierdes la salida.</p>
+      <p><strong>Comas</strong> enumeran valores (<code>1,5,10</code>), <strong>guion</strong> marca intervalos (<code>6-9</code>). Ejemplo completo: «lunes a sábado a las 4 a.m.» = <code>0 4 * * 1-6</code>.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Planificas <code>* * * * * date</code> sin redirección y no encuentras el resultado. ¿Por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Cron ejecuta sin shell conectada: no hay pantalla. Sin <code>&gt;&gt;</code> la salida se pierde.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué significa <code>1,5,10 6-9 * * *</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Ejecuta en minutos 1, 5 y 10 de las horas 6 a 9, todos los días. Total: 12 ejecuciones diarias.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Cómo quitas tu planificación sin perder el fichero fuente?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>crontab -ri</code> borra del sistema con confirmación. Tu fichero <code>mi_crontab</code> sigue en el home para volver a subirlo.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/47-planificar-con-cron" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/49-shadow-y-caducidad-de-claves" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

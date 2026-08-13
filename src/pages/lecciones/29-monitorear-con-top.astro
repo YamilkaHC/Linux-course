@@ -1,0 +1,146 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 29. Fuente: transcripciones/video_24.md (segunda mitad: comando top interactivo)
+---
+
+<Layout titulo="Monitorear el sistema en vivo con top — Curso Linux" descripcion="Usa top, el monitor interactivo de Linux: lee su cabecera (uptime, tareas, CPU, memoria, swap), ordena por CPU o memoria, filtra por usuario y guarda tu vista con W.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 29</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Monitorear el sistema en vivo con top</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      A diferencia de <a href="/Linux-course/lecciones/26-procesos-y-ps"><code>ps</code></a>, que da una foto fija, <code>top</code> es una pantalla <strong>interactiva</strong> que se actualiza sola: procesos, CPU y memoria en tiempo real. Es el panel de control del administrador.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A leer la <strong>cabecera</strong> de <code>top</code>: tiempo activo, tareas, uso de CPU, memoria y swap.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A ordenar los procesos por <strong>CPU</strong> (<code>P</code>), <strong>memoria</strong> (<code>M</code>) o <strong>tiempo</strong> (<code>T</code>).</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A filtrar por usuario (<code>u</code>), verlo en árbol (<code>V</code>) y guardar tu vista personalizada (<code>W</code>).</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Abrir top y leer la cabecera</h2>
+    <p class="mt-4">Escribe <code>top</code> y entrarás en una pantalla que se refresca sola. Sales con <kbd>q</kbd> (o <kbd>Ctrl+C</kbd>). Arriba, una cabecera con el resumen del sistema:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ top                   # monitor interactivo (q para salir)</code></pre>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 195" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">La cabecera de top</text>
+        <rect x="30" y="35" width="460" height="26" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="45" y="52" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">tiempo activo + usuarios + carga media (como uptime)</text>
+        <rect x="30" y="66" width="460" height="26" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="45" y="83" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">tareas: running / sleeping / stopped / zombie</text>
+        <rect x="30" y="97" width="460" height="26" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="45" y="114" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">CPU: % usuario, % sistema...</text>
+        <rect x="30" y="128" width="460" height="26" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="45" y="145" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">memoria (RAM): total / libre / usada / buffer</text>
+        <rect x="30" y="159" width="460" height="26" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="45" y="176" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">swap: zona de disco de baja prioridad</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">La cabecera empieza con un resumen tipo <code>uptime</code> y baja hasta la memoria.</figcaption>
+    </figure>
+
+    <ul class="list-disc pl-6 space-y-1 mt-4">
+      <li><strong>Primera línea</strong> — igual que <a href="/Linux-course/lecciones/18-fecha-y-tiempo-activo"><code>uptime</code></a>: tiempo encendido, usuarios y carga media.</li>
+      <li><strong>Tareas</strong> — cuántos procesos hay <em>running</em>, <em>sleeping</em>, <em>stopped</em> y <em>zombie</em>.</li>
+      <li><strong>CPU</strong> — porcentaje en uso a nivel de usuario y de sistema.</li>
+      <li><strong>Memoria</strong> — RAM total, libre, usada y en caché/buffer.</li>
+      <li><strong>Swap</strong> — zona de disco donde se aparta lo de baja prioridad; cuanto más bajo su uso, más desahogado el sistema (lo verás a fondo más adelante).</li>
+    </ul>
+    <p class="mt-4">Debajo, la tabla de procesos con columnas conocidas de <code>ps</code>: PID, usuario, NI (<a href="/Linux-course/lecciones/28-prioridad-nice-renice">prioridad</a>), memoria, estado, %CPU, %MEM, tiempo y el comando. Por defecto se ordena por <strong>uso de CPU</strong>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Ordenar: P, M, T</h2>
+    <p class="mt-4">Dentro de <code>top</code>, unas teclas (en mayúscula) cambian el criterio de orden al instante:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>P    ordena por uso de CPU (el orden por defecto)
+M    ordena por uso de memoria
+T    ordena por tiempo de actividad</code></pre>
+    <p class="mt-4">Así ves de un vistazo qué proceso se está comiendo la CPU o la RAM (suele ser el entorno gráfico, GNOME).</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Abre <code>top</code> y pulsa <kbd>M</kbd>, luego <kbd>P</kbd> y <kbd>T</kbd>. <strong>Meta:</strong> ver cómo se reordena la lista según memoria, CPU y tiempo, e identificar el proceso que más recursos consume.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Filtrar, ver en árbol y personalizar</h2>
+    <p class="mt-4">Más teclas interactivas muy útiles:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>u    filtra por usuario (te pregunta cuál: escribe user001)
+V    alterna la vista en árbol (jerarquía padre-hijo, como pstree)
+l    muestra/oculta la primera línea (uptime) de la cabecera
+t    alterna la info de CPU (texto, barras, oculta...)
+m    alterna la info de memoria igual que t</code></pre>
+    <p class="mt-4">Cuando dejas <code>top</code> a tu gusto (por ejemplo memoria y CPU en barras y vista en árbol), guarda esa configuración con <strong><code>W</code></strong> (mayúscula): la próxima vez que abras <code>top</code> aparecerá igual.</p>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">Matar procesos: con cuidado</p>
+      <p class="!mt-2 text-cream/90">La tecla <code>k</code> pregunta qué proceso matar (propone el mayor por defecto). Matar un proceso puede ser peligroso para la estabilidad del sistema, y quizá no tengas privilegios. Lo verás en detalle con <code>kill</code> más adelante; por ahora, sal con <kbd>Esc</kbd> sin confirmar.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">En <code>top</code>, pulsa <kbd>u</kbd>, escribe tu usuario y <kbd>Enter</kbd> para ver solo tus procesos. Luego pulsa <kbd>V</kbd> para la vista en árbol. <strong>Meta:</strong> quedarte con una vista limpia de tus propios procesos y su jerarquía.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: pilotar top</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Abre <code>top</code> y localiza en la cabecera el tiempo activo, las tareas, el uso de CPU, la memoria y el swap.</li>
+        <li>Ordena con <kbd>P</kbd> (CPU), <kbd>M</kbd> (memoria) y <kbd>T</kbd> (tiempo). Identifica el proceso que más CPU consume.</li>
+        <li>Filtra por tu usuario con <kbd>u</kbd> y activa la vista en árbol con <kbd>V</kbd>.</li>
+        <li>Personaliza la vista con <kbd>t</kbd> y <kbd>m</kbd> (barras) y guárdala con <kbd>W</kbd>. <strong>Reto:</strong> sal con <kbd>q</kbd>, vuelve a abrir <code>top</code> y comprueba que conserva tu configuración.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>top</code> es un monitor interactivo que se actualiza en vivo. Su cabecera resume el sistema: tiempo activo y carga (como <code>uptime</code>), tareas por estado, uso de CPU, memoria RAM y swap. Debajo, la tabla de procesos con columnas de <code>ps</code>, ordenada por CPU por defecto.</p>
+      <p>Dentro, ordenas con <kbd>P</kbd> (CPU), <kbd>M</kbd> (memoria) y <kbd>T</kbd> (tiempo); filtras por usuario con <kbd>u</kbd>, alternas la vista en árbol con <kbd>V</kbd> y ajustas la cabecera con <kbd>l</kbd>, <kbd>t</kbd> y <kbd>m</kbd>.</p>
+      <p>Con <kbd>W</kbd> guardas tu vista personalizada para futuras sesiones. La tecla <kbd>k</kbd> mata procesos, pero hazlo con cuidado (lo verás con <code>kill</code>). Se sale con <kbd>q</kbd>.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿En qué se diferencia <code>top</code> de <code>ps</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>ps</code> da una foto fija de los procesos en ese instante. <code>top</code> es una pantalla interactiva que se actualiza sola y muestra además el uso de CPU, memoria y swap en tiempo real.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Estás en <code>top</code> y quieres ver qué proceso usa más memoria. ¿Qué tecla pulsas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><kbd>M</kbd> (mayúscula), que ordena la tabla por uso de memoria. <kbd>P</kbd> ordena por CPU (el orden por defecto) y <kbd>T</kbd> por tiempo de actividad.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Para qué sirve la tecla <code>W</code> en <code>top</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Guarda tu configuración actual (orden, filtros, vista en árbol, formato de la cabecera) para que la próxima vez que abras <code>top</code> aparezca igual que la dejaste.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/28-prioridad-nice-renice" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/30-senales-y-kill" class="btn-primario">Siguiente: señales y kill</a>
+    </nav>
+
+  </article>
+</Layout>

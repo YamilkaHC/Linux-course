@@ -1,0 +1,189 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 45. Fuente: transcripciones/video_36.md (segunda mitad: zip, unzip y tar czf)
+---
+
+<Layout titulo="zip, unzip y tar comprimido — Curso Linux" descripcion="Comprime directorios enteros con zip -r, descomprime con unzip y aprende el atajo definitivo: tar czvf para empaquetar y comprimir en un solo comando.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 45</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">zip, unzip y tar comprimido</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      El compresor que sí entiende directorios, y el atajo que hace en un solo comando lo que llevas dos lecciones haciendo en dos.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A comprimir <strong>varios ficheros en uno solo</strong> con <code>zip</code>, y directorios enteros con <code>zip -r</code>. Es lo que <code>gzip</code> no puede hacer.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Cuándo elegir <code>zip</code> y cuándo <code>gzip</code>: la regla práctica tiene que ver con si el fichero va a acabar en un Windows.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>El atajo que usarás siempre: <code>tar czvf</code> empaqueta y comprime de una sola vez, sin llamar a <code>gzip</code> por separado.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">zip: todo en un único fichero</h2>
+    <p class="mt-4">Vuelve a tu directorio <code>compresion</code> con los ficheros descomprimidos y prueba esto:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ zip copia.zip *
+  adding: pam.conf (deflated 71%)
+  adding: passwd (deflated 60%)
+  adding: profile (deflated 52%)
+  adding: protocols (deflated 66%)
+
+$ ls -l
+copia.zip  pam.conf  passwd  profile  protocols</code></pre>
+    <p class="mt-4">Ahí está la diferencia grande con <a href="/Linux-course/lecciones/44-comprimir-gzip-y-bzip2">gzip</a>: un <strong>único</strong> <code>copia.zip</code> con todo dentro, en vez de un fichero comprimido por cada original. Y, de paso, <code>zip</code> te va diciendo cuánto ha comprimido cada uno y no borra nada.</p>
+    <p class="mt-4">Fíjate en el orden de los argumentos: primero el nombre del fichero que quieres generar, después lo que quieres meter dentro.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">En <code>compresion</code>, ejecuta <code>zip copia.zip *</code> y luego <code>ls -l</code>. <strong>Meta:</strong> comprobar que ahora tienes un solo fichero comprimido y que los originales siguen ahí, al contrario que con <code>gzip</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Directorios enteros: zip -r</h2>
+    <p class="mt-4">Súbete a tu home y comprime absolutamente todo lo que hay dentro, subdirectorios incluidos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd ..
+$ zip -r copia_total.zip *
+  adding: compresion/ (stored 0%)
+  adding: compresion/passwd (deflated 60%)
+  adding: ejecutable/listar.sh (deflated 12%)
+  ...
+
+$ ls -ltr
+-rw-r--r-- 1 user001 user001 48210 ago  4 15:40 copia_total.zip</code></pre>
+    <p class="mt-4">La <code>-r</code> es de <em>recursivo</em>, la misma idea que en <code>cp -r</code> o <code>rm -r</code>: entra en todos los subdirectorios. Sin ella, <code>zip</code> se queda en el nivel actual.</p>
+    <p class="mt-4">Aquí está la razón de que <code>zip</code> exista en Linux teniendo <code>gzip</code>: <strong><code>zip</code> comprime directorios, <code>gzip</code> no</strong>. Se parece mucho más al compresor al que estás acostumbrado en Windows.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Cuál usar</text>
+
+        <rect x="30" y="42" width="230" height="120" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="145" y="66" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">gzip / bzip2</text>
+        <line x1="60" y1="78" x2="230" y2="78" stroke="#E5E1D8"/>
+        <text x="145" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">solo ficheros sueltos</text>
+        <text x="145" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">se combina con tar</text>
+        <text x="145" y="144" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">se queda en Linux</text>
+
+        <rect x="300" y="42" width="230" height="120" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="415" y="66" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">zip</text>
+        <line x1="330" y1="78" x2="500" y2="78" stroke="#E5E1D8"/>
+        <text x="415" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">ficheros Y directorios</text>
+        <text x="415" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">un solo fichero de salida</text>
+        <text x="415" y="144" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">viaja bien a Windows</text>
+
+        <text x="280" y="186" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">¿lo va a abrir alguien en Windows? zip. ¿se queda en Linux? tar + gzip</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">La regla práctica, en una línea.</figcaption>
+    </figure>
+
+    <p class="mt-4">La costumbre en entornos Linux es: si lo que comprimes va a usarse también en Windows, usa <code>zip</code>, porque genera un formato más compatible entre los dos sistemas. Dicho esto, tampoco es una norma sagrada: WinRAR, 7-Zip y compañía leen ficheros <code>.gz</code> sin problema. Que comprimas con <code>gzip</code> no significa que no se pueda recuperar en Windows.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Descomprimir donde tú quieras: unzip</h2>
+    <p class="mt-4">La misma prueba que hiciste con <code>tar</code>: recuperar el contenido en otro directorio. Primero deja limpio el destino:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /tmp/restore
+$ rm -rf *
+$ ls
+
+$ unzip /home/user001/copia_total.zip
+Archive:  /home/user001/copia_total.zip
+   creating: compresion/
+  inflating: compresion/passwd
+  inflating: ejecutable/listar.sh
+   ...
+
+$ ls -l
+compresion  ejecutable  ejemplo.txt  ...</code></pre>
+    <p class="mt-4">Igual que <code>tar x</code>, <code>unzip</code> extrae en el directorio donde estás. Por eso el <code>cd</code> va primero.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Cuidado con rm -rf *</p>
+      <p class="!mt-0">Ese comando borra todo el contenido del directorio actual, sin preguntar y sin papelera. Antes de escribirlo, comprueba dónde estás con <code>pwd</code>. Aquí lo usamos porque <code>/tmp/restore</code> es un directorio de pruebas que creaste tú; nunca lo lances a ciegas.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Vacía <code>/tmp/restore</code>, descomprime ahí tu <code>copia_total.zip</code> con <code>unzip</code> y compara el resultado con un <code>ls</code> de tu home. <strong>Meta:</strong> ver que los subdirectorios se han recreado tal cual, gracias a la <code>-r</code> del principio.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El atajo: tar que comprime solo</h2>
+    <p class="mt-4">Hasta ahora, para tener un paquete comprimido has hecho dos pasos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ tar cvf copia1.tar *          # 1. empaquetar
+$ gzip copia1.tar               # 2. comprimir
+$ ls
+copia1.tar.gz</code></pre>
+    <p class="mt-4">Funciona, y es la combinación clásica. Pero <code>tar</code> tiene una opción que lo hace todo de una vez: la <strong><code>z</code></strong>.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ tar czvf copia1.tar.gz *
+$ ls -ltr
+-rw-r--r-- 1 user001 user001 38120 ago  4 15:45 copia1.tar.gz</code></pre>
+    <p class="mt-4">Mismo resultado, un solo comando. Sobre las letras que ya conoces de <a href="/Linux-course/lecciones/43-empaquetar-con-tar">empaquetar con tar</a> —<code>c</code> crear, <code>v</code> verbose, <code>f</code> fichero— se añade la <code>z</code>, que le dice a <code>tar</code> que llame a <code>gzip</code> por debajo. Porque eso es exactamente lo que hace: <code>tar</code> sigue sin comprimir por sí mismo, delega en el compresor.</p>
+    <p class="mt-4">Ponle al fichero la extensión <code>.tar.gz</code> para que se vea de un vistazo qué contiene y cómo está comprimido. Y para desempaquetarlo, la misma <code>z</code> con la <code>x</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ tar xzvf copia1.tar.gz</code></pre>
+    <p class="mt-4">Esta es la forma que vas a usar el 90 % de las veces. Si tienes que empaquetar y comprimir, hazlo de una sola vez.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Genera <code>tar czvf copia1.tar.gz *</code> y compara su tamaño con el <code>copia_ficheros.tar</code> sin comprimir de la lección 43, usando <code>ls -l</code>. <strong>Meta:</strong> medir con tus propios números lo que aporta la <code>z</code>.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: tres formas de guardar lo mismo</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Desde tu home, genera las tres versiones: <code>tar cvf prueba.tar *</code>, <code>zip -r prueba.zip *</code> y <code>tar czvf prueba.tar.gz *</code>.</li>
+        <li>Compara los tamaños con <code>ls -lS prueba.*</code> —el <code>-S</code> de <a href="/Linux-course/lecciones/07-navegar-ficheros">ordenar por tamaño</a>— y explica en una línea por qué el <code>.tar</code> es el más grande.</li>
+        <li>Vacía <code>/tmp/restore</code> (comprobando antes con <code>pwd</code>) y restaura ahí el <code>.zip</code> con <code>unzip</code> y luego el <code>.tar.gz</code> con <code>tar xzvf</code>. Verifica con <code>ls</code> que el contenido es equivalente.</li>
+        <li><strong>Reto:</strong> comprueba que la <code>z</code> de <code>tar</code> hace lo mismo que llamar a <code>gzip</code> a mano. Haz por un lado <code>tar cvf a.tar *</code> seguido de <code>gzip a.tar</code>, y por otro <code>tar czvf b.tar.gz *</code>. Compara los dos tamaños con <code>ls -l a.tar.gz b.tar.gz</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>zip destino.zip *</code> mete varios ficheros en un único comprimido y no borra los originales; <code>zip -r</code> añade los subdirectorios. Es lo que <code>gzip</code> no sabe hacer, y por eso <code>zip</code> es la elección cuando el fichero va a abrirse en Windows.</p>
+      <p><code>unzip fichero.zip</code> extrae en el directorio donde estás, igual que <code>tar x</code>. Haz <code>cd</code> al destino antes de lanzarlo.</p>
+      <p>La opción <code>z</code> de <code>tar</code> empaqueta y comprime en un solo paso: <code>tar czvf copia.tar.gz *</code> para crear y <code>tar xzvf copia.tar.gz</code> para recuperar. Por debajo sigue siendo <code>gzip</code> quien comprime.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Tienes que enviar una carpeta con subdirectorios a un compañero que trabaja en Windows. ¿Qué usas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>zip -r carpeta.zip *</code>. Comprime directorios (cosa que <code>gzip</code> no hace), genera un único fichero y el formato es el más compatible con Windows. La <code>-r</code> es imprescindible para que entre en los subdirectorios.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué diferencia hay entre <code>tar cvf copia.tar *</code> + <code>gzip copia.tar</code> y <code>tar czvf copia.tar.gz *</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Ninguna en el resultado: los dos dejan un paquete comprimido equivalente. La <code>z</code> simplemente hace que <code>tar</code> llame a <code>gzip</code> por debajo, ahorrándote el segundo comando. <code>tar</code> sigue sin comprimir por sí mismo.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Recibes un <code>backup.tar.gz</code> y quieres dejarlo en <code>/tmp/restore</code>. ¿Cómo lo haces?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>cd /tmp/restore</code> y después <code>tar xzvf /ruta/backup.tar.gz</code>. La <code>x</code> extrae, la <code>z</code> descomprime al vuelo y la extracción ocurre siempre en el directorio actual, por eso el <code>cd</code> va primero.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/44-comprimir-gzip-y-bzip2" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/46-monitorear-con-watch" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

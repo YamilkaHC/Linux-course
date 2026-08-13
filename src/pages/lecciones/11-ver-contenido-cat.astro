@@ -1,0 +1,129 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 11. Fuente: transcripciones/video 8.md (cat, cat -n, ficheros del sistema /etc/passwd y /etc/group, redirigir man > archivo)
+---
+
+<Layout titulo="Ver el contenido con cat — Curso Linux" descripcion="Lee archivos de texto en la terminal con cat, numera líneas con -n y explora ficheros del sistema como /etc/passwd y /etc/group.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 11</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">6 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Ver el contenido con cat</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Crear, mover y borrar ya lo dominas. Ahora abre los archivos y mira qué guardan dentro, sin salir de la terminal.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A volcar el contenido de un archivo de texto con <code>cat</code> y a numerar sus líneas con <code>-n</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A fabricar un archivo de prueba largo redirigiendo la ayuda del manual: <code>man ls &gt; ejemplo.txt</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A leer ficheros de configuración del sistema como <code>/etc/passwd</code> y <code>/etc/group</code>, donde Linux guarda usuarios y grupos.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <p class="mt-8 text-ink/70">Ya viste <code>cat</code> de pasada al <a href="/Linux-course/lecciones/09-crear-y-copiar">crear archivos</a>. Aquí lo usas de verdad: para leer ficheros de texto, de configuración o cualquier archivo legible. Con binarios o ejecutables funciona, pero el resultado es ilegible: <code>cat</code> está pensado para <strong>texto</strong>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Primero, un archivo de prueba de verdad</h2>
+    <p class="mt-4">Para practicar necesitas un archivo con bastante texto. Un truco: coge la ayuda de <a href="/Linux-course/lecciones/07-navegar-ficheros"><code>man</code></a> y, en vez de mostrarla en pantalla, <strong>redirígela</strong> a un archivo con <code>&gt;</code> (el mismo operador que ya usaste con <code>echo</code>):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ man ls &gt; ejemplo.txt   # guarda TODO el manual de ls dentro de ejemplo.txt
+$ ls -l ejemplo.txt      # un archivo con contenido, listo para practicar</code></pre>
+    <p class="text-sm text-ink/60">La redirección con <code>&gt;</code> tiene su propio capítulo más adelante; por ahora te basta con saber que envía la salida de un comando a un archivo en lugar de a la pantalla.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">cat: volcar el contenido</h2>
+    <p class="mt-4"><code>cat</code> muestra de una sola vez todo lo que hay dentro del archivo, sin abrir ningún editor:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat ejemplo.txt        # imprime el manual de ls que acabas de guardar</code></pre>
+    <p>Es el mismo contenido que verías haciendo doble clic en el archivo con el entorno gráfico, pero directo en la terminal y sin esperas.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Genera <code>man ls &gt; ejemplo.txt</code> y léelo con <code>cat ejemplo.txt</code>. <strong>Meta:</strong> ver cómo <code>cat</code> vuelca un archivo largo entero en pantalla.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">cat -n: numerar las líneas</h2>
+    <p class="mt-4">La opción <code>-n</code> antepone el número a cada línea. Es cómodo para referirte a una línea concreta o para ver cuántas tiene el archivo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat -n ejemplo.txt
+     1  LS(1)                    User Commands
+     2
+     3  NAME
+   ...
+   267  ...                      # la última línea te dice el total</code></pre>
+    <p>Como todo comando, tiene su propia ayuda con <code>cat --help</code> si quieres ver más opciones.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>cat -n ejemplo.txt</code> y fíjate en el número de la última línea. <strong>Meta:</strong> saber cuántas líneas tiene el archivo de un vistazo.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Leer ficheros del sistema</h2>
+    <p class="mt-4"><code>cat</code> no solo sirve para tus archivos: también lee los <strong>ficheros de configuración</strong> del sistema. Recuerda que en <a href="/Linux-course/lecciones/06-usuarios-y-ficheros"><code>/etc</code></a> vive la configuración de Linux. Dos ejemplos clave:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat /etc/passwd    # lista los usuarios configurados (el 1.er dato de cada línea es el nombre)
+$ cat /etc/group     # lista los grupos de usuarios del sistema</code></pre>
+    <p>Estos ficheros conectan con lo que verás al <strong>crear y administrar usuarios</strong> más adelante. Por ahora te muestran que la configuración de Linux es, en el fondo, texto plano que puedes leer con un comando tan simple como <code>cat</code>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lee <code>cat /etc/passwd</code> y busca tu propio usuario al principio de una de las líneas. <strong>Meta:</strong> comprobar que los usuarios del sistema son simple texto en un fichero.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: genera y explora texto</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>En tu home fabrica un archivo largo: <code>man cd &gt; ayuda.txt</code> y confírmalo con <code>ls -l ayuda.txt</code>.</li>
+        <li>Vuélcalo con <code>cat ayuda.txt</code> y luego numéralo con <code>cat -n ayuda.txt</code>. Anota cuántas líneas tiene.</li>
+        <li>Lee un fichero del sistema: <code>cat /etc/group</code> y localiza un grupo que reconozcas.</li>
+        <li><strong>Reto extra:</strong> crea con <code>echo</code> un archivo propio (<code>echo primera linea &gt; mias.txt</code>) y compáralo numerado (<code>cat -n mias.txt</code>) con el tamaño de <code>ayuda.txt</code>. Piensa por qué uno tiene cientos de líneas y el otro solo una.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>cat archivo</code> vuelca en pantalla el contenido de un archivo de texto sin abrir editores; con <code>-n</code> numera cada línea.</p>
+      <p>Redirigir con <code>&gt;</code> (por ejemplo <code>man ls &gt; ejemplo.txt</code>) es una forma rápida de generar archivos de prueba con contenido real.</p>
+      <p>La configuración de Linux es texto: <code>cat /etc/passwd</code> lista los usuarios y <code>cat /etc/group</code> los grupos, ficheros a los que volverás al administrar usuarios.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué hace <code>man ls &gt; ejemplo.txt</code> y por qué es útil?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">En vez de mostrar el manual de <code>ls</code> en pantalla, <strong>redirige</strong> ese texto a un archivo llamado <code>ejemplo.txt</code>. Sirve para fabricar rápido un archivo largo con el que practicar comandos de lectura.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué añade <code>cat -n</code> respecto a <code>cat</code> a secas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Antepone el <strong>número de línea</strong> a cada línea del archivo, lo que ayuda a referirse a un punto concreto y a saber cuántas líneas tiene en total.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué guardan <code>/etc/passwd</code> y <code>/etc/group</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>/etc/passwd</code> contiene los <strong>usuarios</strong> configurados en el sistema y <code>/etc/group</code> los <strong>grupos</strong>. Ambos están en <code>/etc</code>, donde vive la configuración de Linux, y son texto plano que puedes leer con <code>cat</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/10-mover-y-borrar" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/12-ver-mas-y-explorar" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

@@ -1,0 +1,192 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Glosario compacto de comandos del curso. Solo referencia rápida, sin enlaces.
+type Comando = { cmd: string; def: string };
+type Grupo = { titulo: string; comandos: Comando[] };
+
+const grupos: Grupo[] = [
+  {
+    titulo: 'Sistema y sesión',
+    comandos: [
+      { cmd: 'df', def: 'Espacio de las unidades de disco (usado, libre, montaje). -h legible.' },
+      { cmd: 'free', def: 'Memoria RAM total, usada, libre y en caché. -m en MB.' },
+      { cmd: 'who', def: 'Usuario conectado, método y hora de la sesión.' },
+      { cmd: 'date', def: 'Fecha y hora del sistema; se formatea con %d, %m, %B…' },
+      { cmd: 'uptime', def: 'Tiempo encendido. -p legible, -s fecha de arranque.' },
+      { cmd: 'top', def: 'Procesos en tiempo real: CPU, memoria, swap.' },
+      { cmd: 'clear', def: 'Limpia la pantalla de la terminal.' },
+      { cmd: 'su -', def: 'Pasa a root con su entorno. El prompt cambia de $ a #.' },
+      { cmd: 'apt', def: 'Paquetes de Debian: apt search busca, apt install instala.' },
+    ],
+  },
+  {
+    titulo: 'Navegar por el sistema',
+    comandos: [
+      { cmd: 'pwd', def: 'Ruta absoluta del directorio actual.' },
+      { cmd: 'ls', def: 'Lista el contenido. -l formato largo (permisos, tamaño, fecha).' },
+      { cmd: 'cd', def: 'Cambia de directorio. cd .. sube un nivel.' },
+      { cmd: 'man', def: 'Manual completo de un comando.' },
+      { cmd: 'tree', def: 'Estructura de directorios en árbol.' },
+      { cmd: 'file', def: 'Tipo de archivo por su contenido, no por la extensión.' },
+    ],
+  },
+  {
+    titulo: 'Crear, copiar, mover, borrar',
+    comandos: [
+      { cmd: 'mkdir', def: 'Crea directorios. -p anidados, -v verboso.' },
+      { cmd: 'touch', def: 'Crea archivo vacío o actualiza su fecha.' },
+      { cmd: 'echo', def: 'Escribe texto; con > o >> crea o llena archivos.' },
+      { cmd: 'cp', def: 'Copia. -i pregunta, -r carpetas enteras.' },
+      { cmd: 'mv', def: 'Mueve o renombra archivos y directorios.' },
+      { cmd: 'rm', def: 'Borra archivos. -i confirma; rm -r borra carpetas (peligroso).' },
+      { cmd: 'rmdir', def: 'Borra directorios vacíos.' },
+      { cmd: 'ln', def: 'Enlace duro; -s crea enlace simbólico a una ruta.' },
+    ],
+  },
+  {
+    titulo: 'Ver el contenido',
+    comandos: [
+      { cmd: 'cat', def: 'Muestra el archivo completo. -n numera líneas.' },
+      { cmd: 'head', def: 'Primeras líneas de un archivo.' },
+      { cmd: 'tail', def: 'Últimas líneas. -f sigue el archivo en vivo.' },
+      { cmd: 'less', def: 'Explora archivos largos página a página.' },
+    ],
+  },
+  {
+    titulo: 'Espacio en disco',
+    comandos: [
+      { cmd: 'du', def: 'Tamaño de directorios. -b, -k, -m; -a incluye archivos.' },
+      { cmd: 'df', def: 'Espacio libre. -h legible, -m en MB, -T tipo de FS.' },
+    ],
+  },
+  {
+    titulo: 'Filtros de texto',
+    comandos: [
+      { cmd: 'grep', def: 'Busca texto. -i ignora caso, -c cuenta, -l lista, -s silencia.' },
+      { cmd: 'sort', def: 'Ordena líneas. -r invierte, -n numérico, -o guarda.' },
+      { cmd: 'cut', def: 'Extrae columnas. -f campos, -d separador, -c posición.' },
+      { cmd: 'uniq', def: 'Quita líneas repetidas. -c cuenta, -d solo duplicadas.' },
+      { cmd: 'wc', def: 'Cuenta -l líneas, -w palabras, -c bytes, -m caracteres.' },
+      { cmd: 'tr', def: 'Traduce o borra caracteres de la entrada.' },
+      { cmd: 'tee', def: 'Muestra en pantalla y guarda en fichero a la vez.' },
+    ],
+  },
+  {
+    titulo: 'Redirecciones y tuberías',
+    comandos: [
+      { cmd: '|', def: 'Tubería: salida de un comando como entrada del siguiente.' },
+      { cmd: '>', def: 'Redirige la salida a un fichero, sobrescribiendo.' },
+      { cmd: '>>', def: 'Redirige la salida añadiendo al final.' },
+      { cmd: '<', def: 'Alimenta un comando desde un fichero.' },
+      { cmd: '<<', def: 'Here-doc: varias líneas a mano como entrada.' },
+      { cmd: '2>', def: 'Redirige solo los errores (stderr) a un fichero.' },
+      { cmd: '/dev/null', def: 'Agujero negro: descarta todo lo que se le envía.' },
+    ],
+  },
+  {
+    titulo: 'Procesos',
+    comandos: [
+      { cmd: 'ps', def: 'Lista procesos. -f completo, -l largo, -ef todos, x los tuyos.' },
+      { cmd: 'pstree', def: 'Árbol padre-hijo. -p con PID, -s antecesores.' },
+      { cmd: 'nice', def: 'Lanza proceso con prioridad (-20 a +19).' },
+      { cmd: 'renice', def: 'Cambia la prioridad de un proceso en marcha.' },
+      { cmd: 'sleep', def: 'Espera N segundos; útil para procesos de prueba.' },
+      { cmd: 'kill', def: 'Señales. -l lista, -15 SIGTERM ordenado, -9 SIGKILL forzado.' },
+      { cmd: '&', def: 'Lanza el comando en segundo plano.' },
+      { cmd: 'jobs', def: 'Lista tus procesos en segundo plano.' },
+      { cmd: 'fg', def: 'Trae un proceso al primer plano.' },
+    ],
+  },
+  {
+    titulo: 'Usuarios y permisos',
+    comandos: [
+      { cmd: 'id', def: 'Tu UID, GID y grupos.' },
+      { cmd: 'chmod', def: 'Cambia permisos. Simbólico (u/g/o/a +/-) u octal (r4 w2 x1).' },
+      { cmd: 'umask', def: 'Permisos por defecto (666/777 menos umask).' },
+    ],
+  },
+  {
+    titulo: 'Productividad',
+    comandos: [
+      { cmd: 'alias', def: 'Crea atajos de comandos con tu propio nombre.' },
+      { cmd: 'time', def: 'Mide cuánto tarda un comando.' },
+      { cmd: 'cal', def: 'Calendario del mes; ncal en vertical.' },
+      { cmd: 'history', def: 'Comandos usados. !! repite el último, !N el número N.' },
+      { cmd: 'TAB', def: 'Autocompleta comandos, archivos y rutas.' },
+      { cmd: 'type', def: 'Dice si un comando es interno o externo.' },
+      { cmd: 'help', def: 'Ayuda de los comandos internos del shell.' },
+      { cmd: 'which', def: 'Ruta del ejecutable de un comando.' },
+      { cmd: 'whereis', def: 'Ejecutable, fuentes y manual de un comando.' },
+    ],
+  },
+];
+
+const total = grupos.reduce((n, g) => n + g.comandos.length, 0);
+---
+
+<Layout titulo="Comandos del curso — Curso Linux" descripcion="Referencia rápida y compacta de todos los comandos de Linux vistos en el curso, con una definición breve.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO + BUSCADOR COMPACTO ================= -->
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+      <div>
+        <span class="etiqueta">Referencia</span>
+        <h1 class="font-display text-3xl md:text-4xl font-bold mt-3">Comandos del curso</h1>
+        <p class="mt-1 text-sm text-ink/50">{total} comandos y operadores.</p>
+      </div>
+      <input
+        id="buscador"
+        type="search"
+        placeholder="Buscar: grep, permisos…"
+        class="w-full sm:w-64 bg-white border border-line px-3 py-2 text-sm text-ink placeholder:text-ink/30 focus:outline-none focus:border-ink"
+        autocomplete="off"
+      />
+    </div>
+    <p id="sin-resultados" class="mt-4 text-sm text-ink/50 hidden">Sin coincidencias.</p>
+
+    <!-- ================= GRUPOS (denso, multicolumna) ================= -->
+    <div id="lista" class="mt-8 grid md:grid-cols-2 gap-x-10 gap-y-6">
+      {grupos.map((g) => (
+        <section data-grupo class="break-inside-avoid">
+          <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 pb-1 border-b border-line !mt-0 !mb-0">{g.titulo}</h2>
+          <dl class="divide-y divide-line/60">
+            {g.comandos.map((c) => (
+              <div class="cmd flex gap-3 py-1.5 leading-snug" data-cmd={c.cmd.toLowerCase()} data-def={c.def.toLowerCase()}>
+                <dt><code class="text-[13px] font-bold whitespace-nowrap">{c.cmd}</code></dt>
+                <dd class="text-[13px] text-ink/70 !mt-0">{c.def}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      ))}
+    </div>
+
+    <nav class="flex items-center justify-between gap-4 mt-12 pt-6 border-t border-line">
+      <a href="/Linux-course/" class="btn-secundario">Inicio</a>
+      <a href="/Linux-course/#lecciones" class="btn-primario">Ver lecciones</a>
+    </nav>
+
+  </article>
+</Layout>
+
+<script>
+  const input = document.getElementById('buscador') as HTMLInputElement | null;
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.cmd'));
+  const grupos = Array.from(document.querySelectorAll<HTMLElement>('[data-grupo]'));
+  const sinResultados = document.getElementById('sin-resultados');
+
+  function filtrar() {
+    const q = (input?.value || '').trim().toLowerCase();
+    let visibles = 0;
+    items.forEach((el) => {
+      const hit = !q || el.dataset.cmd!.includes(q) || el.dataset.def!.includes(q);
+      el.classList.toggle('hidden', !hit);
+      if (hit) visibles++;
+    });
+    grupos.forEach((g) => g.classList.toggle('hidden', !g.querySelector('.cmd:not(.hidden)')));
+    sinResultados?.classList.toggle('hidden', visibles !== 0);
+  }
+
+  input?.addEventListener('input', filtrar);
+</script>

@@ -1,0 +1,198 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 3. Fuente: transcripciones/video 2.md (parte 2: instalación paso a paso de Debian)
+---
+
+<Layout titulo="Instalar Debian paso a paso — Curso Linux" descripcion="Instalación guiada de Debian: idioma, usuarios, particionado, escritorio GNOME y GRUB.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 3</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">9 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Instalar Debian paso a paso</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Del menú de arranque al escritorio: idioma, usuarios, particionado, escritorio y cargador de arranque.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>La diferencia entre el usuario <strong>root</strong> y tu usuario normal — clave para la seguridad del sistema.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Qué es el <strong>particionado</strong> y por qué Debian crea las particiones <strong>raíz (/)</strong> y <strong>swap</strong>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Por qué el <strong>cargador de arranque GRUB</strong> es obligatorio y qué es un entorno de escritorio.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <p class="mt-8 text-ink/70">Esta lección continúa justo donde terminó la <a href="/Linux-course/lecciones/02-instalacion">Lección 2</a>: acabas de pulsar <strong>Start</strong> y Debian muestra su menú de instalación dentro de VirtualBox.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 1 — Idioma, ubicación y teclado</h2>
+    <p class="mt-4">En el menú inicial elige <strong>Graphical install</strong> (instalación gráfica): haz clic dentro de la máquina y pulsa <strong>Enter</strong>. Luego configuras tres cosas seguidas:</p>
+    <ul class="list-disc pl-6 space-y-2 my-4 text-ink/80">
+      <li><strong>Idioma:</strong> <em>Spanish / Español</em>.</li>
+      <li><strong>Ubicación:</strong> tu país real. <strong>Importa técnicamente:</strong> Debian usa la ubicación para elegir el repositorio de actualizaciones geográficamente más cercano.</li>
+      <li><strong>Teclado:</strong> según la distribución física de tus teclas (por ejemplo <em>inglés estadounidense</em>). Elígelo bien o algunos símbolos saldrán cambiados.</li>
+    </ul>
+    <p>Tras esto, el instalador carga sus componentes y empieza a crear el árbol de carpetas del sistema. Espera a que termine.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Selecciona idioma, tu país y tu distribución de teclado. <strong>Meta:</strong> ver la barra de progreso «Cargando componentes del instalador».</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 2 — Nombre del equipo y dominio</h2>
+    <ul class="list-disc pl-6 space-y-2 my-4 text-ink/80">
+      <li><strong>Nombre de la máquina (hostname):</strong> el que quieras, por ejemplo <code>linux-debian</code>.</li>
+      <li><strong>Dominio:</strong> si no estás dentro de una red con dominio, déjalo <strong>vacío</strong> y continúa.</li>
+    </ul>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 3 — root y tu usuario (¡ojo aquí!)</h2>
+    <p class="mt-4">Este paso crea <strong>dos identidades distintas</strong>. Entender la diferencia es la base de la seguridad en Linux:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead>
+          <tr class="bg-sand text-left">
+            <th class="p-3 font-bold border-b border-line">Cuenta</th>
+            <th class="p-3 font-bold border-b border-line">Para qué sirve</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">root (superusuario)</td><td class="p-3">La cuenta de <strong>administración total</strong> del sistema. Su contraseña es la más importante: no la olvides.</td></tr>
+          <tr><td class="p-3 font-semibold">Tu usuario local</td><td class="p-3">La cuenta con la que trabajas a diario. Tiene su propio nombre de acceso (<em>login</em>) y su propia contraseña.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>El instalador te pide, en orden:</p>
+    <ol class="list-decimal pl-6 space-y-2 my-4 text-ink/80">
+      <li>La <strong>contraseña de root</strong> (dos veces). Es la contraseña administrativa: guárdala bien.</li>
+      <li>Tu <strong>nombre completo</strong> (nombre y apellido).</li>
+      <li>El <strong>nombre de usuario</strong> para acceder, que no tiene que coincidir con tu nombre — por ejemplo <code>usuario01</code>.</li>
+      <li>La <strong>contraseña de ese usuario local</strong> (dos veces). No la confundas con la de root.</li>
+    </ol>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Define ambas contraseñas. <strong>Meta:</strong> anota en papel cuál es la de <strong>root</strong> y cuál la de <code>usuario01</code>; las necesitarás en las próximas lecciones.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 4 — Particionado del disco</h2>
+    <p class="mt-4">Particionar es dividir el disco en <strong>espacios de almacenamiento con funciones distintas</strong>. Como montas un equipo sencillo en una VM nueva, deja que Debian lo haga por ti:</p>
+    <ol class="list-decimal pl-6 space-y-2 my-4 text-ink/80">
+      <li>Elige <strong>Guiado — utilizar todo el disco</strong>.</li>
+      <li>Acepta la advertencia de que se borrarán los datos del disco (es el disco virtual vacío, sin problema).</li>
+      <li>Elige <strong>«Todos los ficheros en una partición (recomendado para novatos)»</strong>.</li>
+      <li><strong>Finalizar el particionado</strong> y confirma <strong>escribir los cambios en el disco</strong>.</li>
+    </ol>
+    <p>Con esa opción Debian crea automáticamente dos particiones que conviene conocer:</p>
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead>
+          <tr class="bg-sand text-left">
+            <th class="p-3 font-bold border-b border-line">Partición</th>
+            <th class="p-3 font-bold border-b border-line">Qué es</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Raíz «/» (ext4)</td><td class="p-3">La partición principal, donde vive todo el sistema. Su formato es <strong>ext4</strong>.</td></tr>
+          <tr><td class="p-3 font-semibold">swap</td><td class="p-3">Una porción pequeña (menos de 1 GB) que el sistema usa como memoria de emergencia si se agota la RAM, para no colapsar.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Luego comienza la instalación del <strong>sistema base</strong>. Espera a que termine.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 5 — Gestor de paquetes</h2>
+    <p class="mt-4">El gestor de paquetes es de donde Debian descargará programas y actualizaciones. Configúralo así:</p>
+    <ul class="list-disc pl-6 space-y-2 my-4 text-ink/80">
+      <li><strong>Escanear otro medio de instalación:</strong> <em>No</em> (se verá más adelante).</li>
+      <li><strong>País de la réplica:</strong> uno cualquiera, por ejemplo <em>Brasil</em>.</li>
+      <li><strong>Dirección de la réplica:</strong> deja la de por defecto (<code>deb.debian.org</code>).</li>
+      <li><strong>Proxy:</strong> si no usas uno, déjalo <strong>vacío</strong> y continúa.</li>
+    </ul>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 6 — Escritorio: elige GNOME</h2>
+    <p class="mt-4">Aquí eliges qué programas y qué <strong>entorno de escritorio</strong> instalar. El escritorio es la interfaz gráfica con la que usarás el sistema. Debian ofrece varios:</p>
+    <ul class="list-disc pl-6 space-y-2 my-4 text-ink/80">
+      <li><strong>GNOME</strong> — el que usarás en este curso.</li>
+      <li><strong>XFCE</strong> — consume menos recursos, ideal para equipos modestos.</li>
+      <li><strong>KDE Plasma, Cinnamon, MATE, LXDE</strong> — otras alternativas gráficas.</li>
+      <li>Opciones sin escritorio como <em>web server</em> o <em>SSH server</em>.</li>
+    </ul>
+    <p>Deja marcado <strong>GNOME</strong> (viene por defecto junto a las utilidades del sistema) y continúa. Debian instalará el escritorio elegido.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">En la selección de software, confirma que <strong>GNOME</strong> queda marcado. <strong>Meta:</strong> continuar y ver la barra «Seleccionando e instalando programas».</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 7 — GRUB, el cargador de arranque</h2>
+    <p class="mt-4">El <strong>cargador de arranque (GRUB)</strong> es el programa que arranca el sistema al encender. <strong>Esta opción JAMÁS se pone en «No».</strong> Sin GRUB, el equipo no sabría cómo iniciar Debian.</p>
+    <ol class="list-decimal pl-6 space-y-2 my-4 text-ink/80">
+      <li>A «¿Instalar GRUB?» responde <strong>Sí</strong>.</li>
+      <li>Cuando pregunte <strong>dónde</strong> instalarlo, elige el disco principal creado en VirtualBox (aparece como <code>/dev/sda</code>), no la opción de introducirlo manualmente.</li>
+    </ol>
+    <p class="text-ink/70 text-sm">En Linux los discos se nombran <code>/dev/sda</code>, <code>/dev/sdb</code>… <code>sda</code> es el disco principal, el que creaste al inicio.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 8 — Reiniciar y entrar</h2>
+    <p class="mt-4">El instalador avisa de que la instalación se completó y hay que reiniciar. Pulsa <strong>Continuar</strong>: la máquina se reinicia, aparece la pantalla de GRUB, arranca sola y llega a la pantalla de inicio de sesión con tu usuario. Escribe tu contraseña y entrarás al escritorio de Debian. <strong>¡Sistema instalado!</strong></p>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: completa la instalación</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Instala Debian entero: idioma, país, teclado, hostname, contraseñas de root y de tu usuario.</li>
+        <li>Particiona con <strong>Guiado — utilizar todo el disco</strong> y <strong>todos los ficheros en una partición</strong>. Identifica en el resumen las particiones <strong>/</strong> (ext4) y <strong>swap</strong>.</li>
+        <li>Elige el escritorio <strong>GNOME</strong> e instala <strong>GRUB en <code>/dev/sda</code></strong> respondiendo <strong>Sí</strong>.</li>
+        <li>Reinicia, inicia sesión con <code>usuario01</code> y confirma que llegas al escritorio. <strong>Reto extra:</strong> repite la instalación creando una segunda VM con escritorio <strong>XFCE</strong> y compara el consumo de recursos con GNOME.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>La instalación gráfica de Debian te guía por idioma, ubicación, teclado, nombre de equipo, usuarios, particionado, escritorio y GRUB.</p>
+      <p>root es la cuenta de administración total y tu usuario local es la del día a día; el particionado guiado crea las particiones raíz (/) en ext4 y swap.</p>
+      <p>GRUB es obligatorio (siempre «Sí», en <code>/dev/sda</code>); tras reiniciar entras con tu usuario al escritorio GNOME ya instalado.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Cuál es la diferencia entre la contraseña de root y la de tu usuario?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">La de <strong>root</strong> es la contraseña de <strong>administración total</strong> del sistema; la de tu <strong>usuario local</strong> es la de la cuenta con la que trabajas a diario. Son distintas y ambas se definen durante la instalación.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué dos particiones crea el particionado guiado y para qué sirve cada una?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">La <strong>raíz «/»</strong> (formato ext4), donde vive todo el sistema, y la <strong>swap</strong>, memoria de emergencia (menos de 1 GB) que evita el colapso cuando se agota la RAM.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Por qué nunca debes responder «No» a la instalación de GRUB?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque GRUB es el <strong>cargador de arranque</strong>: sin él el sistema no sabría cómo iniciar. Siempre se instala («Sí») en el disco principal (<code>/dev/sda</code>).</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/02-instalacion" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/04-explorar-escritorio" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

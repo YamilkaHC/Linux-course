@@ -1,0 +1,174 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 47. Fuente: transcripciones/video_38.md (primera mitad: qué es cron, /etc/crontab, los cinco campos)
+---
+
+<Layout titulo="Planificar tareas con cron — Curso Linux" descripcion="Entiende cron y crontab: el demonio que revisa el sistema cada minuto, el fichero /etc/crontab y los cinco campos de tiempo que deciden cuándo se ejecuta cada trabajo.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 47</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">4 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Planificar tareas con cron</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Un backup a las 4 a.m. sin estar tú delante. Eso hace cron.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Qué es <code>cron</code> y cómo comprueba cada minuto si hay trabajo pendiente.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Los <strong>cinco campos de tiempo</strong> de una línea de <code>crontab</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Qué hay dentro de <code>/etc/crontab</code> y por qué tu usuario no escribe ahí.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">cron vs crontab</h2>
+    <p class="mt-4"><code>cron</code> es el <strong>proceso</strong> que ejecuta los trabajos; <code>crontab</code> es el <strong>comando</strong> con el que los configuras. El proceso ya está corriendo en tu máquina:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps -ef | grep cron
+root       412     1  0 09:14 ?     00:00:00 /usr/sbin/cron -f</code></pre>
+    <p class="mt-4">PPID <strong>1</strong> = lo lanzó <code>systemd</code> al arrancar (como viste en <a href="/Linux-course/lecciones/27-arbol-de-procesos-pstree">pstree</a>). Cada minuto comprueba si hay algo que ejecutar.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">/etc/crontab: la planificación del sistema</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat /etc/crontab
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+17 *    * * *   root    cd / &amp;&amp; run-parts --report /etc/cron.hourly
+25 6    * * *   root    test -x /usr/sbin/anacron || run-parts --report /etc/cron.daily
+47 6    * * 7   root    test -x /usr/sbin/anacron || run-parts --report /etc/cron.weekly
+52 6    1 * *   root    test -x /usr/sbin/anacron || run-parts --report /etc/cron.monthly</code></pre>
+    <p class="mt-4"><code>SHELL</code> y <code>PATH</code> definen intérprete y rutas de binarios (lo de <a href="/Linux-course/lecciones/37-variables-de-entorno">variables de entorno</a>). Cada línea tiene <strong>cinco campos de tiempo + usuario + comando</strong>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Los cinco campos de tiempo</h2>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Anatomía de una línea de crontab</text>
+
+        <rect x="24" y="44" width="86" height="30" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="67" y="64" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">m</text>
+        <rect x="116" y="44" width="86" height="30" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="159" y="64" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">h</text>
+        <rect x="208" y="44" width="86" height="30" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="251" y="64" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">dom</text>
+        <rect x="300" y="44" width="86" height="30" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="343" y="64" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">mon</text>
+        <rect x="392" y="44" width="86" height="30" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="435" y="64" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">dow</text>
+        <rect x="484" y="44" width="52" height="30" fill="#FDFCFB" stroke="#1A1A1A"/>
+        <text x="510" y="64" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">cmd</text>
+
+        <text x="67" y="92" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">minuto</text>
+        <text x="67" y="105" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">0-59</text>
+        <text x="159" y="92" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">hora</text>
+        <text x="159" y="105" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">0-23</text>
+        <text x="251" y="92" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">día del mes</text>
+        <text x="251" y="105" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">1-31</text>
+        <text x="343" y="92" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">mes</text>
+        <text x="343" y="105" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">1-12</text>
+        <text x="435" y="92" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">día semana</text>
+        <text x="435" y="105" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">0-6 (0=domingo)</text>
+        <text x="510" y="92" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">qué</text>
+        <text x="510" y="105" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">ejecutar</text>
+
+        <line x1="24" y1="128" x2="536" y2="128" stroke="#E5E1D8"/>
+        <text x="280" y="150" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">25  6  *  *  *   →   todos los días a las 6:25</text>
+        <text x="280" y="172" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">17  *  *  *  *   →   al minuto 17 de cada hora</text>
+        <text x="280" y="196" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">el asterisco significa «cualquier valor de este campo»</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Cinco huecos para el cuándo, uno para el qué.</figcaption>
+    </figure>
+
+    <p class="mt-4"><strong>Asterisco = «cualquiera»</strong>. <code>*</code> en hora = «a cualquier hora». En día de la semana, <strong>0 = domingo</strong>, 1 = lunes… 6 = sábado.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Ejemplos del fichero real</h2>
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Línea</th>
+            <th class="text-left p-3 border-b border-line font-bold">Significado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>17 * * * *</code></td><td class="p-3 border-b border-line">Al minuto 17 de cada hora, todos los días</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>25 6 * * *</code></td><td class="p-3 border-b border-line">Todos los días a las 6:25</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>47 6 * * 7</code></td><td class="p-3 border-b border-line">Sábados a las 6:47</td></tr>
+          <tr><td class="p-3"><code>52 6 1 * *</code></td><td class="p-3">Día 1 de cada mes a las 6:52</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">El campo <code>root</code> entre tiempo y comando indica <strong>qué usuario ejecuta la tarea</strong>. Solo aparece en <code>/etc/crontab</code>; en tu crontab personal no hace falta.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">/etc/crontab no se toca</p>
+      <p class="!mt-0">Solo root puede editarlo. Para tus propios trabajos usarás <code>crontab</code>, que es lo de la <a href="/Linux-course/lecciones/48-tu-propio-crontab">siguiente lección</a>.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lanza <code>cat /etc/crontab</code> y traduce cada línea en voz alta: señala minuto, hora y qué campos están a <code>*</code>.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: leer planificaciones</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Localiza cron con <code>ps -ef | grep cron</code> y confirma que su PPID es 1.</li>
+        <li>Cuenta líneas de planificación: <code>cat /etc/crontab | grep -c "^[0-9]"</code>.</li>
+        <li>Traduce a palabras: <code>0 4 * * *</code>, <code>30 2 * * 0</code> y <code>0 0 1 1 *</code>.</li>
+        <li><strong>Reto:</strong> escribe los cinco campos para «de lunes a viernes a las 4 a.m.». Pista: rango <code>1-5</code> en el día de la semana.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>cron</code> es el proceso planificador: arranca con el sistema y cada minuto busca trabajos pendientes. <code>crontab</code> es el comando para configurarlos.</p>
+      <p>La planificación del sistema vive en <code>/etc/crontab</code>, con variables <code>SHELL</code> y <code>PATH</code> que controlan ejecución.</p>
+      <p>Cada línea = cinco campos (minuto, hora, día mes, mes, día semana) + comando. Asterisco = «cualquier valor». Día de la semana: 0 = domingo.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué significa <code>17 * * * *</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">La tarea se ejecuta al minuto 17 de cada hora, todos los días. Los asteriscos en hora, día, mes y día de la semana significan «cualquier valor».</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué número pones en el quinto campo para ejecutar algo solo los domingos?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><strong>0</strong>. La semana empieza en domingo: 0 = domingo, 1 = lunes… 6 = sábado.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Por qué <code>/etc/crontab</code> lleva un campo <code>root</code> y tu crontab personal no?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Ese campo indica qué usuario ejecuta la tarea. Solo tiene sentido en el crontab del sistema; en el tuyo, el sistema ya sabe quién eres.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/46-monitorear-con-watch" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/48-tu-propio-crontab" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

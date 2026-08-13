@@ -1,0 +1,154 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 17. Fuente: transcripciones/video_14.md (alias, time, cal/ncal)
+---
+
+<Layout titulo="Alias, time y calendario: alias, time, cal — Curso Linux" descripcion="Crea tus propios comandos con alias, mide cuánto tarda un proceso con time y consulta el calendario con cal y ncal.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 17</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Atajos propios, cronómetro y calendario</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Tres herramientas para el día a día: <code>alias</code> convierte un comando largo en una palabra tuya, <code>time</code> mide cuánto tarda un proceso, y <code>cal</code> te saca el calendario sin salir de la terminal.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A crear tus propios comandos con <strong><code>alias</code></strong>, una especie de macro que sustituye un nombre corto por un comando largo.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A medir cuánto tarda cualquier operación con <strong><code>time</code></strong> y a leer sus tres tiempos: real, usuario y sistema.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A consultar el calendario con <strong><code>cal</code></strong> y su hermano <strong><code>ncal</code></strong>, incluyendo meses y años concretos.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">alias: tus comandos a medida</h2>
+    <p class="mt-4">Supón que consultas mucho el tamaño total de tu directorio con <a href="/Linux-course/lecciones/14-espacio-en-disco"><code>du</code></a>. Con <code>-s</code> (de <em>summarize</em>) obtienes la suma total en vez del detalle, y con <code>-m</code> en megas:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ du -sm /home/user001   # total en megabytes de todo el directorio</code></pre>
+    <p class="mt-4">Teclear eso cada vez cansa. Con <code>alias</code> lo empaquetas en una palabra: escribes <code>alias</code>, el nombre nuevo, <code>=</code> y el comando entre comillas. Después, esa palabra ejecuta el comando entero:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ alias tam="du -sm /home/user001"   # crea el alias "tam"
+$ tam                                 # ahora "tam" hace todo el du -sm</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">No es un ejecutable</p>
+      <p class="!mt-2">Un alias no es un binario ni un fichero (repasa <a href="/Linux-course/lecciones/16-editar-y-localizar-comandos">interno vs externo</a>): es una sustitución de texto que hace la shell. Al escribir <code>tam</code>, Linux lo reemplaza por el comando completo antes de ejecutarlo.</p>
+    </div>
+
+    <p class="mt-4">Para ver qué hace un alias, escribe <code>alias</code> seguido de su nombre. Y <code>alias</code> a secas te lista <strong>todos</strong> los que existen —verás que la distribución ya trae algunos precreados, como uno para <a href="/Linux-course/lecciones/07-navegar-ficheros"><code>ls</code></a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ alias tam             # muestra el comando asociado a "tam"
+$ alias                 # lista TODOS los alias definidos</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea un alias <code>tam</code> que ejecute <code>du -sm</code> sobre tu directorio, lánzalo, y luego escribe <code>alias</code> para verlo en la lista. <strong>Meta:</strong> ejecutar un comando largo escribiendo una sola palabra.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">time: cuánto tarda un proceso</h2>
+    <p class="mt-4">Antepón <code>time</code> a cualquier comando y, al terminar, Linux te dice cuánto tardó. Da <strong>tres</strong> cifras porque el sistema reparte la CPU entre todos los procesos a la vez:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ time ls               # mide una operación rápida
+$ time du -a /          # mide algo largo: recorrer TODO el sistema</code></pre>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 175" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Los tres tiempos de time</text>
+        <rect x="20" y="45" width="150" height="105" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="95" y="72" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">real</text>
+        <text x="95" y="100" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">reloj de pared:</text>
+        <text x="95" y="116" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">del inicio al fin</text>
+        <rect x="185" y="45" width="150" height="105" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="72" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">user</text>
+        <text x="260" y="100" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">CPU gastada en</text>
+        <text x="260" y="116" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">tu programa</text>
+        <rect x="350" y="45" width="150" height="105" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="425" y="72" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">sys</text>
+        <text x="425" y="100" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">CPU gastada en</text>
+        <text x="425" y="116" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">el sistema</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">real es lo que mide tu reloj; user y sys son CPU de tu programa y del sistema.</figcaption>
+    </figure>
+
+    <p class="mt-4">En un sistema recién instalado, recorrer todo el disco con <code>du -a /</code> puede tardar decenas de segundos; en uno con años de datos, muchísimo más. Y si cortas el proceso con <kbd>Ctrl+C</kbd>, <code>time</code> igual te da el tiempo transcurrido hasta ese instante. Es una herramienta clave para desarrolladores y administradores que buscan cuellos de botella.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>time ls -l</code> y luego <code>time du -a /</code>. <strong>Meta:</strong> comparar los tres tiempos y ver la enorme diferencia entre una operación instantánea y una que recorre todo el sistema.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">cal y ncal: el calendario</h2>
+    <p class="mt-4">El comando <code>cal</code> saca el calendario del mes actual. Si al ejecutarlo ves «orden no encontrada», es que falta su paquete: instálalo como <a href="/Linux-course/lecciones/06-usuarios-y-ficheros">root</a> con <a href="/Linux-course/lecciones/05-primeros-comandos"><code>su -</code></a> y <code>apt-get</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ su -
+# apt-get install bsdmainutils    # responde "s" para continuar
+# exit                            # vuelve a tu usuario normal
+$ cal                             # calendario del mes actual</code></pre>
+
+    <p class="mt-4">Acepta argumentos para viajar en el tiempo: un año entero, un mes concreto con <code>-m</code>, o un mes de un año pasado:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cal 2015              # el año 2015 completo
+$ cal -m 8              # agosto del año en curso
+$ cal -m 8 1999         # agosto de 1999</code></pre>
+
+    <p class="mt-4">Su hermano <code>ncal</code> es más potente: presenta el calendario en vertical y <strong>marca el día de hoy</strong>. Con <code>-M</code> (mayúscula) haces que la semana empiece en lunes en vez de en domingo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ncal                  # calendario que resalta el día actual
+$ ncal -M               # la semana empieza en lunes (M mayúscula)</code></pre>
+    <p class="text-sm text-ink/60">Ojo: la <code>-M</code> es mayúscula; la minúscula <code>-m</code> pediría un mes como argumento.</p>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: atajos, tiempos y fechas</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Crea un alias que llame a <code>du -sm</code> sobre tu directorio. Ejecútalo y luego lista todos los alias con <code>alias</code> para confirmar que aparece el tuyo.</li>
+        <li>Mide con <code>time ls -l</code> y con <code>time du -a /</code>. Anota los tres tiempos (real, user, sys) de cada uno y compara.</li>
+        <li>Si te falta <code>cal</code>, instálalo con <code>su -</code> y <code>apt-get install bsdmainutils</code>. Luego ejecuta <code>cal</code> y <code>cal 2015</code>.</li>
+        <li>Saca <code>cal -m 8 1999</code> (agosto de 1999). <strong>Reto:</strong> compara <code>ncal</code> con <code>ncal -M</code> y observa qué cambia en el día de inicio de la semana.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>alias nombre="comando"</code> crea un atajo que la shell sustituye por el comando completo; no es un ejecutable, es texto. <code>alias</code> a secas lista todos los definidos y <code>alias nombre</code> muestra a qué apunta uno concreto.</p>
+      <p><code>time comando</code> mide cuánto tarda un proceso y devuelve tres tiempos: <strong>real</strong> (reloj de pared), <strong>user</strong> (CPU de tu programa) y <strong>sys</strong> (CPU del sistema). Útil para detectar cuellos de botella; con <kbd>Ctrl+C</kbd> aún te da el tiempo parcial.</p>
+      <p><code>cal</code> muestra el calendario (instálalo con <code>apt-get install bsdmainutils</code> si falta); acepta año, <code>-m mes</code> y mes+año. <code>ncal</code> resalta el día de hoy y con <code>-M</code> empieza la semana en lunes.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué escribes para que la palabra <code>tam</code> ejecute <code>du -sm /home/user001</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>alias tam="du -sm /home/user001"</code>. A partir de ahí, escribir <code>tam</code> ejecuta el comando completo. Recuerda que el alias es una sustitución de texto de la shell, no un ejecutable.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. <code>time</code> da tres tiempos. ¿Qué es el tiempo <em>real</em>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">El tiempo <strong>real</strong> es el que marca el reloj de pared: desde que lanzas el comando hasta que termina. Los otros dos, <em>user</em> y <em>sys</em>, son la CPU consumida por tu programa y por el sistema, y suelen sumar menos que el real porque la CPU se comparte entre procesos.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Cómo ves el calendario de agosto de 1999?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>cal -m 8 1999</code>: <code>-m 8</code> fija el mes (agosto) y <code>1999</code> el año. Sin el año, <code>cal -m 8</code> mostraría agosto del año en curso.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/16-editar-y-localizar-comandos" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/18-fecha-y-tiempo-activo" class="btn-primario">Siguiente: fecha y tiempo activo</a>
+    </nav>
+
+  </article>
+</Layout>

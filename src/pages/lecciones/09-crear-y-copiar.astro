@@ -1,0 +1,167 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 9. Fuente: transcripciones/video 7.md (mkdir, touch, echo/redirección, cat, cp)
+---
+
+<Layout titulo="Crear y copiar archivos — Curso Linux" descripcion="Crea directorios con mkdir (-p, -v), archivos con touch y echo, míralos con cat y cópialos con cp (-i, -r).">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 9</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">9 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Crear y copiar archivos</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Deja de solo mirar el sistema: empieza a construirlo. Crea carpetas, archivos de prueba y cópialos a donde quieras.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A crear directorios con <code>mkdir</code>, incluyendo subcarpetas anidadas con <code>-p</code>. Es el punto de partida para organizar cualquier trabajo.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A crear archivos de prueba con <code>touch</code> y <code>echo &gt;</code>, y ver su contenido con <code>cat</code>. Los necesitarás en casi todas las lecciones siguientes.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A copiar archivos y directorios con <code>cp</code>, protegiéndote de sobrescrituras con <code>-i</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <p class="mt-8 text-ink/70">Todos estos comandos trabajan sobre <strong>ficheros y directorios</strong>, así que aceptan <strong>rutas relativas y absolutas</strong> igual que <a href="/Linux-course/lecciones/07-navegar-ficheros"><code>cd</code></a>, y admiten los <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo">comodines</a> que ya viste. Sitúate primero en tu home con <code>cd</code>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">mkdir: crear directorios</h2>
+    <p class="mt-4"><code>mkdir</code> (de <em>make directory</em>) crea una carpeta en donde estés. Es el equivalente a «clic derecho → carpeta nueva»:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ pwd              # ¿dónde estoy? p. ej. /home/user01
+$ mkdir carpeta01  # crea carpeta01 aquí (ruta relativa)
+$ ls               # aparece carpeta01
+$ mkdir /home/user01/carpeta02   # lo mismo con ruta absoluta</code></pre>
+    <p>Si no muestra ningún mensaje, es que funcionó. Con la opción <code>-v</code> (verbose) sí te confirma cada creación por pantalla:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ mkdir -v dir3    # mkdir: se ha creado el directorio 'dir3'</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">En tu home crea <code>mkdir practica</code> y luego <code>mkdir -v practica2</code>. <strong>Meta:</strong> ver la diferencia entre el silencio de <code>mkdir</code> y el mensaje que añade <code>-v</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">mkdir -p: crear carpetas anidadas de golpe</h2>
+    <p class="mt-4">Si intentas crear una carpeta dentro de otra que <strong>aún no existe</strong>, da error:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ mkdir dir5/prueba
+mkdir: no se puede crear el directorio 'dir5/prueba': No existe el fichero o el directorio</code></pre>
+    <p>La opción <code>-p</code> (de <em>parents</em>) crea toda la ruta que haga falta, padres incluidos, en un solo comando:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ mkdir -p dir4/prueba   # crea dir4 y, dentro, prueba
+$ cd dir4
+$ ls                     # aparece: prueba
+$ cd ..</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea de un tirón <code>mkdir -p proyecto/src/util</code> y entra hasta el fondo con <code>cd proyecto/src/util</code>. <strong>Meta:</strong> comprobar que <code>-p</code> te ahorró tres comandos.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">touch: crear un archivo vacío</h2>
+    <p class="mt-4">Para las pruebas de las próximas lecciones necesitas archivos de ejemplo. El comando <code>touch</code> hace dos cosas: si el archivo <strong>no existe lo crea vacío</strong>, y si <strong>ya existe le actualiza la fecha</strong> de modificación.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ touch f1         # crea el archivo vacío f1
+$ ls -l            # aparece f1: tipo "-", tamaño 0, con fecha de ahora</code></pre>
+    <p>Recuerda la regla de nombres: no puedes tener dos archivos iguales <strong>en el mismo directorio</strong>, pero sí el mismo nombre en <strong>carpetas distintas</strong>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>touch f1</code> en tu home y <code>ls -l</code> para ver su tamaño 0. Entra en <code>dir4</code> con <code>cd dir4</code>, haz otro <code>touch f1</code> y comprueba que conviven sin chocar. <strong>Meta:</strong> confirmar que el nombre solo debe ser único dentro de cada carpeta.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">echo y &gt;: crear un archivo con contenido</h2>
+    <p class="mt-4"><code>echo</code> imprime texto por pantalla (la «salida estándar»):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo Estoy aprendiendo Linux
+Estoy aprendiendo Linux</code></pre>
+    <p>Lo potente llega con el símbolo <code>&gt;</code>: <strong>redirige</strong> ese texto a un archivo en vez de a la pantalla. Si el archivo no existe lo crea; si existe, <strong>sustituye</strong> todo su contenido:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo prueba &gt; f1.txt      # graba "prueba" dentro de f1.txt
+$ ls -l                     # f1.txt ya tiene tamaño &gt; 0</code></pre>
+    <p class="text-sm text-ink/60">La redirección con <code>&gt;</code> se ve a fondo más adelante; por ahora te basta para fabricar archivos con contenido.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">cat: ver el contenido de un archivo</h2>
+    <p class="mt-4"><code>cat</code> vuelca por pantalla lo que hay dentro de un archivo, sin abrir ningún editor:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat f1.txt        # muestra: prueba
+$ echo esto es una prueba &gt; f1.txt   # SUSTITUYE el contenido
+$ cat f1.txt        # muestra: esto es una prueba</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Haz <code>echo hola &gt; notas.txt</code>, míralo con <code>cat notas.txt</code>, vuelve a redirigir <code>echo adios &gt; notas.txt</code> y lee otra vez. <strong>Meta:</strong> ver que <code>&gt;</code> reemplaza, no añade.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">cp: copiar archivos</h2>
+    <p class="mt-4"><code>cp</code> copia con la forma <code>cp origen destino</code>. El origen se conserva; el destino es la copia:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cp f1.txt f2.txt          # copia f1.txt en un nuevo f2.txt (aquí mismo)
+$ cp f2.txt /tmp/           # copia f2.txt dentro del directorio /tmp
+$ cp /tmp/f2.txt f3.txt     # trae /tmp/f2.txt y lo llama f3.txt aquí</code></pre>
+    <p>Como siempre, valen rutas relativas, absolutas y <strong>comodines</strong> para copiar varios de golpe:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cp f*.txt /tmp/           # copia TODOS los f*.txt a /tmp</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">cp -i: evita sobrescribir por error</h2>
+    <p class="mt-4">Cuidado: <code>cp f1.txt f3.txt</code> <strong>machaca</strong> f3.txt sin avisar. La opción <code>-i</code> (interactivo) pregunta antes de sobrescribir un archivo que ya existe:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cp -i f1.txt f3.txt
+cp: ¿sobreescribir 'f3.txt'? (s/n)   # 's' sustituye, 'n' cancela</code></pre>
+    <p>Un simple <code>-i</code> te salva de destruir un archivo que no querías tocar.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">cp -r: copiar directorios</h2>
+    <p class="mt-4"><code>cp</code> a secas <strong>no copia directorios</strong>; da error. Para copiar una carpeta con todo su contenido se usa <code>-r</code> (recursivo):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cp dir3 dir6           # error: cp: se omite el directorio 'dir3'
+$ cp -r dir3 dir6        # clona dir3 completo en un nuevo dir6
+$ ls -l                  # aparece dir6 con lo mismo que dir3</code></pre>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: monta tu zona de pruebas</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>En tu home crea la estructura <code>mkdir -p taller/datos</code> y entra con <code>cd taller</code>.</li>
+        <li>Crea un archivo vacío con <code>touch vacio.txt</code> y otro con contenido: <code>echo hola linux &gt; saludo.txt</code>. Míralo con <code>cat saludo.txt</code>.</li>
+        <li>Copia ambos a la subcarpeta: <code>cp *.txt datos/</code> y verifica con <code>ls -l datos</code>.</li>
+        <li>Prueba la protección: <code>cp -i saludo.txt datos/saludo.txt</code> y responde <code>n</code> para no sobrescribir. <strong>Reto extra:</strong> clona toda la carpeta con <code>cp -r datos copia_datos</code> y compruébalo con <code>ls</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>mkdir</code> crea directorios; con <code>-v</code> te confirma cada uno y con <code>-p</code> crea de golpe toda una ruta anidada aunque las carpetas padre no existan.</p>
+      <p>Para archivos de prueba tienes <code>touch</code> (vacío), <code>echo texto &gt; archivo</code> (con contenido, sustituyendo lo previo) y <code>cat</code> para leerlos sin abrir un editor.</p>
+      <p><code>cp origen destino</code> copia archivos; <code>-i</code> pregunta antes de sobrescribir y <code>-r</code> es obligatorio para copiar directorios completos. Todos aceptan rutas relativas/absolutas y comodines.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Por qué falla <code>mkdir dir5/prueba</code> y cómo lo arreglas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Falla porque <code>dir5</code> aún no existe y <code>mkdir</code> no crea las carpetas padre por su cuenta. Se arregla con <code>mkdir -p dir5/prueba</code>, que crea toda la ruta de una vez.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué le pasa a un archivo existente cuando haces <code>echo texto &gt; archivo</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Se <strong>sustituye</strong> todo su contenido por el nuevo texto. La redirección <code>&gt;</code> no añade al final: reemplaza. Si el archivo no existía, lo crea.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué diferencia hay entre <code>cp</code>, <code>cp -i</code> y <code>cp -r</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>cp</code> copia archivos y machaca el destino sin avisar; <code>cp -i</code> pregunta antes de sobrescribir; <code>cp -r</code> es el único que copia directorios completos (de forma recursiva).</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/10-mover-y-borrar" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

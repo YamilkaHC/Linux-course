@@ -1,0 +1,181 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 56. Fuente: transcripciones/video_43.md (segunda parte: su, su -, logname, exit)
+---
+
+<Layout titulo="Cambiar de usuario con su — Curso Linux" descripcion="Conviértete en otro usuario con su: la diferencia entre su y su -, cómo saber quién eres con id y logname, y cómo volver atrás con exit.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 56</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">6 min de lectura</span>
+      <span class="etiqueta-arribita">Por arribita</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Cambiar de usuario con su</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      sudo ejecuta un comando como otro. su te convierte en él y te quedas ahí hasta que salgas.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Cuándo usar <code>su</code> en vez de <a href="/Linux-course/lecciones/55-sudo-y-el-grupo-sudo">sudo</a>: cuando necesitas <strong>mantener la sesión</strong> de otro usuario, no lanzar un comando suelto.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>La diferencia entre <code>su usuario</code> y <code>su - usuario</code>. Ese guion decide si arrastras tu entorno o empiezas de cero.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Tres comandos para saber quién eres en cada momento: <code>id</code>, <code>logname</code> y <code>who</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Saber quién eres</h2>
+    <p class="mt-4">Antes de cambiar de identidad conviene tener a mano las tres formas de comprobarla:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ id
+uid=1000(user001) gid=1000(user001) grupos=1000(user001),27(sudo),...
+
+$ logname
+user001
+
+$ who
+user001  :0    2026-08-04 09:15 (:0)</code></pre>
+    <p class="mt-4"><a href="/Linux-course/lecciones/50-grupos-y-groupadd">id</a> te da tu identidad completa con sus grupos; <a href="/Linux-course/lecciones/12-ver-mas-y-explorar">who</a> lista quién está conectado. El nuevo es <code>logname</code>: dice el nombre del usuario <strong>con el que hiciste login</strong>. Esa distinción va a importar dentro de un minuto.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Primero, una clave</h2>
+    <p class="mt-4">Para convertirte en otro usuario, ese usuario <strong>tiene que tener contraseña</strong>. Los que creaste con <a href="/Linux-course/lecciones/51-crear-usuarios-useradd">useradd</a> nacieron sin ella, así que asígnasela con lo que aprendiste en <a href="/Linux-course/lecciones/53-contrasenas-con-passwd">passwd</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo passwd dsa2
+Nueva contraseña:
+Vuelva a escribir la nueva contraseña:
+contraseña actualizada correctamente</code></pre>
+    <p class="mt-4">Necesitas <code>sudo</code> porque estás cambiando la clave de <em>otro</em>, no la tuya.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Convertirte: su - usuario</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ su - dsa2
+Contraseña:
+dsa2@debian:~$</code></pre>
+    <p class="mt-4">Te pide la clave <strong>del usuario destino</strong> —no la tuya— y a partir de ahí eres esa persona. El prompt cambia, y todo lo que ejecutes lo hará con sus permisos.</p>
+    <p class="mt-4">Y aquí está la pregunta importante: ¿qué hace ese guion?</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 185" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">El guion lo cambia todo</text>
+
+        <rect x="30" y="44" width="230" height="106" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="145" y="68" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">su dsa2</text>
+        <line x1="55" y1="80" x2="235" y2="80" stroke="#E5E1D8"/>
+        <text x="145" y="100" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">cambias de usuario</text>
+        <text x="145" y="120" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">arrastras TU entorno</text>
+        <text x="145" y="140" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">mismas variables, mismo PATH</text>
+
+        <rect x="300" y="44" width="230" height="106" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="415" y="68" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">su - dsa2</text>
+        <line x1="325" y1="80" x2="505" y2="80" stroke="#E5E1D8"/>
+        <text x="415" y="100" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">login completo</text>
+        <text x="415" y="120" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">SU entorno y su home</text>
+        <text x="415" y="140" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">como entrar por la consola</text>
+
+        <text x="280" y="175" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">para convertirte de verdad en otro usuario, usa el guion</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Sin guion cambias de nombre; con guion cambias de mundo.</figcaption>
+    </figure>
+
+    <p class="mt-4">Con <code>su - dsa2</code> es <strong>como si ese usuario entrara directamente desde la consola</strong>: se cargan sus <a href="/Linux-course/lecciones/39-prompt-ps1-y-ficheros-de-arranque">ficheros de arranque</a>, sus variables y su directorio home.</p>
+    <p class="mt-4">Con <code>su dsa2</code>, sin guion, te conviertes en él pero <strong>arrastrando el entorno del usuario anterior</strong>: tus variables, tu PATH, tu directorio actual. A veces resulta cómodo, pero lo normal —y lo que evita sorpresas— es usar el guion.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Entra con <code>su - dsa2</code> y ejecuta <code>echo $HOME</code> y <code>pwd</code>. Sal con <code>exit</code>, vuelve a entrar con <code>su dsa2</code> (sin guion) y repite los dos comandos. <strong>Meta:</strong> ver con tus ojos qué home te toca en cada caso.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cuando el home ya no existe</h2>
+    <p class="mt-4">Si borraste cosas en <a href="/Linux-course/lecciones/54-borrar-usuarios-y-grupos">la lección de bajas</a>, es posible que te encuentres esto:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ su - dsa2
+Contraseña:
+su: aviso: no se puede cambiar el directorio a /home/dsa2: No existe el fichero o el directorio</code></pre>
+    <p class="mt-4">No es un fallo de <code>su</code>: es que el directorio que figura en <code>/etc/passwd</code> ya no está, así que te deja en otro sitio. Compruébalo desde dentro:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ id
+uid=3000(dsa2) gid=3005 grupos=3005</code></pre>
+    <p class="mt-4">Fíjate en el GID: aparece <strong>solo el número, sin nombre entre paréntesis</strong>. Eso significa que el grupo tampoco existe. Es exactamente la inconsistencia contra la que te advertía la regla de orden: <strong>primero se borran los usuarios y luego los grupos</strong>. Aquí la estás viendo en carne propia.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">logname no miente</h2>
+    <p class="mt-4">Ya convertido en <code>dsa2</code>, prueba los dos comandos del principio:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ id
+uid=3000(dsa2) ...
+
+$ logname
+user001</code></pre>
+    <p class="mt-4">Ahí está la diferencia: <code>id</code> dice <strong>quién eres ahora</strong>; <code>logname</code> dice <strong>con quién iniciaste sesión</strong>. Por muchos <code>su</code> que encadenes, <code>logname</code> sigue recordando de dónde vienes. Es útil para saber quién está detrás de una sesión.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Volver: exit</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ exit
+cerrar sesión
+
+$ id
+uid=1000(user001) ...</code></pre>
+    <p class="mt-4">Con <code>exit</code> cierras la sesión del otro usuario y vuelves a la tuya, con tu entorno intacto.</p>
+    <p class="mt-4">Y un último uso, el más clásico de todos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ su
+Contraseña:
+root@debian:/home/user001#</code></pre>
+    <p class="mt-4"><code>su</code> a secas te convierte en <strong>root</strong>. Pero ojo con la contraseña que pide: es <strong>la de root</strong>, la que pusiste al instalar el sistema, no la tuya. Ahí está la diferencia de fondo con <code>sudo</code>, que solo te pide la tuya.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Desde <code>su - dsa2</code>, ejecuta <code>id</code> y <code>logname</code> seguidos y compara las dos respuestas. Sal con <code>exit</code> y vuelve a comprobar <code>id</code>. <strong>Meta:</strong> tener claro en todo momento con qué identidad estás ejecutando cada cosa.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: saltar entre identidades</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Asigna una clave con <code>sudo passwd dsa2</code> (o al usuario de prueba que tengas) y comprueba su estado con <code>sudo passwd -S dsa2</code>.</li>
+        <li>Entra con <code>su - dsa2</code>. Dentro, ejecuta <code>id</code>, <code>logname</code>, <code>pwd</code> y <code>echo $HOME</code>. Sal con <code>exit</code>.</li>
+        <li>Repite la entrada <strong>sin guion</strong> (<code>su dsa2</code>) y compara los mismos cuatro comandos. Anota qué cambia y qué no.</li>
+        <li><strong>Reto:</strong> comprueba los permisos desde el otro lado. Ya convertido en <code>dsa2</code>, intenta <code>cat /etc/shadow</code> y <code>sudo cat /etc/shadow</code>. El segundo también fallará, y esa es la lección: <code>dsa2</code> no está en el grupo <code>sudo</code>. Sal, vuelve a ser tú y verifícalo con <code>grep sudo /etc/group</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>sudo</code> lanza un comando suelto como otro usuario; <code>su</code> te <strong>convierte</strong> en él y mantiene la sesión hasta que escribes <code>exit</code>. Para poder hacerlo, el usuario destino necesita contraseña.</p>
+      <p><code>su - usuario</code> hace un login completo: carga su entorno, sus variables y su home. <code>su usuario</code>, sin guion, cambia de identidad pero arrastra el entorno anterior. Lo habitual es usar el guion. <code>su</code> a secas te lleva a root, y pide la clave de root.</p>
+      <p><code>id</code> dice quién eres ahora y <code>logname</code> con quién iniciaste sesión: no cambian a la vez. Si al entrar ves avisos sobre el home o un GID sin nombre, hay usuarios o grupos borrados en mal orden.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Tienes que ejecutar diez comandos seguidos como otro usuario. ¿<code>sudo</code> o <code>su</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>su - usuario</code>. <code>sudo</code> está pensado para comandos sueltos; si necesitas mantener la sesión con esa identidad durante un rato, te conviertes en él y sales al final con <code>exit</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué diferencia hay entre <code>su dsa2</code> y <code>su - dsa2</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Con guion se hace un login completo: se cargan el entorno, las variables y el home de <code>dsa2</code>, como si entrara por la consola. Sin guion cambias de usuario pero conservas el entorno del usuario anterior.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Estás dentro de una sesión con <code>su</code> y <code>id</code> dice <code>dsa2</code> pero <code>logname</code> dice <code>user001</code>. ¿Cuál miente?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Ninguno. <code>id</code> informa de la identidad con la que estás ejecutando <strong>ahora</strong>; <code>logname</code>, del usuario con el que se <strong>inició la sesión</strong>. Son dos datos distintos y ambos correctos.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/55-sudo-y-el-grupo-sudo" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/57-editor-vi-primeros-pasos" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

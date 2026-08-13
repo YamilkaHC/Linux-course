@@ -1,0 +1,135 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 20. Fuente: transcripciones/video_17.md (redirección de entrada <, wc -l, here-doc <<, error 2>, /dev/null)
+---
+
+<Layout titulo="Redirigir entrada y errores: <, <<, 2> y /dev/null — Curso Linux" descripcion="Alimenta comandos desde ficheros con <, cuenta líneas con wc -l, usa el here-doc <<, y captura o descarta errores con 2> y /dev/null.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 20</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Redirigir la entrada y los errores</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Segunda parte de las redirecciones. Ya mandaste la salida a ficheros; ahora harás lo contrario —alimentar un comando desde un fichero— y aprenderás a apartar los errores con el código <code>2</code>.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A redirigir la <strong>entrada</strong> con <code>&lt;</code>, para que un comando lea de un fichero en vez del teclado.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A contar líneas con <strong><code>wc -l</code></strong> y a usar el <em>here-doc</em> <code>&lt;&lt;</code>, que lee hasta una palabra de control.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A redirigir los <strong>errores</strong> con <code>2&gt;</code> hacia un fichero, y a descartarlos por completo con <strong><code>/dev/null</code></strong>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Redirección de entrada: &lt;</h2>
+    <p class="mt-4">En la <a href="/Linux-course/lecciones/19-entrada-salida-y-redirecciones">lección anterior</a> viste que <code>tr</code> lee del teclado. Con <code>&lt;</code> le dices que, en su lugar, tome la entrada de un <strong>fichero</strong>. Primero creamos un fichero y luego lo alimentamos a <code>tr</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo "esto es una prueba" > documento1.txt   # creamos el fichero
+$ tr a x < documento1.txt   # tr lee de documento1.txt y cambia cada 'a' por 'x'</code></pre>
+    <p class="mt-4">La <code>&lt;</code> sustituye la entrada estándar (el teclado) por el contenido del fichero. Es una operación muy común: dar de comer a un comando desde un fichero.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>documento1.txt</code> con una frase y ejecuta <code>tr o i &lt; documento1.txt</code>. <strong>Meta:</strong> ver cómo <code>tr</code> transforma el contenido del fichero sin que teclees nada.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">wc -l: contar líneas</h2>
+    <p class="mt-4"><code>wc</code> (<em>word count</em>) con <code>-l</code> cuenta líneas. Sin fichero, lee del teclado hasta que pulsas <kbd>Ctrl+D</kbd>; con <code>&lt;</code> cuenta las de un fichero:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ wc -l                     # cuenta lo que teclees, hasta Ctrl+D
+$ wc -l < documento1.txt    # cuenta las líneas del fichero</code></pre>
+    <p class="text-sm text-ink/60"><code>wc</code> tiene su propio capítulo más adelante; aquí es solo un buen ejemplo para las redirecciones.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El here-doc: &lt;&lt;</h2>
+    <p class="mt-4">Así como <code>&gt;&gt;</code> era «añadir», existe <code>&lt;&lt;</code>, pero su uso es distinto: lee de la entrada estándar <strong>hasta encontrar una palabra de control</strong> que tú eliges. Verás mucho esto en scripts.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ wc -l << final       # cuenta líneas hasta leer la palabra "final"
+> una
+> dos
+> tres
+> cuatro
+> final                # palabra de control: para aquí (NO se cuenta)
+4</code></pre>
+    <p class="mt-4">La palabra de control marca el fin: <code>wc</code> cuenta 4 líneas y no incluye <code>final</code>. Quien programe lo reconocerá como un bucle que lee hasta una condición.</p>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">&lt; contra &lt;&lt;</p>
+      <p class="!mt-2 text-cream/90">Con <code>&lt;</code> la entrada viene de un <strong>fichero</strong>. Con <code>&lt;&lt;</code> la entrada la tecleas tú y termina en una <strong>palabra de control</strong>: el comando espera a leer toda la secuencia y solo entonces se ejecuta, no línea a línea.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Redirigir errores: 2&gt; y /dev/null</h2>
+    <p class="mt-4">Recuerda los códigos: <strong>0</strong> entrada, <strong>1</strong> salida, <strong>2</strong> error. Un <a href="/Linux-course/lecciones/11-ver-contenido-cat"><code>cat</code></a> de un fichero inexistente lanza un error por <code>stderr</code>. Con <code>2&gt;</code> lo mandas a un fichero en vez de a la pantalla:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat documento50           # error en pantalla: "no existe el fichero"
+$ cat documento50 2> error.txt   # el error se guarda en error.txt (nada en pantalla)
+$ cat error.txt             # ahí está el mensaje de error</code></pre>
+
+    <p class="mt-4">El <code>2</code> es obligatorio para el error. Para la salida normal, el <code>1</code> es opcional (Linux la asume por defecto): <code>&gt;</code> y <code>1&gt;</code> son lo mismo.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat /etc/passwd 1> usuarios.txt   # el 1 es opcional: igual que > usuarios.txt</code></pre>
+
+    <p class="mt-4">¿Y si no quieres el error <strong>ni</strong> en pantalla ni en un fichero? Mándalo a <code>/dev/null</code>, un fichero especial del directorio <a href="/Linux-course/lecciones/06-usuarios-y-ficheros"><code>/dev</code></a> que actúa como agujero negro: todo lo que le envías desaparece.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat documento52 2> /dev/null   # el error se descarta: ni pantalla ni fichero</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>cat noexiste 2&gt; error.txt</code> y luego <code>cat error.txt</code> para leer el mensaje capturado. Después prueba <code>cat noexiste 2&gt; /dev/null</code>. <strong>Meta:</strong> ver que en el primer caso el error se guarda y en el segundo se esfuma.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: entrada y errores</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Crea <code>documento1.txt</code> con dos frases (usa <code>echo ... &gt;</code> y <code>echo ... &gt;&gt;</code>). Luego ejecuta <code>tr a x &lt; documento1.txt</code> y <code>wc -l &lt; documento1.txt</code>.</li>
+        <li>Prueba el here-doc: <code>wc -l &lt;&lt; final</code>, escribe varias líneas y termina con <code>final</code>. Comprueba que no cuenta la palabra de control.</li>
+        <li>Captura un error: <code>cat documento50 2&gt; error.txt</code> y léelo con <code>cat error.txt</code>. Fíjate en que la pantalla quedó limpia.</li>
+        <li>Guarda una salida normal con <code>cat /etc/passwd 1&gt; usuarios.txt</code>. <strong>Reto:</strong> descarta un error con <code>cat noexiste 2&gt; /dev/null</code> y explica por qué no aparece nada.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>La redirección de entrada <code>&lt;</code> hace que un comando lea de un fichero en vez del teclado (<code>tr a x &lt; documento1.txt</code>). El here-doc <code>&lt;&lt;</code> lee de la entrada hasta una palabra de control que tú eliges, y solo entonces ejecuta el comando; ideal para scripts.</p>
+      <p><code>wc -l</code> cuenta líneas, ya sea de la entrada estándar (hasta <kbd>Ctrl+D</kbd>) o de un fichero. Aquí sirve para practicar las redirecciones.</p>
+      <p>Para los errores se usa el código <code>2</code>: <code>2&gt;</code> los guarda en un fichero. El <code>1</code> de la salida normal es opcional. Y <code>/dev/null</code> es el agujero negro donde mandas lo que quieres descartar del todo.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué hace <code>tr a x &lt; documento1.txt</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Ejecuta <code>tr</code> tomando como entrada el fichero <code>documento1.txt</code> (en vez del teclado) y sustituye en su contenido cada <code>a</code> por una <code>x</code>. La <code>&lt;</code> es la redirección de entrada.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Por qué para guardar un error hace falta <code>2&gt;</code> y no basta con <code>&gt;</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque <code>&gt;</code> (equivalente a <code>1&gt;</code>) redirige la salida estándar, no los errores. Los errores viajan por el flujo 2 (<code>stderr</code>), así que hay que indicarlo explícitamente con <code>2&gt;</code>. El <code>1</code> se puede omitir, pero el <code>2</code> nunca.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué es <code>/dev/null</code> y para qué se usa?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Es un fichero especial que actúa como agujero negro: todo lo que le mandas desaparece. Se usa para descartar salidas o errores que no quieres ni ver en pantalla ni guardar, por ejemplo <code>cat noexiste 2&gt; /dev/null</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/19-entrada-salida-y-redirecciones" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/21-tuberias-y-filtros" class="btn-primario">Siguiente: tuberías y filtros</a>
+    </nav>
+
+  </article>
+</Layout>

@@ -1,0 +1,158 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 67. Fuente: transcripciones/video_50.md (primera parte: PATH permanente en .profile y recarga con punto)
+---
+
+<Layout titulo="PATH permanente y recargar el perfil — Curso Linux" descripcion="Haz que tu carpeta de scripts sobreviva al cierre de sesión editando ~/.profile, y recarga los cambios sin reiniciar con el comando punto.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 67</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">PATH permanente y recargar el perfil</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Tu script funcionaba… hasta que cerraste la terminal. Vamos a arreglarlo de verdad.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Por qué un <code>PATH=</code> escrito en la terminal <strong>solo dura esa sesión</strong>, y dónde hay que escribirlo para que dure siempre.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A editar tu <code>~/.profile</code> para que tu carpeta de scripts esté en el PATH desde el arranque.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>El truco del <strong>punto espacio</strong>: recargar el perfil sin cerrar sesión, y por qué sin él no sirve de nada.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">El problema: se pierde al cerrar</h2>
+    <p class="mt-4">En <a href="/Linux-course/lecciones/66-tu-primer-script">la lección anterior</a> añadiste tu carpeta al PATH y el script se ejecutaba desde cualquier sitio. Abre ahora una terminal nueva y prueba:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ s1.sh
+s1.sh: orden no encontrada</code></pre>
+    <p class="mt-4">No es un fallo. Aquel <code>PATH=$PATH:...</code> <strong>solo valía para la sesión donde lo escribiste</strong>. Al cerrarla, desaparece.</p>
+    <p class="mt-4">Para que sea permanente hay que ponerlo en uno de los ficheros que se ejecutan solos al iniciar sesión, los que estudiaste en <a href="/Linux-course/lecciones/39-prompt-ps1-y-ficheros-de-arranque">ficheros de arranque</a>. Repásalos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls /etc/profile /etc/bash.bashrc      # globales, para todos los usuarios
+$ ls -l ~/.profile ~/.bashrc            # personales, solo para ti</code></pre>
+    <p class="mt-4">Como el cambio es tuyo y solo tuyo, el sitio correcto es <strong><code>~/.profile</code></strong>, que se ejecuta al iniciar sesión.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Editar el perfil</h2>
+    <p class="mt-4">Ábrelo con el editor que ya dominas:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ vi .profile</code></pre>
+    <p class="mt-4">Verás condiciones y bloques que aún no toca entender —son estructuras de script que llegarán pronto—. Vete al final del fichero con <code>G</code>, abre línea nueva con <code>o</code> y escribe:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>PATH=$PATH:/home/user001/scripts</code></pre>
+    <p class="mt-4">Exactamente lo mismo que escribiste en la terminal, pero aquí queda guardado. Sal con <code>Esc</code> y <code>:x</code>.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">No olvides el $PATH</p>
+      <p class="!mt-0">Aquí el aviso es más serio que en la terminal: si escribes <code>PATH=/home/user001/scripts</code> sin el <code>$PATH:</code> delante, <strong>borras todas las rutas del sistema en cada inicio de sesión</strong> y te quedas sin <code>ls</code>, sin <code>vi</code> y sin casi nada. Antes de tocar este fichero, guarda una copia con <code>:w .profile.bak</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Comprobarlo: abrir una terminal no basta</h2>
+    <p class="mt-4">La trampa: abrir otra ventana de terminal <strong>no vuelve a leer el <code>.profile</code></strong>, porque sigues en la misma sesión de usuario.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ s1.sh
+s1.sh: orden no encontrada        # aunque el .profile ya esté editado</code></pre>
+    <p class="mt-4">Para comprobarlo de verdad hay que iniciar sesión otra vez. Usa las <a href="/Linux-course/lecciones/15-autocompletado-e-historial">sesiones virtuales</a>: <code>Ctrl+Alt+F3</code>, entra con tu usuario y clave, y prueba:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo $PATH
+/usr/local/bin:/usr/bin:...:/home/user001/scripts
+
+$ s1.sh
+Este es mi primer script de Linux</code></pre>
+    <p class="mt-4">Funciona. Vuelve al escritorio con <code>Ctrl+Alt+F2</code>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El truco: punto espacio</h2>
+    <p class="mt-4">Salir y volver a entrar cada vez que tocas el perfil es incómodo. Hay una forma de <strong>recargarlo sin cerrar sesión</strong>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ . ./.profile
+
+$ echo $PATH
+/usr/local/bin:/usr/bin:...:/home/user001/scripts</code></pre>
+    <p class="mt-4">Fíjate bien en la orden: <strong>un punto, un espacio, y después la ruta del fichero</strong>. Ese primer punto aislado no es decorativo, es un comando.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 195" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Dos formas de lanzar el mismo fichero</text>
+
+        <rect x="30" y="44" width="230" height="106" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="145" y="70" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">./.profile</text>
+        <line x1="55" y1="82" x2="235" y2="82" stroke="#E5E1D8"/>
+        <text x="145" y="102" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">se ejecuta aparte</text>
+        <text x="145" y="122" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">las variables se pierden</text>
+        <text x="145" y="140" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">tu PATH no cambia</text>
+
+        <rect x="300" y="44" width="230" height="106" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="415" y="70" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">. ./.profile</text>
+        <line x1="325" y1="82" x2="505" y2="82" stroke="#E5E1D8"/>
+        <text x="415" y="102" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">se ejecuta AQUÍ</text>
+        <text x="415" y="122" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">las variables se quedan</text>
+        <text x="415" y="140" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">tu PATH queda actualizado</text>
+
+        <text x="280" y="180" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">un punto y un espacio de diferencia</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Lo que separa «ejecutar» de «cargar».</figcaption>
+    </figure>
+
+    <p class="mt-4">La diferencia es importante. Si escribes <code>./.profile</code> a secas, el fichero <strong>se ejecuta como un programa aparte</strong>: hace su trabajo y al terminar todas sus variables mueren con él, así que tu PATH sigue igual.</p>
+    <p class="mt-4">Con <code>. ./.profile</code>, en cambio, le estás diciendo a la shell que <strong>ejecute esas líneas en tu propia sesión</strong>, de modo que las variables definidas dentro se quedan contigo. Es la forma que tiene Linux de cargar ficheros de variables sin salir y entrar de nuevo.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Edita tu <code>.profile</code>, comprueba con <code>echo $PATH</code> que todavía no ha cambiado nada, ejecuta <code>. ./.profile</code> y vuelve a mirar. <strong>Meta:</strong> ver aparecer tu carpeta en el PATH sin cerrar la sesión.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: dejarlo configurado para siempre</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Comprueba el punto de partida: abre una terminal nueva y verifica con <code>echo $PATH</code> que tu carpeta de scripts no está.</li>
+        <li>Abre <code>vi .profile</code>, guarda una copia de seguridad con <code>:w .profile.bak</code> y añade al final la línea del PATH. Sal con <code>:x</code>.</li>
+        <li>Recarga con <code>. ./.profile</code> y confirma con <code>echo $PATH</code>. Ejecuta tu script desde <code>/tmp</code> para asegurarte.</li>
+        <li><strong>Reto:</strong> comprueba la diferencia entre las dos formas. Abre una terminal limpia, ejecuta <code>./.profile</code> (sin el punto delante) y mira el PATH: no habrá cambiado. Después haz <code>. ./.profile</code> y vuelve a mirarlo. Termina verificándolo en una sesión virtual con <code>Ctrl+Alt+F3</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Un <code>PATH=</code> escrito en la terminal solo dura esa sesión. Para que sea permanente hay que añadirlo a un fichero de arranque: los globales están en <code>/etc</code> y los personales en tu home, siendo <code>~/.profile</code> el adecuado para un cambio propio.</p>
+      <p>Abrir otra terminal no relee el perfil, porque la sesión de usuario es la misma. Se comprueba de verdad iniciando sesión otra vez, por ejemplo en una consola virtual con <code>Ctrl+Alt+F3</code>.</p>
+      <p><code>. ./.profile</code> —punto, espacio y ruta— ejecuta el fichero <strong>en tu sesión actual</strong>, así que las variables que define se conservan. Sin ese punto inicial, el fichero se ejecuta aparte y sus variables se pierden al terminar.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Añadiste tu carpeta al PATH y hoy el script ya no se encuentra. ¿Qué ha pasado?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Que aquel cambio valía solo para esa sesión. Al cerrar la terminal se perdió. Para que persista hay que escribirlo en <code>~/.profile</code>, que se ejecuta cada vez que inicias sesión.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Por qué <code>./.profile</code> no actualiza tu PATH y <code>. ./.profile</code> sí?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque el primero ejecuta el fichero como un programa aparte: sus variables mueren cuando termina. El punto seguido de espacio hace que las líneas se ejecuten <strong>en tu sesión actual</strong>, así que las variables se quedan.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué pasa si escribes <code>PATH=/home/user001/scripts</code> en el <code>.profile</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Que sustituyes el PATH entero en cada inicio de sesión y pierdes las rutas del sistema: dejarían de funcionar los comandos habituales. Siempre hay que conservar lo anterior con <code>PATH=$PATH:/tu/ruta</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/66-tu-primer-script" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/68-variables-y-aritmetica-en-scripts" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

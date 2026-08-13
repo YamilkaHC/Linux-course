@@ -1,0 +1,221 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 42. Fuente: transcripciones/video_34.md (find: -type, -atime/-mtime/-ctime, -size)
+---
+
+<Layout titulo="find por tipo, fecha y tamaño — Curso Linux" descripcion="Filtra con find más allá del nombre: -type para ficheros, directorios, enlaces y dispositivos; -atime, -mtime y -ctime por fecha; -size para cazar archivos grandes.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 42</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">find por tipo, fecha y tamaño</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Buscar por nombre es solo el principio. Estas tres opciones son las que usan los administradores para encontrar de verdad.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A filtrar por <code>-type</code>: solo ficheros, solo directorios, solo enlaces o solo dispositivos. Deja de mezclar cosas distintas en la misma lista.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>La diferencia entre <code>-atime</code>, <code>-mtime</code> y <code>-ctime</code>, y por qué el número que pones se multiplica siempre por 24 horas.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A cazar los archivos que te están comiendo el disco con <code>-size</code>. Es la búsqueda más útil del día a día de un administrador.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO: -type ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Filtrar por tipo: -type</h2>
+    <p class="mt-4">Estás en tu home y quieres contar solo los ficheros normales, sin que se cuelen los directorios:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ find . -type f | wc -l
+8211
+
+$ find . -type d | wc -l
+553
+
+$ find . -type l | wc -l
+2</code></pre>
+    <p class="mt-4">Fíjate en un detalle que despista al principio: la letra del tipo <strong>no lleva guion</strong>. Es <code>-type f</code>, no <code>-type -f</code>; si pones el guion de más, <code>find</code> responde con un error de argumento desconocido.</p>
+    <p class="mt-4">Las letras son las mismas que ya sabes leer en la primera columna de <code>ls -l</code>, de la lección de <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo">tipos de archivo</a>:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Letra</th>
+            <th class="text-left p-3 border-b border-line font-bold">Qué busca</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>f</code></td><td class="p-3 border-b border-line">Fichero normal</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>d</code></td><td class="p-3 border-b border-line">Directorio</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>l</code></td><td class="p-3 border-b border-line">Enlace simbólico</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>c</code></td><td class="p-3 border-b border-line">Dispositivo de caracteres (teclado, monitor…)</td></tr>
+          <tr><td class="p-3"><code>b</code></td><td class="p-3">Dispositivo de bloques (disco duro, memoria…)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">Si buscas <code>-type c</code> o <code>-type b</code> en tu home no saldrá absolutamente nada, y no es un fallo: los ficheros de dispositivo viven en <code>/dev</code>. Hay que ir allí:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /dev
+$ find . -type c | wc -l
+158
+
+$ find . -type b | wc -l
+5</code></pre>
+    <p class="mt-4">Los <code>c</code> son todo lo que se comunica con el sistema mediante caracteres secuenciales —monitor, teclado y demás—; los <code>b</code> son los dispositivos que se leen por bloques, como el disco duro o una memoria USB.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Desde tu home, ejecuta <code>find . -type f | wc -l</code> y después <code>find . -type d | wc -l</code>. Repítelo desde <code>/dev</code> con <code>-type c</code> y <code>-type b</code>. <strong>Meta:</strong> comprobar con tus propios números que el resultado depende siempre del directorio de inicio.</p>
+    </div>
+
+    <!-- ================= CUERPO: fechas ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Filtrar por fecha: el número siempre son días</h2>
+    <p class="mt-4">Quieres saber a qué ficheros de tu home has accedido en las últimas 24 horas:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ find . -atime 1        # accedidos DENTRO de las últimas 24 h
+$ find . -atime +1       # accedidos hace MÁS de 24 h
+$ find . -atime +2       # accedidos hace MÁS de 48 h</code></pre>
+    <p class="mt-4">La regla es una sola y vale para las tres opciones de tiempo: <strong>el número que escribes se multiplica por 24 horas</strong>. Un <code>3</code> son tres días; un <code>+3</code> significa «más de tres días atrás». Por eso <code>+2</code> devuelve muchos más resultados que <code>1</code>: cuanto más atrás miras, más ficheros entran.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 190" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Tres relojes distintos</text>
+
+        <rect x="20" y="40" width="160" height="80" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="100" y="66" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">-atime</text>
+        <line x1="45" y1="78" x2="155" y2="78" stroke="#E5E1D8"/>
+        <text x="100" y="96" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">acceso</text>
+        <text x="100" y="110" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">se abrió o se leyó</text>
+
+        <rect x="200" y="40" width="160" height="80" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="280" y="66" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">-mtime</text>
+        <line x1="225" y1="78" x2="335" y2="78" stroke="#E5E1D8"/>
+        <text x="280" y="96" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">modificación</text>
+        <text x="280" y="110" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">cambió el contenido</text>
+
+        <rect x="380" y="40" width="160" height="80" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="460" y="66" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">-ctime</text>
+        <line x1="405" y1="78" x2="515" y2="78" stroke="#E5E1D8"/>
+        <text x="460" y="96" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">metadatos</text>
+        <text x="460" y="110" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">permisos, dueño, enlaces</text>
+
+        <line x1="20" y1="145" x2="540" y2="145" stroke="#E5E1D8"/>
+        <text x="280" y="166" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">N = últimas N x 24 h &nbsp;&nbsp;·&nbsp;&nbsp; +N = hace MÁS de N x 24 h</text>
+        <text x="280" y="182" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">el número siempre se multiplica por 24 horas</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Misma sintaxis, tres marcas de tiempo diferentes.</figcaption>
+    </figure>
+
+    <p class="mt-4">Lo que cambia entre las tres opciones es <em>qué</em> fecha miran:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ find . -mtime 1        # MODIFICADOS en las últimas 24 h
+$ find . -mtime +2       # modificados hace más de 48 h
+
+$ find . -ctime 1        # con los METADATOS actualizados en las últimas 24 h</code></pre>
+    <p class="mt-4"><code>-atime</code> se fija en cuándo se <strong>abrió o se leyó</strong> el fichero por última vez; <code>-mtime</code>, en cuándo cambió su <strong>contenido</strong>; <code>-ctime</code>, en cuándo se tocaron sus <strong>metadatos</strong>: permisos, dueño, número de enlaces. Es decir, un <code>chmod</code> de los que viste en <a href="/Linux-course/lecciones/34-cambiar-permisos-chmod">cambiar permisos</a> no altera el <code>-mtime</code>, pero sí el <code>-ctime</code>. Y ahí está la conexión con los <a href="/Linux-course/lecciones/13-enlaces">i-nodos</a>: los metadatos son justo eso que el i-nodo guarda.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">En tu home lanza <code>find . -mtime 1</code> y luego <code>find . -mtime +2</code>. <strong>Meta:</strong> ver con tus propios ojos que el <code>+</code> abre la ventana hacia atrás y devuelve muchos más resultados. Compáralo después con <code>ls -l</code> para reconocer las fechas.</p>
+    </div>
+
+    <!-- ================= CUERPO: -size ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Filtrar por tamaño: -size</h2>
+    <p class="mt-4">Se te está llenando el disco y no sabes dónde está el problema. Esta es la búsqueda que resuelve el caso:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ find . -size +5M        # ficheros de MÁS de 5 megabytes
+$ find . -size +100k      # ficheros de más de 100 kilobytes
+$ find . -size +1G        # ficheros de más de 1 gigabyte</code></pre>
+    <p class="mt-4">Las unidades son estas, y <strong>importa mucho si van en mayúscula o minúscula</strong>:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Sufijo</th>
+            <th class="text-left p-3 border-b border-line font-bold">Unidad</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>c</code></td><td class="p-3 border-b border-line">Bytes</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>k</code> (minúscula)</td><td class="p-3 border-b border-line">Kilobytes</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>M</code> (mayúscula)</td><td class="p-3 border-b border-line">Megabytes</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>G</code> (mayúscula)</td><td class="p-3 border-b border-line">Gigabytes</td></tr>
+          <tr><td class="p-3"><em>sin sufijo</em></td><td class="p-3">Bloques de 512 bytes</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">Igual que con las fechas, el <code>+</code> significa «más de». Sin él buscas el tamaño exacto, que casi nunca es lo que quieres. Con <code>+5M</code> pides todo lo que pase de cinco megas.</p>
+    <p class="mt-4">El caso real donde esto se usa a diario es <code>/var/log</code>. Los logs del sistema van registrando toda la actividad y crecen sin parar; en un Linux con meses de uso en una red de trabajo es normal encontrar ahí ficheros enormes:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /var/log
+$ find . -size +1G
+find: './private': Permiso denegado
+
+$ find . -size +100k
+./syslog
+./daemon.log</code></pre>
+    <p class="mt-4">En tu máquina virtual recién instalada seguramente no aparezca nada de un giga: el sistema todavía es muy pequeño. Los avisos de <strong>permiso denegado</strong> son los de siempre y se quitan con <code>2&gt; /dev/null</code>, como en la <a href="/Linux-course/lecciones/41-buscar-ficheros-find">lección anterior</a>. Y si quieres ver cuánto ocupa el total de un directorio en vez de fichero a fichero, la herramienta es <a href="/Linux-course/lecciones/14-espacio-en-disco">du</a>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>find . -size +5M</code> en tu home y <code>find . -size +100k 2&gt; /dev/null</code> en <code>/var/log</code>. <strong>Meta:</strong> quedarte con la costumbre de poner el <code>+</code> y de escribir la <code>M</code> en mayúscula.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: filtrar como un administrador</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Desde tu home, cuenta por separado ficheros, directorios y enlaces: <code>find . -type f | wc -l</code>, <code>find . -type d | wc -l</code> y <code>find . -type l | wc -l</code>. Suma los tres y compáralo con <code>find . | wc -l</code>.</li>
+        <li>Vete a <code>/dev</code> y cuenta los dispositivos de caracteres y de bloques con <code>-type c</code> y <code>-type b</code>. Anota los dos números.</li>
+        <li>Compara ventanas de tiempo: <code>find . -mtime 1</code>, <code>find . -mtime +1</code> y <code>find . -mtime +3</code>. Explica en una línea por qué el tercero devuelve lo que devuelve.</li>
+        <li><strong>Reto:</strong> combina dos filtros en un solo comando para buscar únicamente <em>ficheros normales</em> de más de 100 kilobytes en <code>/var/log</code>, silenciando los errores y contando el resultado: <code>find . -type f -size +100k 2&gt; /dev/null | wc -l</code>. Después cámbialo a <code>-mtime 1</code> para ver cuáles de esos logs se han escrito hoy.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>-type</code> filtra por clase de fichero con las mismas letras de <code>ls -l</code>: <code>f</code> fichero, <code>d</code> directorio, <code>l</code> enlace, <code>c</code> y <code>b</code> dispositivos de caracteres y de bloques (estos dos solo en <code>/dev</code>). La letra va sin guion.</p>
+      <p>Las tres opciones de tiempo miran fechas distintas: <code>-atime</code> el último acceso, <code>-mtime</code> la última modificación del contenido y <code>-ctime</code> la última actualización de los metadatos. El número siempre se multiplica por 24 horas y el <code>+</code> significa «hace más de».</p>
+      <p><code>-size</code> busca por tamaño con sufijos <code>c</code>, <code>k</code>, <code>M</code> y <code>G</code>, sensibles a mayúsculas. Con <code>+</code> delante pides «más de», y esa es la búsqueda que usan los administradores en <code>/var/log</code> para encontrar los ficheros que se están comiendo el disco.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Escribes <code>find . -type -f</code> y Linux te responde con un error. ¿Qué pasa?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Sobra el guion delante de la <code>f</code>. La opción es <code>-type</code> y la letra del tipo va sola, sin guion: <code>find . -type f</code>. Con el guion de más, <code>find</code> lo interpreta como una opción que no existe.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué diferencia hay entre <code>find . -mtime 2</code> y <code>find . -mtime +2</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Sin el <code>+</code> buscas dentro de esos dos días (2 × 24 = 48 horas). Con <code>+2</code> buscas lo modificado <strong>hace más de</strong> 48 horas, es decir, hacia atrás en el tiempo. Por eso la segunda suele devolver muchos más resultados.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Se está llenando el disco. ¿Cómo localizas en <code>/var/log</code> los ficheros de más de 5 megas sin que te molesten los errores?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>cd /var/log</code> y después <code>find . -size +5M 2&gt; /dev/null</code>. El <code>+</code> pide «más de», la <code>M</code> en mayúscula son megabytes y <code>2&gt; /dev/null</code> descarta los avisos de permiso denegado. Puedes afinar más añadiendo <code>-type f</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/41-buscar-ficheros-find" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/43-empaquetar-con-tar" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

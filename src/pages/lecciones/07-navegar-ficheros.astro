@@ -1,0 +1,160 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 7. Fuente: transcripciones/video 5.md (pwd, ls, cd, rutas, man)
+---
+
+<Layout titulo="Navegar por archivos: pwd, ls, cd y man — Curso Linux" descripcion="Muévete por el sistema de archivos con pwd, ls y cd (rutas absolutas y relativas) y aprende a leer el manual con man.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 7</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">9 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Navegar por archivos: pwd, ls, cd y man</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Cuatro comandos que usarás en cada sesión: saber dónde estás, listar, moverte y pedir ayuda al sistema.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A ubicarte con <code>pwd</code> y a listar con <code>ls</code> y sus opciones más útiles.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>La diferencia entre <strong>ruta absoluta</strong> y <strong>ruta relativa</strong> al usar <code>cd</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A leer el <strong>manual</strong> de cualquier comando con <code>man</code> — tu fuente de ayuda dentro del propio sistema.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">¿Dónde estoy? pwd y ls</h2>
+    <p class="mt-4">Abre la terminal. Como viste en la <a href="/Linux-course/lecciones/06-usuarios-y-ficheros">Lección 6</a>, arrancas en tu home. Confírmalo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ pwd            # print working directory: la ruta donde estás
+/home/usuario01
+$ ls             # lista el contenido del directorio actual
+$ ls -l          # formato largo (long): detalle de cada elemento</code></pre>
+    <p><code>ls -l</code> añade, para cada archivo, sus permisos, propietario, tamaño y fecha. Esos detalles los desglosaremos en la <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo">Lección 8</a>; por ahora quédate con la idea: <strong>añadir opciones a un comando te da más información</strong>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>pwd</code>, luego <code>ls</code> y luego <code>ls -l</code>. <strong>Meta:</strong> comparar la salida simple de <code>ls</code> con la salida detallada de <code>ls -l</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Moverte: cd con rutas absolutas y relativas</h2>
+    <p class="mt-4"><code>cd</code> significa <em>change directory</em>. Solo, sin nada más, te devuelve siempre a tu home estés donde estés. Para ir a otro sitio hay <strong>dos formas</strong> de indicar el destino:</p>
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead>
+          <tr class="bg-sand text-left">
+            <th class="p-3 font-bold border-b border-line">Tipo de ruta</th>
+            <th class="p-3 font-bold border-b border-line">Cómo se escribe</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Absoluta</td><td class="p-3">Empieza por <code>/</code> (la raíz). Llega al destino <strong>estés donde estés</strong>. Ej: <code>cd /tmp</code>.</td></tr>
+          <tr><td class="p-3 font-semibold">Relativa</td><td class="p-3">Parte de <strong>donde estás ahora</strong> (sin <code>/</code> inicial). Ej: desde <code>/home</code>, <code>cd usuario01</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /tmp        # ruta absoluta: al directorio temporal, vengas de donde vengas
+$ ls
+$ cd             # sin argumentos: de vuelta a tu home
+$ cd ..          # sube un nivel (retrocede un salto en la ruta)</code></pre>
+    <p>Cuidado con la barra inicial: <code>cd curso</code> (relativa) busca una carpeta <em>curso</em> dentro de donde estás; <code>cd /curso</code> (absoluta) la busca colgando de la raíz. No es lo mismo.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Desde tu home, ve a <code>/tmp</code> con ruta absoluta, haz <code>ls</code>, vuelve con <code>cd</code> y comprueba con <code>pwd</code>. Luego usa <code>cd ..</code> y vuelve a mirar <code>pwd</code>. <strong>Meta:</strong> ver cómo cambia la ruta en cada paso.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Pedir ayuda al sistema: man</h2>
+    <p class="mt-4"><code>man</code> (de <em>manual</em>) muestra la documentación de cualquier comando, sin salir del sistema. Se usa <code>man</code> seguido del nombre del comando:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ man pwd        # abre el manual del comando pwd
+$ man ls         # el de ls, que tiene muchísimas opciones</code></pre>
+    <p><code>man</code> abre un visor (no vuelve solo a la terminal). Muévete así:</p>
+    <ul class="list-disc pl-6 space-y-2 my-4 text-ink/80">
+      <li><strong>Flechas arriba / abajo:</strong> línea a línea.</li>
+      <li><strong>f</strong> avanza página, <strong>b</strong> retrocede página.</li>
+      <li><strong>/palabra</strong> + Enter: busca ese texto (ej. <code>/copyright</code>).</li>
+      <li><strong>q</strong>: salir del manual y volver a la terminal.</li>
+    </ul>
+    <p>El número entre paréntesis tras el comando (como <code>PWD(1)</code>) indica la <strong>sección</strong> de la documentación a la que pertenece. Con <code>man man</code> ves cómo se divide toda la documentación en secciones.</p>
+    <p class="text-ink/70 text-sm">Recuerda: muchas opciones tienen forma corta y forma larga equivalentes. <code>-l</code> es lo mismo que <code>--long</code>; usa la que prefieras.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Abre <code>man ls</code>, busca la palabra <code>sort</code> con <code>/sort</code> y sal con <code>q</code>. <strong>Meta:</strong> localizar en el manual una opción para ordenar sin salir a un navegador.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">ls a fondo: ocultos, tamaño y fecha</h2>
+    <p class="mt-4"><code>ls</code> es mucho más potente combinando opciones. Las más usadas:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -a          # muestra también los ocultos (los que empiezan por punto)
+$ ls -al         # ocultos + formato largo
+$ ls -alh        # + tamaños legibles (KB, MB) en vez de bytes
+$ ls -lS         # ordena por tamaño (mayor primero)
+$ ls -lr         # orden alfabético inverso
+$ ls -lt         # ordena por fecha (más nuevo primero)
+$ ls -ltr        # por fecha, inverso (más viejo primero)</code></pre>
+    <p>En Linux, los archivos y carpetas <strong>ocultos empiezan por un punto</strong> (<code>.bashrc</code>). No es por seguridad, sino para no saturar la vista con archivos de configuración. Si creas un archivo cuyo nombre empieza por punto, queda oculto.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">En tu home ejecuta <code>ls -alh</code>. <strong>Meta:</strong> encontrar al menos un archivo oculto (empieza por <code>.</code>) y ver su tamaño en formato legible.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: recorre tu sistema de archivos</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Ubícate con <code>pwd</code> y lista tu home con <code>ls -alh</code>. Anota cuántos archivos ocultos ves.</li>
+        <li>Ve a <code>/tmp</code> con ruta <strong>absoluta</strong>, lístalo con <code>ls -l</code> y vuelve a tu home con <code>cd</code> (sin argumentos).</li>
+        <li>Abre <code>man cd</code> o <code>man ls</code>, desplázate con <code>f</code>/<code>b</code>, busca una palabra con <code>/</code> y sal con <code>q</code>.</li>
+        <li>Compara <code>ls -lt</code> con <code>ls -ltr</code> en tu home. <strong>Reto extra:</strong> averigua en <code>man ls</code> qué hace la opción <code>-R</code> y pruébala sobre <code>/etc</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>pwd</code> dice dónde estás y <code>ls</code> lista el contenido; con opciones como <code>-l</code>, <code>-a</code> o <code>-h</code> obtienes más detalle, ocultos y tamaños legibles.</p>
+      <p><code>cd</code> te mueve: una ruta absoluta (empieza por <code>/</code>) llega al destino desde cualquier sitio, y una relativa parte de donde estás; <code>cd</code> solo vuelve al home y <code>cd ..</code> sube un nivel.</p>
+      <p><code>man</code> abre el manual de cualquier comando dentro del sistema; navegas con flechas, <code>f</code>/<code>b</code> y <code>/palabra</code>, y sales con <code>q</code>.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué diferencia hay entre <code>cd /tmp</code> y <code>cd tmp</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>cd /tmp</code> es una <strong>ruta absoluta</strong>: va al <code>tmp</code> que cuelga de la raíz, estés donde estés. <code>cd tmp</code> es <strong>relativa</strong>: busca una carpeta <code>tmp</code> dentro del directorio actual, que puede no existir.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Cómo se sale del visor de <code>man</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Pulsando <strong>q</strong>. <code>man</code> abre un visor que no vuelve solo a la terminal; también te mueves con las flechas, con <code>f</code>/<code>b</code> por páginas y buscas con <code>/palabra</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué opción de <code>ls</code> muestra los archivos ocultos y por qué están ocultos?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>ls -a</code>. Los archivos ocultos <strong>empiezan por un punto</strong> (<code>.bashrc</code>); no es por seguridad, sino para no saturar la vista con archivos de configuración.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/06-usuarios-y-ficheros" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

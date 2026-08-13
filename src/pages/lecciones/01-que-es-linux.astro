@@ -1,0 +1,162 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 1. Fuente: transcripciones/INTRODUCCION (video 1).md
+---
+
+<Layout titulo="Qué es Linux — Curso Linux" descripcion="Qué es Linux, sus ventajas técnicas y qué es una distribución.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 1</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">9 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Qué es Linux</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Qué es realmente Linux, por qué «libre» no significa «gratis», y por qué en este curso instalarás Debian.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Qué es Linux y qué significa que sea <strong>multiusuario, multitarea y multiplataforma</strong> — la base para entender todo lo demás.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Las <strong>cuatro ventajas técnicas</strong> (libertad, estabilidad, seguridad, adaptabilidad) que explican por qué Linux domina en servidores.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Qué es una <strong>distribución</strong> y por qué usarás <strong>Debian</strong> para aprender desde cero.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-12">Linux en una frase</h2>
+    <p class="mt-4">Instalas un sistema mínimo que arranca en segundos y consume casi nada, y luego le vas añadiendo solo lo que necesitas, según lo vayas necesitando. Eso, en la práctica, es Linux.</p>
+    <p>Más formalmente: <strong>Linux es el nombre que recibe una serie de sistemas operativos</strong>, en su mayoría de distribución gratuita y con todo lo necesario para hacer funcionar una PC. Es una tecnología de <strong>software libre</strong> y uno de los sistemas operativos más utilizados en la actualidad. Su peculiaridad es esa modularidad: puedes instalar un sistema muy ligero e ir incorporando todo lo demás más adelante.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Tres palabras clave: multiusuario, multitarea, multiplataforma</h2>
+    <p class="mt-4">Imagina un mismo servidor atendiendo a varias personas a la vez, ejecutando decenas de procesos en paralelo, y corriendo igual en una PC, un teléfono o un router. Esas tres capacidades tienen nombre:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead>
+          <tr class="bg-sand text-left">
+            <th class="p-3 font-bold border-b border-line">Término</th>
+            <th class="p-3 font-bold border-b border-line">Qué significa</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Multiusuario</td><td class="p-3">Varios usuarios trabajan en el mismo sistema a la vez.</td></tr>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Multitarea</td><td class="p-3">Muchos servicios y procesos se ejecutan simultáneamente.</td></tr>
+          <tr><td class="p-3 font-semibold">Multiplataforma</td><td class="p-3">Funciona sobre hardware muy distinto sin cambiar el sistema.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Estas tres capacidades significan que puedes realizar una o más actividades de forma simultánea y manejar diferentes servicios y procesos con un mismo sistema.</p>
+    <p>Además Linux puede funcionar en <strong>modo consola</strong> para un consumo mínimo de recursos, o trabajar con un <strong>entorno gráfico</strong>. Ese entorno gráfico lo instalas mediante comandos de terminal, o lo obtienes al adquirir un paquete que ya lo trae incluido. Verás ambos modos en la <a href="/Linux-course/lecciones/02-instalacion">Lección 2</a>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Ventaja 1 — «Free» es libertad, no (solo) precio</h2>
+    <p class="mt-4">Habrás escuchado el término inglés <strong>free</strong>. Tiene dos significados: uno es <em>gratis</em> y el otro es <em>libertad</em> (libre). Cuando se habla de Linux, el significado real es <strong>libertad</strong> más que gratis.</p>
+    <p>Es libre porque su uso no tiene limitación: puedes usar Linux en el ambiente que quieras, modificarlo, copiarlo, venderlo y un sinnúmero de cosas más. Otros sistemas como <strong>Windows</strong> o <strong>iOS</strong> no te lo permiten, porque están registrados bajo un tipo de licencia específico.</p>
+    <p>¿Y por qué se dice que «no necesariamente es gratis»? Porque al implementar Linux no pagas licencia de software, pero sí existen <strong>costos implícitos</strong>:</p>
+    <ul class="list-disc pl-6 space-y-2 my-4 text-ink/80">
+      <li><strong>Entrenamiento:</strong> implementarlo a nivel personal o empresarial exige capacitar al usuario o al personal de informática. Ese entrenamiento cuesta tiempo y energía si eres autodidacta, o cuesta dinero si lo aceleras con cursos y seminarios.</li>
+      <li><strong>Soporte:</strong> como Linux es de código abierto, no hay una empresa detrás que dé soporte directo al cliente. Debes apoyarte en usuarios internos capacitados o pagar soporte externo a una consultora. De hecho, ese es un modelo de negocio propio de Linux: individuos y empresas que existen para dar soporte y consultoría sobre el sistema.</li>
+    </ul>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Ventaja 2 — Estabilidad</h2>
+    <p class="mt-4">Cuando instalas y configuras correctamente un servidor Linux, prácticamente puedes olvidarte de esa instalación: es un sistema que casi no falla. Es muy difícil encontrar un servidor Linux con una falla de software o de hardware.</p>
+    <p>Por eso Linux es conocido en la industria de la informática por su estabilidad. Los servidores a los que no se les está poniendo la mano todo el tiempo —sin cambiar configuraciones, actualizaciones ni instalaciones— tienden a durar <strong>años y años sin ser reiniciados</strong>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Ventaja 3 — Seguridad</h2>
+    <p class="mt-4">Linux es un sistema bastante seguro, y esto nace de ser <strong>open source</strong> (código abierto): todo el mundo tiene acceso al código y puede verlo y verificarlo. Esa apertura hace que muchísimos programadores en el mundo entero estén revisando el código constantemente. Si se descubre una vulnerabilidad, al ser abierto se corrige en un tiempo bastante corto.</p>
+    <p>Consecuencia práctica: a diferencia de otros servidores como Windows Server, en Linux los virus prácticamente no existen. No necesitas invertir dinero en un antivirus, porque el sistema es muy robusto y ningún software sin los permisos adecuados puede dañarlo.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Ventaja 4 — Adaptabilidad: dónde vive Linux</h2>
+    <p class="mt-4">Linux tiene una gran adaptabilidad a la tecnología informática. No es solo un sistema de servidores; el mismo Linux se adapta a escenarios muy distintos:</p>
+    <ul class="list-disc pl-6 space-y-2 my-4 text-ink/80">
+      <li><strong>Servidores</strong> — donde es el sistema líder.</li>
+      <li><strong>Escritorio</strong> — para tus tareas diarias.</li>
+      <li><strong>Smartphones</strong> — teléfonos inteligentes.</li>
+      <li><strong>Firewall</strong> — como solución de seguridad de red.</li>
+      <li><strong>Central telefónica IP (IP PBX)</strong> — con <strong>Asterisk</strong>, el software libre de voz sobre IP más famoso, que permite que una computadora normal (incluso con procesador de 32 bits) se convierta en una central telefónica de voz sobre IP.</li>
+    </ul>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Distribuciones: el mismo núcleo, muchos sabores</h2>
+    <p class="mt-4">Cuando alguien dice «uso Ubuntu» o «uso Debian» no está nombrando otro Linux, sino una <strong>distribución</strong> (coloquialmente, <em>distro</em>).</p>
+    <p>Una distribución de Linux es una versión de software basada en un núcleo que incluye determinados paquetes para satisfacer las necesidades de un grupo específico de usuarios. De ahí nacen ediciones <strong>domésticas</strong>, <strong>empresariales</strong> y <strong>para servidores</strong>. Por lo general están compuestas mayormente de software libre, aunque a menudo incorporan aplicaciones o controladores propietarios.</p>
+
+    <!-- ================= DIAGRAMA SVG ================= -->
+    <figure class="my-10">
+      <div class="overflow-x-auto border border-line bg-cream p-6">
+        <svg viewBox="0 0 640 300" width="100%" role="img" aria-labelledby="svg-distro-title" style="max-width:640px;margin:0 auto;display:block;">
+          <title id="svg-distro-title">Un mismo núcleo más distintos paquetes forman distintas distribuciones</title>
+          <circle cx="120" cy="150" r="55" fill="#F4F1EA" stroke="#1A1A1A" stroke-width="1.5"/>
+          <text x="120" y="146" text-anchor="middle" font-family="'Playfair Display',serif" font-size="18" font-weight="700" fill="#1A1A1A">Núcleo</text>
+          <text x="120" y="166" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" fill="#1A1A1A">(kernel)</text>
+          <text x="205" y="158" text-anchor="middle" font-family="Inter,sans-serif" font-size="26" fill="#1A1A1A">+</text>
+          <text x="240" y="60" font-family="Inter,sans-serif" font-size="11" fill="#1A1A1A" letter-spacing="0.5">PAQUETES DE SOFTWARE</text>
+          <line x1="240" y1="70" x2="470" y2="70" stroke="#E5E1D8" stroke-width="1"/>
+          <rect x="240" y="95" width="230" height="110" fill="#FDFCFB" stroke="#E5E1D8" stroke-width="1"/>
+          <text x="355" y="130" text-anchor="middle" font-family="'Playfair Display',serif" font-size="16" font-weight="600" fill="#1A1A1A">Distribución</text>
+          <text x="355" y="155" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#1A1A1A">núcleo empaquetado</text>
+          <text x="355" y="172" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#1A1A1A">con software elegido</text>
+          <line x1="490" y1="80" x2="555" y2="80" stroke="#1A1A1A" stroke-width="1.5"/>
+          <line x1="490" y1="150" x2="555" y2="150" stroke="#1A1A1A" stroke-width="1.5"/>
+          <line x1="490" y1="220" x2="555" y2="220" stroke="#1A1A1A" stroke-width="1.5"/>
+          <text x="570" y="84" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#1A1A1A">Debian</text>
+          <text x="570" y="154" font-family="Inter,sans-serif" font-size="13" fill="#1A1A1A">Ubuntu</text>
+          <text x="570" y="224" font-family="Inter,sans-serif" font-size="13" fill="#1A1A1A">Fedora...</text>
+        </svg>
+      </div>
+      <figcaption class="text-xs text-ink/50 mt-3 text-center">Mismo núcleo + distintos paquetes = distintas distribuciones.</figcaption>
+    </figure>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Tu distribución: Debian</h2>
+    <p class="mt-4">En este curso trabajarás con <strong>Debian</strong>, un sistema operativo de Linux desarrollado por una comunidad de voluntarios dedicada al software libre. Es un sistema <strong>estandarizado</strong>, lo que permite a los desarrolladores de software y hardware crear fácilmente programas y controladores de dispositivos para Linux en general.</p>
+    <p>Está pensado para el usuario promedio, se caracteriza por tener las últimas novedades de Linux y está considerado una de las distribuciones más estables que existen — ideal para aprender sin sorpresas.</p>
+    <p>En la <a href="/Linux-course/lecciones/02-instalacion">siguiente lección</a> preparas tu entorno de trabajo: descargas, instalas y configuras Debian en una máquina virtual.</p>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Linux es una familia de sistemas operativos libres, modulares y multiusuario/multitarea/multiplataforma.</p>
+      <p>Su fuerza técnica está en la libertad de uso, la estabilidad y la seguridad del código abierto, no en el precio.</p>
+      <p>Se distribuye en «distros» basadas en un mismo núcleo; aquí usarás Debian por su estabilidad.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Cuando se dice que Linux es <em>free</em>, ¿a qué se refiere principalmente?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">A <strong>libertad</strong>: puedes usarlo, modificarlo, copiarlo y venderlo sin limitación. No implica que siempre sea gratis, porque existen costos como entrenamiento y soporte.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué significa que Linux sea «multitarea»?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Que puede ejecutar <strong>muchos servicios y procesos simultáneamente</strong> en el mismo sistema.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué es una distribución (distro) de Linux?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Una versión basada en el <strong>mismo núcleo</strong> empaquetada con software específico para un grupo de usuarios (doméstico, empresarial, servidores). Debian es un ejemplo.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/" class="btn-secundario">Inicio</a>
+      <a href="/Linux-course/lecciones/02-instalacion" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

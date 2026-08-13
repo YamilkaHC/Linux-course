@@ -1,0 +1,112 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 74. Fuente: transcripciones/video_53.md (segunda parte: comando read, -p y varias variables)
+---
+
+<Layout titulo="Pedir datos por teclado: read — Curso Linux" descripcion="Haz scripts interactivos con read: guarda lo que escribe el usuario en una variable, ahorra líneas con read -p y recoge varios datos de una vez.">
+  <article class="prose-editorial">
+
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 74</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">4 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Pedir datos por teclado: read</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Tus scripts hablaban solos. Con <code>read</code> pasan a escuchar.
+    </p>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Capturar entrada con <code>read variable</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Pregunta + lectura en una línea con <code>read -p</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Recoger <strong>varios datos</strong> de una vez.</span></li>
+      </ul>
+    </section>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Básico</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ read v1
+10
+$ echo $v1
+10</code></pre>
+    <p class="mt-4">La shell se detiene hasta que escribas algo y pulses Enter.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">read -p: pregunta incluida</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>read -p "Introduce tu apellido: " apellido
+echo "Tu primer apellido es: $apellido"</code></pre>
+    <p class="mt-4">Orden: <code>-p</code>, texto entre comillas, <strong>variable al final</strong>. Ahorra el <code>echo</code> previo.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 180" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Dos formas de preguntar</text>
+        <rect x="30" y="44" width="230" height="92" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="145" y="68" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">echo "Introduce tu nombre: "</text>
+        <text x="145" y="86" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">read nombre</text>
+        <line x1="55" y1="100" x2="235" y2="100" stroke="#E5E1D8"/>
+        <text x="145" y="120" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">dos líneas</text>
+        <rect x="300" y="44" width="230" height="92" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="415" y="76" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">read -p "Introduce tu nombre: " nombre</text>
+        <line x1="325" y1="100" x2="505" y2="100" stroke="#E5E1D8"/>
+        <text x="415" y="120" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">una sola línea</text>
+        <text x="280" y="166" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">con -p, la variable va SIEMPRE al final</text>
+      </svg>
+    </figure>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Varias variables de una vez</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ read v1 v2 v3
+10 20 30
+$ echo $v1 $v2 $v3
+10 20 30</code></pre>
+    <p class="mt-4">Cada palabra va a su variable, en orden. Si un dato sale vacío al mostrarlo, el nombre de la variable no coincide entre <code>read</code> y <code>echo</code>.</p>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Prueba <code>read</code> suelto en terminal, con una variable y con tres.</li>
+        <li>Escribe <code>entrada.sh</code> con <code>echo</code>+<code>read</code> y con <code>read -p</code>. Dale permisos con <code>chmod u+x</code>.</li>
+        <li><strong>Reto:</strong> escribe <code>saludo.sh</code> que pida nombre con <code>read -p</code> y compruebe con <code>if [ -z "$nombre" ]</code> si está vacío.</li>
+      </ol>
+    </section>
+
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>read variable</code> detiene el script y guarda lo tecleado. Comando interno de la shell.</p>
+      <p><code>read -p "Pregunta: " variable</code> integra el mensaje. Con varias variables, lo escrito se reparte por espacios.</p>
+      <p>Dato vacío al mostrarlo = nombre de variable no coincide entre <code>read</code> y <code>echo</code>.</p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Ejecutas <code>read nombre</code> y la terminal parece colgada. ¿Qué pasa?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Está esperando que escribas algo y pulses Enter.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Ventaja de <code>read -p</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Hace lo mismo en una línea. Variable siempre al final, después del texto.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Pides tres datos pero falta el último al mostrarlo. ¿Dónde buscar?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Nombre de variable: que sea idéntico en <code>read</code> y en <code>echo</code>. Variable inexistente se expande a nada.</p>
+        </details>
+      </div>
+    </section>
+
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/73-comparar-cadenas-y-numeros" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/75-proyecto-menu-monitor" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

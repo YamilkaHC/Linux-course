@@ -1,0 +1,166 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 59. Fuente: transcripciones/video_45.md (segunda parte: x, X, dw, d0, dd y el multiplicador numérico)
+---
+
+<Layout titulo="Borrar texto en vi — Curso Linux" descripcion="Borra en vi con x, X, dw, d0 y dd, y multiplica cualquier comando anteponiéndole un número: 3dw, 3x.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 59</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+      <span class="etiqueta-arribita">Por arribita</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Borrar texto en vi</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      El backspace no funciona, y no lo necesitas. Aquí se borra por caracteres, por palabras o por líneas enteras.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A borrar caracteres con <code>x</code> y <code>X</code>, palabras con <code>dw</code> y líneas enteras con <code>dd</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>El <strong>multiplicador numérico</strong>: anteponer un número repite cualquier comando. Es lo que convierte <code>vi</code> en una herramienta rápida.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Que el punto exacto del cursor decide qué desaparece: <code>dw</code> no borra lo mismo si estás al principio o en medio de una palabra.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Todo esto es modo comando</h2>
+    <p class="mt-4">Aviso antes de empezar: <strong>todo lo de esta lección se hace en modo comando</strong>. Si vienes de escribir, pulsa <code>Esc</code> primero. Si pruebas estas teclas en <a href="/Linux-course/lecciones/58-insertar-texto-en-vi">modo edición</a>, lo único que conseguirás es escribir equis y des en tu texto.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Un carácter: x y X</h2>
+    <p class="mt-4">Colócate encima de una letra que sobre y pulsa <code>x</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>x     → borra el carácter donde está el cursor
+X     → borra el carácter anterior (a la izquierda)</code></pre>
+    <p class="mt-4">La equivalencia con lo que ya conoces es directa: <code>x</code> hace lo mismo que la tecla <strong>Supr</strong> —que, por cierto, también funciona en modo comando—, y <code>X</code> mayúscula hace de <strong>retroceso</strong>, borrando hacia atrás.</p>
+    <p class="mt-4">Fíjate en que el <strong>backspace normal no borra</strong> en modo comando: se limita a mover el cursor al carácter anterior. Por eso existe la <code>X</code>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">En modo comando, sitúate sobre una letra cualquiera y pulsa <code>x</code> tres veces. Luego prueba <code>X</code> otras tres. <strong>Meta:</strong> ver que una borra hacia delante y la otra hacia atrás desde el mismo punto.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Una palabra: dw</h2>
+    <p class="mt-4">La <code>d</code> es de <em>delete</em>, y se combina con los movimientos que ya aprendiste:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>dw    → borra desde el cursor hasta el final de la palabra
+d0    → borra desde el cursor hacia atrás, hasta el principio de la línea
+dd    → borra la línea entera</code></pre>
+    <p class="mt-4">Con <code>dw</code> hay un matiz que conviene entender bien. Si te colocas <strong>al principio</strong> de la palabra, desaparece entera. Pero si te colocas <strong>en medio</strong>, solo borra de ahí hasta el final:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>printing        cursor en la p  →  dw  →  (nada)
+printing        cursor en la t  →  dw  →  prin</code></pre>
+    <p class="mt-4">Es decir: <code>dw</code> no borra «la palabra», borra <strong>de aquí hasta que acabe la palabra</strong>. Colócate siempre al principio si quieres llevártela completa.</p>
+    <p class="mt-4">El <code>d0</code> hace lo contrario en la línea: se lleva todo lo que hay <strong>desde el cursor hacia atrás</strong> hasta el comienzo. Útil cuando quieres conservar el final de una línea y tirar el principio.</p>
+    <p class="mt-4">Y <code>dd</code> —la <code>d</code> dos veces seguidas— borra <strong>la línea completa</strong>, esté el cursor donde esté. Es probablemente el comando de borrado que más vas a usar.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Con <code>w</code> colócate al principio de una palabra y bórrala con <code>dw</code>. Después sitúate en mitad de otra y repite. Termina borrando una línea entera con <code>dd</code>. <strong>Meta:</strong> comprobar en tu propio texto la diferencia entre los dos <code>dw</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El multiplicador: pon un número delante</h2>
+    <p class="mt-4">Esta es la idea más potente de <code>vi</code>, y sirve para casi todo:</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Número + comando = comando repetido</p>
+      <p class="!mt-0">Si antepones un número a un comando, ese comando <strong>se ejecuta tantas veces</strong>. No es una excepción de <code>dw</code>: funciona con la inmensa mayoría de los comandos del editor.</p>
+    </div>
+
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>3dw     → borra tres palabras seguidas
+4dw     → borra cuatro palabras
+3x      → borra tres caracteres
+5dd     → borra cinco líneas enteras</code></pre>
+    <p class="mt-4">Un caso práctico: quieres eliminar cuatro palabras de una frase. Te colocas delante de la primera, escribes <code>4</code> y luego <code>dw</code>. Las cuatro desaparecen de golpe.</p>
+    <p class="mt-4">Otro: quieres quitar las tres primeras letras de una palabra. Te sitúas en la primera letra y pulsas <code>3x</code>.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 195" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">El alcance del borrado</text>
+
+        <rect x="30" y="44" width="150" height="66" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="105" y="70" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">x</text>
+        <line x1="55" y1="80" x2="155" y2="80" stroke="#E5E1D8"/>
+        <text x="105" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">un carácter</text>
+
+        <rect x="205" y="44" width="150" height="66" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="280" y="70" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">dw</text>
+        <line x1="230" y1="80" x2="330" y2="80" stroke="#E5E1D8"/>
+        <text x="280" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">una palabra</text>
+
+        <rect x="380" y="44" width="150" height="66" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="455" y="70" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">dd</text>
+        <line x1="405" y1="80" x2="505" y2="80" stroke="#E5E1D8"/>
+        <text x="455" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">una línea</text>
+
+        <line x1="30" y1="132" x2="530" y2="132" stroke="#E5E1D8"/>
+        <text x="280" y="156" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">3x &nbsp;·&nbsp; 4dw &nbsp;·&nbsp; 5dd</text>
+        <text x="280" y="180" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">un número delante multiplica cualquiera de ellos</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Carácter, palabra, línea. Y un número para repetir.</figcaption>
+    </figure>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Colócate al principio de una frase y bórrala en un solo golpe contando las palabras: <code>5dw</code> o las que sean. Después borra dos líneas de una vez con <code>2dd</code>. <strong>Meta:</strong> incorporar el número como reflejo antes de repetir un comando cinco veces.</p>
+    </div>
+
+    <p class="mt-4">Recuerda que ninguna de estas pruebas toca el fichero real hasta que guardes: si te has cargado medio documento practicando, sal con <code>:q!</code> y todo queda como estaba. Guardar y salir de verdad lo verás en la siguiente lección.</p>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: limpiar un documento</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Abre <code>vi loren.txt</code> y, en modo comando, borra tres caracteres sueltos con <code>x</code> y otros tres hacia atrás con <code>X</code>.</li>
+        <li>Elimina una palabra entera colocándote al principio con <code>w</code> y pulsando <code>dw</code>. Repítelo desde el centro de otra palabra y compara los resultados.</li>
+        <li>Borra las cinco primeras líneas del fichero con un solo comando: <code>5dd</code>. Después usa <code>d0</code> en mitad de una línea para tirar todo lo que hay a su izquierda.</li>
+        <li><strong>Reto:</strong> deja el documento reducido a un solo párrafo usando el menor número de pulsaciones posible. Cuenta cuántas has necesitado, sal sin guardar con <code>:q!</code> y vuelve a intentarlo aprovechando más el multiplicador numérico.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>En modo comando, <code>x</code> borra el carácter del cursor (como Supr) y <code>X</code> el anterior (como el retroceso, que por sí solo no borra en este modo).</p>
+      <p><code>dw</code> borra desde el cursor hasta el final de la palabra —colócate al principio si la quieres entera—, <code>d0</code> borra hacia atrás hasta el comienzo de la línea y <code>dd</code> se lleva la línea completa.</p>
+      <p>Anteponer un número repite el comando: <code>3x</code>, <code>4dw</code>, <code>5dd</code>. Funciona con casi todos los comandos de <code>vi</code> y es lo que lo hace rápido de verdad.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Te colocas en la <code>t</code> de «printing» y pulsas <code>dw</code>. ¿Qué queda?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Queda <code>prin</code>. <code>dw</code> borra desde la posición del cursor hasta el final de la palabra, no la palabra entera. Para llevártela completa hay que situarse en su primera letra.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Necesitas borrar seis líneas seguidas. ¿Pulsas <code>dd</code> seis veces?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Puedes, pero es más rápido <code>6dd</code>. Anteponer un número repite el comando esas veces, y funciona igual con <code>x</code>, <code>dw</code> y la mayoría de comandos del editor.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Pulsas backspace para borrar un carácter y solo se mueve el cursor. ¿Qué usas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>X</code> mayúscula, que borra el carácter anterior. En modo comando el retroceso no borra, solo desplaza; para borrar hacia delante está <code>x</code> minúscula.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/58-insertar-texto-en-vi" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/60-copiar-y-pegar-en-vi" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

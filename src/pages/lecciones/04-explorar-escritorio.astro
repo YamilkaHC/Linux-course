@@ -1,0 +1,152 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 4. Fuente: transcripciones/video 3.md (parte 1: explorar el escritorio GNOME)
+---
+
+<Layout titulo="Explorar el escritorio de Debian — Curso Linux" descripcion="Recorre el escritorio GNOME de Debian: Actividades, favoritos, Configuración y cómo dejar lista tu terminal.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 4</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Explorar el escritorio de Debian</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Ya tienes Debian instalado. Ahora conoce GNOME de punta a punta y deja tu terminal preparada para trabajar.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A poner tu escritorio a <strong>pantalla completa</strong> y ajustar la <strong>resolución</strong>, para que la VM se sienta como un equipo real.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A moverte por <strong>Actividades</strong> y la <strong>Configuración</strong> de GNOME — desde dónde controlas todo el sistema.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A dejar tu <strong>terminal</strong> anclada y personalizada: la usarás en cada lección práctica a partir de ahora.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <p class="mt-8 text-ink/70">Retomamos donde terminó la <a href="/Linux-course/lecciones/03-instalar-debian">Lección 3</a>: acabas de iniciar sesión y estás viendo el escritorio de Debian con el entorno <strong>GNOME</strong>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Primero: pantalla completa y resolución</h2>
+    <p class="mt-4">Antes de explorar nada, haz que el escritorio ocupe toda la pantalla. Son dos ajustes distintos:</p>
+    <ul class="list-disc pl-6 space-y-2 my-4 text-ink/80">
+      <li><strong>Resolución (dentro de Debian):</strong> clic derecho en el centro del escritorio &rarr; <em>Configuración de pantalla</em> &rarr; en <strong>Resolución</strong> elige la <strong>máxima</strong> disponible &rarr; <em>Aplicar</em> &rarr; <em>Mantener cambios</em>.</li>
+      <li><strong>Pantalla completa (de VirtualBox):</strong> en el menú <strong>View</strong> de la ventana de la VM elige <em>Modo de pantalla completa</em>. El escritorio pasa a ocupar todo el monitor, como un sistema instalado localmente.</li>
+    </ul>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Sube la resolución al máximo y activa pantalla completa. <strong>Meta:</strong> que el escritorio de Debian llene tu monitor sin bordes de VirtualBox.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Actividades: el menú de inicio de GNOME</h2>
+    <p class="mt-4">Arriba a la izquierda de la barra superior está <strong>Actividades</strong>. Al hacer clic se abre el menú de aplicaciones y una barra de accesos directos (los <strong>favoritos</strong>). Cosas que puedes hacer aquí:</p>
+    <ul class="list-disc pl-6 space-y-2 my-4 text-ink/80">
+      <li><strong>Reordenar iconos:</strong> arrástralos de un lugar a otro.</li>
+      <li><strong>Clic derecho sobre un icono:</strong> <em>Abrir en ventana nueva</em>, <em>Quitar de favoritos</em> (desaparece de la barra) o <em>Mostrar detalles</em>.</li>
+      <li><strong>Todas las aplicaciones:</strong> el botón de los <strong>puntitos</strong> despliega todas las apps preinstaladas. Desplázate para ver más; muchas son comunes a Windows y macOS, otras son exclusivas de Linux.</li>
+      <li><strong>Búsqueda:</strong> empieza a escribir y GNOME filtra al instante. Escribe <code>fire</code> y aparece <strong>Firefox</strong>. Pulsa <strong>Esc</strong> para volver.</li>
+    </ul>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Abre <strong>Actividades</strong>, escribe <code>fire</code> y localiza Firefox. <strong>Meta:</strong> abrirlo desde la búsqueda sin usar el ratón para navegar el menú.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">La esquina derecha y la Configuración</h2>
+    <p class="mt-4">En el extremo derecho de la barra superior están los iconos de <strong>red</strong>, <strong>volumen</strong> y <strong>batería</strong>. Al hacer clic aparece la opción de <strong>Configuración</strong>, el panel central del sistema. Estas son las secciones que más usarás:</p>
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead>
+          <tr class="bg-sand text-left">
+            <th class="p-3 font-bold border-b border-line">Sección</th>
+            <th class="p-3 font-bold border-b border-line">Para qué sirve</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Red</td><td class="p-3">Confirma que estás conectado a internet.</td></tr>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Fondo</td><td class="p-3">Cambia el fondo de escritorio; se aplica al instante al elegirlo.</td></tr>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Notificaciones</td><td class="p-3">Activa o desactiva avisos por aplicación.</td></tr>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Privacidad</td><td class="p-3">Controla cámara, micrófono y el histórico de archivos de la papelera.</td></tr>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Sonido</td><td class="p-3">Volumen y sonidos del sistema.</td></tr>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Pantallas</td><td class="p-3">La resolución del monitor (lo que ajustaste arriba).</td></tr>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Ratón / touchpad</td><td class="p-3">Velocidad del puntero.</td></tr>
+          <tr><td class="p-3 font-semibold">Región e idioma</td><td class="p-3">Idioma del sistema y distribución del teclado.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="text-ink/70 text-sm">También hay <em>Bluetooth</em>, <em>Impresoras</em> y <em>Soportes extraíbles</em> (qué hace el equipo al conectar un USB). Explóralas con calma: no rompes nada por mirar.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Deja lista tu terminal</h2>
+    <p class="mt-4">La terminal será tu herramienta principal desde la <a href="/Linux-course/lecciones/05-primeros-comandos">próxima lección</a>. Ánclala y dale un aspecto cómodo:</p>
+    <ol class="list-decimal pl-6 space-y-2 my-4 text-ink/80">
+      <li>En <strong>Actividades</strong> escribe <code>termi</code>, clic derecho sobre <strong>Terminal</strong> &rarr; <em>Añadir a los favoritos</em>. Queda anclada en la barra.</li>
+      <li>Ábrela y ve a <strong>Preferencias &rarr; Perfiles</strong>. Crea un perfil con el nombre que quieras.</li>
+      <li>Activa <strong>Tipografía personalizada</strong> (por ejemplo <em>Monospace 12</em>) y sube el tamaño para leer mejor los ejemplos.</li>
+      <li>En <strong>Colores</strong>, desmarca <em>Usar colores del sistema</em> y elige el color de <strong>texto</strong> y de <strong>fondo</strong> a tu gusto.</li>
+      <li>Selecciona tu perfil desde la flecha del menú para abrir una terminal con ese tema.</li>
+    </ol>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ancla la terminal a favoritos y crea tu perfil con tipografía y colores propios. <strong>Meta:</strong> abrir la terminal de un clic desde la barra, ya con tu tema aplicado.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: haz tuyo el escritorio</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Pon la resolución al máximo y activa el modo de pantalla completa de VirtualBox.</li>
+        <li>Abre <strong>Actividades</strong>, busca <code>fire</code> y abre Firefox; luego quita algún icono de favoritos y vuelve a añadirlo.</li>
+        <li>En <strong>Configuración</strong>, cambia el fondo de escritorio y revisa la sección de <strong>Privacidad</strong>.</li>
+        <li>Ancla la <strong>Terminal</strong> a favoritos y créale un perfil con tipografía y colores propios. <strong>Reto extra:</strong> añade también el <em>explorador de archivos</em> a favoritos arrastrándolo desde el menú de aplicaciones.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Ajustar la resolución al máximo y activar la pantalla completa de VirtualBox hace que la VM se sienta como un equipo instalado localmente.</p>
+      <p>Actividades es el menú de inicio de GNOME (favoritos, todas las apps y búsqueda), y Configuración es el panel central donde controlas red, fondo, privacidad, sonido, pantallas e idioma.</p>
+      <p>Anclar y personalizar la terminal te deja listo para empezar a trabajar con comandos en la próxima lección.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué es «Actividades» en GNOME?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Es el <strong>menú de inicio</strong> de GNOME: da acceso a los favoritos, a todas las aplicaciones (botón de los puntitos) y a una <strong>búsqueda</strong> que filtra apps y archivos mientras escribes.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿En qué se diferencian el ajuste de «Resolución» y el «Modo de pantalla completa»?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">La <strong>resolución</strong> se cambia dentro de Debian (Configuración de pantalla) y define el detalle de la imagen; el <strong>modo de pantalla completa</strong> es de <strong>VirtualBox</strong> (menú View) y hace que la ventana de la VM ocupe todo el monitor.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Cómo anclas la terminal para tenerla siempre a mano?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">En Actividades escribes <code>termi</code>, haces <strong>clic derecho</strong> sobre Terminal y eliges <strong>Añadir a los favoritos</strong>. Queda anclada en la barra para abrirla de un clic.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/03-instalar-debian" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/05-primeros-comandos" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

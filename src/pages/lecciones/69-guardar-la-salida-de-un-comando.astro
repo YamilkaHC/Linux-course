@@ -1,0 +1,160 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 69. Fuente: transcripciones/video_51.md (primera parte: sustitución de comandos con acentos graves y $( ))
+---
+
+<Layout titulo="Guardar la salida de un comando — Curso Linux" descripcion="Sustitución de comandos en bash: guarda el resultado de cualquier comando en una variable con $( ) o con acentos graves.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 69</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">6 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Guardar la salida de un comando</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Que una variable guarde texto está bien. Que guarde el resultado de un comando lo cambia todo.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A meter el resultado de cualquier comando —o de un pipeline entero— dentro de una variable.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Las <strong>dos sintaxis</strong>: los acentos graves de siempre y el <code>$( )</code> moderno.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Por qué esto es la pieza que convierte una lista de comandos en un programa de verdad.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">El caso: contar ficheros</h2>
+    <p class="mt-4">Estás en tu carpeta de scripts y quieres saber cuántas entradas tiene. Con lo que ya sabes de <a href="/Linux-course/lecciones/21-tuberias-y-filtros">tuberías</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -l | wc -l
+2</code></pre>
+    <p class="mt-4">El número aparece en pantalla, se lee y se pierde. Para poder <strong>usarlo</strong> —restarle uno, compararlo, meterlo en un mensaje— hay que guardarlo en algún sitio. Y esto no funciona:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ num_fich="ls -l | wc -l"
+$ echo $num_fich
+ls -l | wc -l          ← ha guardado el texto, no el resultado</code></pre>
+    <p class="mt-4">Lógico: como viste en <a href="/Linux-course/lecciones/68-variables-y-aritmetica-en-scripts">la lección anterior</a>, para la shell todo es texto salvo que le digas lo contrario.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">La forma moderna: $( )</h2>
+    <p class="mt-4">Encierra el comando entre <code>$(</code> y <code>)</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ num_fich=$(ls -l | wc -l)
+$ echo $num_fich
+2</code></pre>
+    <p class="mt-4">Ahí está el número. Lo que ocurre por dentro: la shell ve esos paréntesis, entiende que <strong>no es una cadena sino una orden</strong>, la ejecuta, y mete el resultado en la variable.</p>
+    <p class="mt-4">Fíjate en que dentro cabe <strong>un pipeline completo</strong>, no solo un comando suelto. Todo lo que has aprendido a encadenar con <code>|</code> sirve aquí.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">La forma clásica: acentos graves</h2>
+    <p class="mt-4">En los Unix antiguos se hacía así, y lo seguirás viendo en scripts heredados:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ num_fich=`ls -l | wc -l`
+$ echo $num_fich
+2</code></pre>
+    <p class="mt-4">Ese carácter es el <strong>acento grave</strong>, no la comilla simple. En teclados en inglés está junto al número 1; en los españoles hay que buscar la combinación, como pasa con <code>~</code> o <code>^</code>.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 185" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Dos sintaxis, un resultado</text>
+
+        <rect x="30" y="44" width="230" height="92" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="145" y="70" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">`ls -l | wc -l`</text>
+        <line x1="55" y1="82" x2="235" y2="82" stroke="#E5E1D8"/>
+        <text x="145" y="102" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">acentos graves</text>
+        <text x="145" y="122" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">la clásica · scripts antiguos</text>
+
+        <rect x="300" y="44" width="230" height="92" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="415" y="70" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">$(ls -l | wc -l)</text>
+        <line x1="325" y1="82" x2="505" y2="82" stroke="#E5E1D8"/>
+        <text x="415" y="102" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">dólar y paréntesis</text>
+        <text x="415" y="122" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">la actual · más legible</text>
+
+        <text x="280" y="168" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">no es una cadena: la shell ejecuta lo de dentro y guarda su salida</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Escribe con la segunda; reconoce la primera.</figcaption>
+    </figure>
+
+    <p class="mt-4">Las dos hacen exactamente lo mismo. Usa <code>$( )</code>: se lee mejor y no se confunde con las comillas.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Guarda tres cosas distintas en variables y muéstralas: <code>fecha=$(date)</code>, <code>yo=$(whoami)</code> y <code>aqui=$(pwd)</code>. <strong>Meta:</strong> comprobar que dentro cabe cualquier comando que ya conozcas.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Caben cosas grandes</h2>
+    <p class="mt-4">Una variable no está limitada a un número o una palabra:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ x=$(ls -l /var/lib)
+$ echo $x
+total 132 drwxr-xr-x 2 root root 4096 ago 4 alsa drwxr-xr-x 3 root...</code></pre>
+    <p class="mt-4">Ha guardado el listado entero. Eso sí, mira cómo sale: <strong>todo pegado en una sola línea</strong>. Al mostrar la variable sin más, se pierden los saltos de línea del resultado original.</p>
+    <p class="mt-4">No es un problema para lo que vamos a hacer —normalmente guardarás valores cortos, como un número o una ruta—, pero conviene saberlo antes de que te sorprenda.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Por qué esto importa</h2>
+    <p class="mt-4">Esta es la pieza que faltaba. Hasta ahora tus scripts eran una <strong>lista fija</strong> de comandos: hacían siempre lo mismo, dijera lo que dijera el sistema.</p>
+    <p class="mt-4">Con la sustitución de comandos, un script puede <strong>preguntarle algo al sistema y trabajar con la respuesta</strong>: cuántos ficheros hay, dónde estoy, qué día es, cuánto espacio queda. Combínalo con la aritmética que ya conoces y empiezan a salir programas de verdad:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ num_fich=$(ls -l | wc -l)
+$ num_fich=$(($num_fich-1))
+$ echo $num_fich
+1</code></pre>
+    <p class="mt-4">Contar, restar, mostrar. En la siguiente lección lo conviertes en un script completo y útil.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Encadena los tres pasos de arriba en tu carpeta de scripts y comprueba el resultado con un <code>ls</code> a ojo. <strong>Meta:</strong> ver que el número calculado coincide con los ficheros que hay de verdad.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: capturar resultados</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Comprueba la diferencia: guarda <code>ls -l | wc -l</code> primero entre comillas dobles y después con <code>$( )</code>. Muestra las dos variables.</li>
+        <li>Escribe la misma captura con acentos graves y confirma que el resultado es idéntico.</li>
+        <li>Guarda en variables la fecha, tu usuario y tu directorio actual, y muéstralos juntos en una frase con un solo <code>echo</code>.</li>
+        <li><strong>Reto:</strong> combina sustitución y aritmética. Cuenta los usuarios reales del sistema guardando <code>$(grep -c bash /etc/passwd)</code> en una variable —usando el <a href="/Linux-course/lecciones/23-buscar-texto-grep">grep -c</a> que ya conoces— y muestra el resultado en una frase. Después réstale 1 con <code>$(( ))</code> para descontar a root.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Asignar un comando entre comillas guarda el texto, no el resultado. Para capturar la salida hay que usar la <strong>sustitución de comandos</strong>.</p>
+      <p>Dos sintaxis equivalentes: los acentos graves <code>`comando`</code>, la clásica que verás en scripts antiguos, y <code>$(comando)</code>, la actual y más legible. Dentro cabe un pipeline completo.</p>
+      <p>Una variable puede guardar resultados largos, aunque al mostrarla se pierdan los saltos de línea. Combinada con la aritmética, esta técnica es lo que permite que un script consulte el estado del sistema y opere con él.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Escribes <code>hoy="date"</code> y <code>echo $hoy</code> muestra «date». ¿Cómo lo arreglas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Con sustitución de comandos: <code>hoy=$(date)</code>. Entre comillas guardas la palabra; con <code>$( )</code> la shell ejecuta el comando y guarda su salida.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Se puede meter una tubería entera dentro de una variable?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Sí: <code>num=$(ls -l | wc -l)</code>. Lo que va dentro de <code>$( )</code> puede ser un pipeline completo, no solo un comando suelto.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Ves en un script antiguo <code>fecha=`date`</code>. ¿Qué es eso?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Sustitución de comandos con acentos graves, la forma clásica. Equivale a <code>fecha=$(date)</code>. Cuidado al leerlo: son acentos graves, no comillas simples.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/68-variables-y-aritmetica-en-scripts" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/70-script-contar-ficheros" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

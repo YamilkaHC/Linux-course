@@ -1,0 +1,159 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 8. Fuente: transcripciones/video 6.md (metacaracteres/wildcards, tipos de fichero en ls -l, comando file)
+---
+
+<Layout titulo="Comodines y tipos de archivo — Curso Linux" descripcion="Filtra archivos con comodines (*, ?, []), interpreta la primera letra de ls -l y descubre el tipo con file.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 8</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">9 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Comodines y tipos de archivo</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Referencia muchos archivos a la vez con comodines y aprende a leer qué es cada archivo de un vistazo.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Los <strong>comodines</strong> <code>*</code>, <code>?</code> y <code>[ ]</code> para filtrar archivos por patrón.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A leer la <strong>primera letra</strong> de <code>ls -l</code> para saber si algo es directorio, enlace o dispositivo.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A averiguar el tipo real de un archivo con el comando <code>file</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <p class="mt-8 text-ink/70">Para practicar necesitas un directorio con muchos archivos. Usa <code>/usr/bin</code>, lleno de ejecutables:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /usr/bin
+$ ls             # cientos de archivos: perfecto para probar comodines</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El asterisco *: cualquier cantidad de caracteres</h2>
+    <p class="mt-4"><code>*</code> sustituye a <strong>cualquier grupo de caracteres</strong> (incluido ninguno). Es el comodín más usado:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls b*          # archivos que EMPIEZAN por b
+$ ls *b          # archivos que TERMINAN en b
+$ ls *ma*        # archivos que CONTIENEN "ma" en cualquier posición
+$ ls *m*ca*      # una m, cualquier cosa, y luego "ca"</code></pre>
+    <p>Recuerda que Linux <strong>distingue mayúsculas y minúsculas</strong>: <code>ls b*</code> y <code>ls B*</code> no dan lo mismo. Si buscas por <code>B*</code> y no hay archivos con B mayúscula, dirá que no existe ninguno.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">En <code>/usr/bin</code>, lista los archivos que empiezan por <code>z</code> con <code>ls z*</code> y los que contienen <code>zip</code> con <code>ls *zip*</code>. <strong>Meta:</strong> ver cómo el patrón cambia el conjunto de resultados.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">La interrogación ?: exactamente un carácter</h2>
+    <p class="mt-4"><code>?</code> sustituye a <strong>un solo carácter</strong>. Cada <code>?</code> equivale a una posición:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls g?          # empieza por g y tiene 1 carácter más (2 letras en total)
+$ ls g??         # empieza por g y tiene 2 caracteres más (3 letras)
+$ ls ?p          # cualquier carácter seguido de p (2 letras, termina en p)</code></pre>
+    <p>La regla práctica: usa <code>*</code> para un <strong>grupo</strong> de caracteres de longitud desconocida y <code>?</code> cuando sabes <strong>cuántas</strong> posiciones exactas hay.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Los corchetes [ ]: un carácter de un conjunto</h2>
+    <p class="mt-4"><code>[ ]</code> significa «uno cualquiera de estos». Sirve para listas de letras o para <strong>rangos</strong>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls [af]*       # empieza por a O por f
+$ ls *[tb]       # termina en t O en b
+$ ls *[0-9]      # termina en cualquier dígito del 0 al 9
+$ ls *[0-3]      # termina en un dígito del 0 al 3</code></pre>
+    <p>Los comodines se pueden <strong>combinar</strong> entre sí para búsquedas muy precisas. Si conoces SQL, <code>*</code> se parece al <code>LIKE</code> con <code>%</code>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lista en <code>/usr/bin</code> los archivos que empiezan por <code>a</code> o <code>b</code> con <code>ls [ab]*</code>, y los que terminan en un dígito con <code>ls *[0-9]</code>. <strong>Meta:</strong> confirmar que el conjunto entre corchetes actúa como «uno de estos».</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">La primera letra de ls -l: qué es cada archivo</h2>
+    <p class="mt-4">Vuelve a tu home (<code>cd</code>) y ejecuta <code>ls -l</code>. El <strong>primer carácter</strong> de cada línea dice <strong>qué tipo de archivo</strong> es:</p>
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead>
+          <tr class="bg-sand text-left">
+            <th class="p-3 font-bold border-b border-line">Letra</th>
+            <th class="p-3 font-bold border-b border-line">Tipo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-line"><td class="p-3 font-semibold"><code>d</code></td><td class="p-3">Directorio (carpeta).</td></tr>
+          <tr class="border-b border-line"><td class="p-3 font-semibold"><code>-</code></td><td class="p-3">Archivo normal: texto, ejecutable o binario (Linux no los distingue aquí).</td></tr>
+          <tr class="border-b border-line"><td class="p-3 font-semibold"><code>l</code></td><td class="p-3">Enlace (como un acceso directo de Windows). Frecuente en <code>/usr/bin</code>.</td></tr>
+          <tr><td class="p-3 font-semibold"><code>c</code> / <code>b</code></td><td class="p-3">Dispositivos de carácter o de bloque. Solo aparecen en <code>/dev</code> (discos, pantallas…).</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Tras esa letra vienen 9 caracteres (<code>rwxr-xr--</code>) que son los <strong>permisos</strong>: los veremos en un capítulo propio. Luego hay un <strong>número</strong> que, en un directorio, indica cuántos enlaces tiene: <strong>2 = carpeta vacía</strong>, y sube a 3, 4… según cuántas subcarpetas contenga.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>ls -l</code> en tu home y fíjate en la primera letra: identifica una línea que empiece por <code>d</code> (directorio). Luego crea una carpeta dentro de <em>Documentos</em> desde el explorador y vuelve a mirar el número de enlaces de <em>Documentos</em>. <strong>Meta:</strong> verlo pasar de 2 a 3.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El comando file: dime qué eres</h2>
+    <p class="mt-4">La primera letra de <code>ls -l</code> distingue directorios de archivos, pero no dice qué contiene un archivo «normal». Para eso está <code>file</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ file Descargas         # Descargas: directory
+$ cd /usr/bin
+$ file host              # host: ELF 64-bit ... (un ejecutable compilado)</code></pre>
+    <p><code>file</code> te dice si algo es un directorio, un archivo de texto, un ejecutable o un binario, sin tener que abrirlo. Muy útil antes de intentar leer o ejecutar un archivo desconocido.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Aplica <code>file</code> a una carpeta de tu home (por ejemplo <code>file Imágenes</code>) y a un ejecutable de <code>/usr/bin</code>. <strong>Meta:</strong> ver cómo describe cada uno con palabras distintas.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: filtra e identifica</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>En <code>/usr/bin</code>, lista con <code>*</code> los archivos que empiezan por <code>py</code> (<code>ls py*</code>) y con <code>?</code> los de exactamente dos letras que empiezan por <code>c</code> (<code>ls c?</code>).</li>
+        <li>Usa corchetes para listar los que empiezan por <code>a</code>, <code>b</code> o <code>c</code> (<code>ls [abc]*</code>) y los que terminan en dígito (<code>ls *[0-9]</code>).</li>
+        <li>Vuelve a tu home con <code>cd</code>, haz <code>ls -l</code> e identifica por la primera letra un directorio (<code>d</code>) y un archivo normal (<code>-</code>).</li>
+        <li>Usa <code>file</code> sobre una carpeta y sobre un ejecutable de <code>/usr/bin</code>. <strong>Reto extra:</strong> combina comodines y detalle con <code>ls -l a*</code> para ver permisos solo de lo que empieza por <code>a</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>*</code> sustituye cualquier grupo de caracteres, <code>?</code> exactamente uno y <code>[ ]</code> uno de un conjunto o rango; se combinan para filtrar archivos con precisión, siempre respetando mayúsculas y minúsculas.</p>
+      <p>La primera letra de <code>ls -l</code> indica el tipo: <code>d</code> directorio, <code>-</code> archivo normal, <code>l</code> enlace y <code>c</code>/<code>b</code> dispositivos (solo en <code>/dev</code>).</p>
+      <p>El comando <code>file</code> revela el tipo real de un archivo —directorio, texto, ejecutable o binario— sin necesidad de abrirlo.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué diferencia hay entre <code>ls g*</code> y <code>ls g?</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>g*</code> lista todo lo que <strong>empieza por g</strong>, sin importar cuántos caracteres siga. <code>g?</code> lista solo lo que empieza por g y tiene <strong>exactamente un carácter más</strong> (dos letras en total).</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. En <code>ls -l</code>, ¿qué significa que una línea empiece por <code>d</code> y qué por <code>l</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>d</code> es un <strong>directorio</strong> (carpeta); <code>l</code> es un <strong>enlace</strong>, equivalente a un acceso directo de Windows. Un guion <code>-</code> sería un archivo normal.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Para qué sirve el comando <code>file</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Para saber el <strong>tipo real</strong> de un archivo (directorio, texto, ejecutable, binario…) sin abrirlo. Por ejemplo, <code>file host</code> revela que es un ejecutable ELF de 64 bits.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/07-navegar-ficheros" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/09-crear-y-copiar" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

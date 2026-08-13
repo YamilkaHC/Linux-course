@@ -1,0 +1,138 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 30. Fuente: transcripciones/video_25.md (primera mitad: señales, kill -l, kill -15 SIGTERM, kill -9 SIGKILL)
+---
+
+<Layout titulo="Señales y matar procesos con kill — Curso Linux" descripcion="Envía señales a los procesos con kill: lista las señales con kill -l, pide una parada ordenada con -15 (SIGTERM) y una forzada con -9 (SIGKILL).">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 30</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Señales y cómo matar un proceso con kill</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Matar un <a href="/Linux-course/lecciones/26-procesos-y-ps">proceso</a> en realidad es enviarle una <strong>señal</strong>. El comando <code>kill</code> gestiona esas señales, y dos de ellas —la 15 y la 9— son las que usarás a diario.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Qué son las <strong>señales</strong> y cómo listarlas con <code>kill -l</code> (código + nombre <code>SIGxxx</code>).</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A pedir una parada <strong>ordenada</strong> con <code>kill -15</code> (SIGTERM), que deja al proceso cerrarse bien.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A forzar una parada <strong>abrupta</strong> con <code>kill -9</code> (SIGKILL) cuando un proceso se queda colgado.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Las señales</h2>
+    <p class="mt-4">Una señal es un mensaje que se manda a un proceso para que reaccione. El sistema (y los programadores) las usan para muchas cosas; nosotros necesitamos solo un par. Lista todas las disponibles con <code>kill -l</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ kill -l               # lista las señales: su número y su nombre (SIGTERM, SIGKILL...)
+$ man 7 signal          # documentación completa (sección 7 del manual)</code></pre>
+    <p class="mt-4">Cada señal tiene un número y un nombre técnico que empieza por <code>SIG</code>. De toda la lista, quédate con dos.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Las dos señales clave</text>
+        <rect x="30" y="40" width="215" height="95" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="137" y="66" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">-15  SIGTERM</text>
+        <text x="137" y="92" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">parada ordenada:</text>
+        <text x="137" y="108" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">el proceso guarda</text>
+        <text x="137" y="124" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">y se cierra bien</text>
+        <rect x="275" y="40" width="215" height="95" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="382" y="66" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">-9  SIGKILL</text>
+        <text x="382" y="92" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">parada abrupta:</text>
+        <text x="382" y="108" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">lo mata al instante,</text>
+        <text x="382" y="124" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">sin guardar nada</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Primero intenta la 15 (educada); si no obedece, la 9 (contundente).</figcaption>
+    </figure>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Matar con kill: primero necesitas el PID</h2>
+    <p class="mt-4"><code>kill</code> necesita saber a <strong>qué</strong> proceso mandar la señal, así que primero localizas su PID. Lanza un <a href="/Linux-course/lecciones/28-prioridad-nice-renice"><code>sleep</code></a> de prueba en otra pestaña y busca su PID:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sleep 1000            # en otra pestaña, para tener un proceso que matar
+$ ps -ef | grep sleep   # en la principal: localiza su PID (p. ej. 6759)</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">-15 (SIGTERM): la parada educada</h2>
+    <p class="mt-4">La señal <strong>15</strong> (SIGTERM) le pide al proceso que termine <em>correctamente</em>: guardar lo pendiente y cerrarse con orden. Es la forma recomendada:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ kill -15 6759         # pide a 6759 que termine ordenadamente
+$ ps -ef | grep sleep   # comprueba que ya no está</code></pre>
+    <p class="mt-4">En la otra pestaña verás «Terminado»: el proceso murió correctamente. Con <code>sleep</code> funciona porque está preparado para atender esa señal.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lanza <code>sleep 1000</code>, encuentra su PID con <code>ps -ef | grep sleep</code> y mándale <code>kill -15 PID</code>. <strong>Meta:</strong> ver el «Terminado» y comprobar con otro <code>ps</code> que desapareció.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">-9 (SIGKILL): la parada forzada</h2>
+    <p class="mt-4">A veces un proceso se queda <strong>colgado</strong> y no atiende la señal 15. Para esos casos está la <strong>9</strong> (SIGKILL): una parada abrupta que lo elimina sin contemplaciones, sin darle ocasión de guardar nada.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ kill -9 6765          # mata el proceso de golpe (cuando -15 no funciona)</code></pre>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">Primero la 15, después la 9</p>
+      <p class="!mt-2 text-cream/90">Intenta siempre <code>kill -15</code> primero: deja que el proceso cierre limpio. Reserva <code>kill -9</code> para cuando el proceso ignora la 15 y se queda pegado. La 9 mata de golpe y puede dejar cosas a medias. Y ojo: necesitas permisos para matar un proceso; no siempre te dejará.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lanza otro <code>sleep 1000</code>, y esta vez mátalo con <code>kill -9 PID</code>. <strong>Meta:</strong> ver que también termina, pero de forma inmediata; el mensaje detalla que fue eliminado (killed).</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: enviar señales</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Lista las señales con <code>kill -l</code> y localiza la 15 (SIGTERM) y la 9 (SIGKILL).</li>
+        <li>Lanza <code>sleep 1000</code> en una pestaña, busca su PID con <code>ps -ef | grep sleep</code> y mátalo con <code>kill -15 PID</code>. Confirma que desapareció.</li>
+        <li>Repite el <code>sleep</code> y esta vez usa <code>kill -9 PID</code>. Compara el mensaje que aparece con el del caso anterior.</li>
+        <li><strong>Reto:</strong> abre <code>man 7 signal</code>, busca qué hace la señal <code>SIGINT</code> (la número 2) y relaciónala con lo que hace <kbd>Ctrl+C</kbd>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Matar un proceso es enviarle una <strong>señal</strong> con <code>kill</code>. Listas todas las señales con <code>kill -l</code> (número + nombre <code>SIG...</code>) y consultas su detalle en <code>man 7 signal</code>. Antes de matar, necesitas el PID: <code>ps -ef | grep nombre</code>.</p>
+      <p><code>kill -15 PID</code> (SIGTERM) pide una parada ordenada: el proceso guarda y se cierra bien. Es la opción recomendada por defecto.</p>
+      <p><code>kill -9 PID</code> (SIGKILL) fuerza una parada abrupta, para cuando el proceso está colgado y no atiende la 15. Mata de golpe, sin guardar nada, y requiere permisos.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué diferencia hay entre <code>kill -15</code> y <code>kill -9</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>-15</code> (SIGTERM) pide una parada ordenada: el proceso guarda lo pendiente y se cierra bien. <code>-9</code> (SIGKILL) lo mata de golpe, sin darle tiempo a nada. Se usa la 9 solo cuando la 15 no funciona.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Antes de <code>kill</code>, ¿qué necesitas averiguar y cómo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">El PID del proceso a matar. Se localiza con <code>ps -ef | grep nombre</code>, que filtra los procesos y muestra su identificador.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Por qué conviene probar <code>-15</code> antes que <code>-9</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque <code>-15</code> deja que el proceso se cierre correctamente (guardar datos, liberar recursos). <code>-9</code> lo corta en seco y puede dejar cosas a medias, así que se reserva para procesos colgados que ignoran la 15.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/29-monitorear-con-top" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/31-procesos-en-segundo-plano" class="btn-primario">Siguiente: procesos en segundo plano</a>
+    </nav>
+
+  </article>
+</Layout>

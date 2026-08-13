@@ -1,0 +1,225 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 68. Fuente: transcripciones/video_50.md (segunda parte: export y aritmética con expr, $(( )) y let)
+---
+
+<Layout titulo="Variables y aritmética en scripts — Curso Linux" descripcion="Usa variables dentro de tus scripts con export y haz cuentas de verdad con expr, la doble paréntesis y let.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 68</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Variables y aritmética en scripts</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Tu script no ve la variable que acabas de crear, y <code>echo 1 + 3</code> no suma. Las dos cosas tienen arreglo.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Por qué una variable creada en la terminal <strong>no llega a tus scripts</strong>, y cómo arreglarlo con <code>export</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Que para la shell <strong>todo es texto</strong> por defecto: <code>10 + 20</code> no da 30, da «10 + 20».</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Las tres formas de hacer cuentas: <code>expr</code>, <code>$(( ))</code> y <code>let</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Repaso rápido</h2>
+    <p class="mt-4">Una variable es un nombre con un valor. Ya las viste en <a href="/Linux-course/lecciones/37-variables-de-entorno">variables de entorno</a>, y aquí las vas a usar de verdad:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ set | less           # variables de sistema y de shell
+$ echo $HOME           # leer una: con $ delante
+$ echo $USER
+
+$ variable1="hola"     # crear la tuya
+$ echo $variable1
+hola
+
+$ variable2=100
+$ echo $variable2
+100</code></pre>
+    <p class="mt-4">Las del sistema van en mayúsculas por convención; las tuyas, como quieras.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El script no ve tu variable</h2>
+    <p class="mt-4">Aquí viene la sorpresa. Añade al final de tu <code>s1.sh</code> esta línea:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>echo $variable1</code></pre>
+    <p class="mt-4">Y ahora, desde la terminal:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ variable1="hola a todos"
+$ echo $variable1
+hola a todos            ← la terminal sí la ve
+
+$ s1.sh
+Este es mi primer script de Linux
+Esta es la segunda línea
+vie 04 ago 2026 16:52:03 CEST
+                        ← el script, en cambio, imprime una línea vacía</code></pre>
+    <p class="mt-4">La variable existe, tú la ves… y el script no. ¿Por qué?</p>
+    <p class="mt-4">Porque una variable creada así <strong>vive solo en tu shell</strong>. Cuando ejecutas un script, este arranca en su propio proceso —recuerda la relación <a href="/Linux-course/lecciones/26-procesos-y-ps">padre-hijo</a>— y no hereda lo que no se le haya entregado explícitamente.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">export: entregársela al hijo</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ export variable1="hola a todos"
+$ s1.sh
+Este es mi primer script de Linux
+Esta es la segunda línea
+vie 04 ago 2026 16:53:10 CEST
+hola a todos            ← ahora sí</code></pre>
+    <p class="mt-4">La regla es corta: <strong>si la variable es solo para ti, basta con <code>variable=valor</code>. Si además la van a usar los scripts que lances, hay que exportarla.</strong></p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 190" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Qué se hereda y qué no</text>
+
+        <rect x="40" y="44" width="200" height="50" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="140" y="64" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">tu shell</text>
+        <text x="140" y="82" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">variable1="hola"</text>
+
+        <rect x="320" y="44" width="200" height="50" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="420" y="64" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">s1.sh</text>
+        <text x="420" y="82" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">proceso hijo</text>
+
+        <line x1="246" y1="60" x2="314" y2="60" stroke="#E5E1D8" stroke-dasharray="4 3"/>
+        <text x="280" y="54" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">no pasa</text>
+
+        <line x1="246" y1="86" x2="314" y2="86" stroke="#1A1A1A"/>
+        <path d="M314 86 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+        <text x="280" y="104" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">export</text>
+
+        <line x1="40" y1="134" x2="520" y2="134" stroke="#E5E1D8"/>
+        <text x="280" y="156" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">variable=valor  →  solo tu sesión</text>
+        <text x="280" y="176" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">export variable=valor  →  tu sesión y los scripts que lances</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">El proceso hijo solo recibe lo exportado.</figcaption>
+    </figure>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Añade <code>echo "saludo: $variable1"</code> a tu script. Ejecútalo primero definiendo la variable sin <code>export</code> y luego con él. <strong>Meta:</strong> ver la línea vacía y después el valor, sin cambiar ni una letra del script.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Para la shell, todo es texto</h2>
+    <p class="mt-4">Segundo tropiezo clásico:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo 1 + 3
+1 + 3
+
+$ v1=10
+$ v2=20
+$ echo $v1 + $v2
+10 + 20</code></pre>
+    <p class="mt-4">No hay ninguna suma. La shell trata esos valores como <strong>cadenas de caracteres</strong>, así que se limita a pegarlas. Para que haga cuentas hay que pedírselo de forma explícita, y existen tres maneras.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">1. expr, la clásica</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ expr 1 + 3
+4
+
+$ expr $v1 + $v2
+30</code></pre>
+    <p class="mt-4"><code>expr</code> —de <em>expresión</em>— es el comando de toda la vida: decide que lo que recibe son números y opera con ellos. Funciona en cualquier Unix, por antiguo que sea.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">2. La doble paréntesis, la actual</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo $((1 + 3))
+4
+
+$ echo $(($v1 + $v2))
+30
+
+$ echo $(($v1 - $v2))
+-10
+
+$ echo $(($v1 / $v2))
+0</code></pre>
+    <p class="mt-4">Esta es <strong>la forma que se usa hoy</strong> y está en cualquier Linux. Ese último resultado no es un error: la aritmética de la shell trabaja con enteros, así que 10 dividido entre 20 da 0.</p>
+    <p class="mt-4">Y lo más útil: guardar el resultado en otra variable.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ v3=$(($v1+$v2))
+$ echo $v3
+30
+
+$ v3=$(($v1*$v2))
+$ echo $v3
+200</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">3. let, la corta</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ let v3=10*35
+$ echo $v3
+350</code></pre>
+    <p class="mt-4"><code>let</code> te ahorra los paréntesis. No está en absolutamente todas las distribuciones, pero sí en casi todas.</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Forma</th>
+            <th class="text-left p-3 border-b border-line font-bold">Ejemplo</th>
+            <th class="text-left p-3 border-b border-line font-bold">Cuándo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>expr</code></td><td class="p-3 border-b border-line"><code>expr $v1 + $v2</code></td><td class="p-3 border-b border-line">Sistemas antiguos, máxima compatibilidad</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>$(( ))</code></td><td class="p-3 border-b border-line"><code>v3=$(($v1+$v2))</code></td><td class="p-3 border-b border-line">La habitual hoy</td></tr>
+          <tr><td class="p-3"><code>let</code></td><td class="p-3"><code>let v3=$v1*$v2</code></td><td class="p-3">Cuando quieras escribir menos</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Con <code>v1=10</code> y <code>v2=20</code>, calcula la suma de las tres maneras y comprueba que dan lo mismo. Después guarda una multiplicación en <code>v3</code> y muéstrala con <code>echo</code>. <strong>Meta:</strong> quedarte con <code>$(( ))</code> como forma por defecto.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: variables que funcionan</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Crea <code>variable1="hola"</code>, añade <code>echo $variable1</code> a tu script y ejecútalo. Después expórtala y vuelve a ejecutarlo.</li>
+        <li>Comprueba que <code>echo 5 + 5</code> no suma, y hazlo funcionar con las tres formas: <code>expr</code>, <code>$(( ))</code> y <code>let</code>.</li>
+        <li>Comprueba la división entera: calcula <code>$((7 / 2))</code> y explica el resultado en una línea.</li>
+        <li><strong>Reto:</strong> escribe un script <code>calculo.sh</code> que defina dos variables numéricas, muestre su suma, su resta y su multiplicación con mensajes claros usando <code>echo</code>, y termine con un <code>date</code>. Dale permisos con <code>chmod +x</code> y ejecútalo desde tu carpeta de scripts.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Una variable creada con <code>variable=valor</code> vive solo en tu shell: los scripts que lances no la ven, porque arrancan como procesos hijos. Con <code>export variable=valor</code> sí la heredan.</p>
+      <p>Para la shell todo es texto por defecto, así que <code>echo $v1 + $v2</code> concatena en lugar de sumar. Hay que pedir la operación de forma explícita.</p>
+      <p>Tres formas de hacer cuentas: <code>expr $v1 + $v2</code> (clásica), <code>$(($v1+$v2))</code> (la actual, la que conviene usar) y <code>let v3=$v1*$v2</code> (la más corta). La aritmética es con enteros: <code>10/20</code> da 0.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Defines una variable, la ves con <code>echo</code>, pero tu script imprime una línea vacía. ¿Por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque la variable solo existe en tu shell y el script se ejecuta en un proceso hijo, que no la hereda. Hay que exportarla: <code>export variable1="valor"</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. <code>echo $v1 + $v2</code> te devuelve «10 + 20». ¿Está roto?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No: la shell trata los valores como texto y se limita a mostrarlos. Para operar hay que usar <code>expr $v1 + $v2</code>, <code>echo $(($v1+$v2))</code> o <code>let</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. <code>echo $((10 / 20))</code> devuelve 0. ¿Es un fallo de la shell?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No: la aritmética de la shell trabaja con números enteros, así que descarta la parte decimal. Para cálculos con decimales hacen falta otras herramientas.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/67-path-permanente-y-source" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/69-guardar-la-salida-de-un-comando" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

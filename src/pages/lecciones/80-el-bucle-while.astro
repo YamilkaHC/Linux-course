@@ -1,0 +1,197 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 80. Fuente: transcripciones/video_56.md (segunda parte: bucle while y contador.sh)
+---
+
+<Layout titulo="El bucle while — Curso Linux" descripcion="Repite mientras se cumpla una condición: la estructura while/do/done, el contador que hay que incrementar y la diferencia con el bucle for.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 80</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">El bucle while</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      <code>for</code> recorre una lista conocida. <code>while</code> repite mientras se cumpla algo, sin saber cuántas vueltas serán.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>La estructura <code>while [ condición ]</code> / <code>do</code> / <code>done</code> y cuándo elegirla en lugar de <code>for</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A montar un <strong>contador</strong>: inicializarlo, comprobarlo e incrementarlo en cada vuelta.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Por qué olvidar el incremento deja el bucle girando para siempre.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">La diferencia con for</h2>
+    <p class="mt-4">Los dos repiten, pero deciden distinto cuándo parar:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Bucle</th>
+            <th class="text-left p-3 border-b border-line font-bold">Se detiene cuando…</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>for</code></td><td class="p-3 border-b border-line">Se acaba la <strong>lista</strong>. Sabes de antemano cuántas vueltas dará</td></tr>
+          <tr><td class="p-3"><code>while</code></td><td class="p-3">Deja de cumplirse una <strong>condición</strong>. Las vueltas dependen de lo que pase dentro</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">Por eso <code>while</code> se traduce literalmente: «<strong>mientras</strong> esto sea cierto, sigue haciendo aquello».</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Un contador del 1 al 10</h2>
+    <p class="mt-4">Crea <code>contador.sh</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>#!/bin/bash
+
+contador=1
+
+while [ $contador -le 10 ]
+do
+    echo "El valor es: $contador"
+    contador=$(($contador+1))
+done</code></pre>
+    <p class="mt-4">Tres piezas, y las tres son imprescindibles:</p>
+    <ol class="mt-4 space-y-2 list-decimal pl-6">
+      <li><strong>Inicializar</strong> la variable antes del bucle: <code>contador=1</code>.</li>
+      <li><strong>Comprobar</strong> la condición en el <code>while</code>: <code>[ $contador -le 10 ]</code>, usando el <code>-le</code> —<em>less or equal</em>— de la familia de <a href="/Linux-course/lecciones/73-comparar-cadenas-y-numeros">comparadores numéricos</a>.</li>
+      <li><strong>Incrementar</strong> dentro del bucle: <code>contador=$(($contador+1))</code>, con la <a href="/Linux-course/lecciones/68-variables-y-aritmetica-en-scripts">aritmética</a> de la doble paréntesis.</li>
+    </ol>
+    <p class="mt-4">Y fíjate en que la condición se escribe entre corchetes con espacios, exactamente igual que en un <code>if</code>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Vuelta a vuelta</h2>
+    <p class="mt-4">Sigue el recorrido mentalmente, que es lo que más cuesta al principio:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>contador vale 1  →  ¿1 ≤ 10? sí  →  imprime 1  →  contador pasa a 2
+contador vale 2  →  ¿2 ≤ 10? sí  →  imprime 2  →  contador pasa a 3
+...
+contador vale 10 →  ¿10 ≤ 10? sí →  imprime 10 →  contador pasa a 11
+contador vale 11 →  ¿11 ≤ 10? NO →  sale del bucle</code></pre>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">El ciclo del while</text>
+
+        <rect x="200" y="36" width="160" height="30" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="280" y="56" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">contador = 1</text>
+
+        <line x1="280" y1="68" x2="280" y2="82" stroke="#1A1A1A"/>
+        <path d="M280 82 l-4 -6 h8 z" fill="#1A1A1A" stroke="none"/>
+
+        <rect x="180" y="84" width="200" height="32" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="280" y="105" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">¿contador ≤ 10?</text>
+
+        <line x1="386" y1="100" x2="450" y2="100" stroke="#1A1A1A"/>
+        <path d="M450 100 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+        <text x="418" y="94" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">no</text>
+        <text x="492" y="104" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">done</text>
+
+        <line x1="280" y1="118" x2="280" y2="132" stroke="#1A1A1A"/>
+        <path d="M280 132 l-4 -6 h8 z" fill="#1A1A1A" stroke="none"/>
+        <text x="298" y="128" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none">sí</text>
+
+        <rect x="180" y="134" width="200" height="48" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="280" y="153" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">echo "El valor es: $contador"</text>
+        <text x="280" y="171" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">contador = contador + 1</text>
+
+        <line x1="180" y1="158" x2="120" y2="158" stroke="#1A1A1A"/>
+        <line x1="120" y1="158" x2="120" y2="100" stroke="#1A1A1A"/>
+        <line x1="120" y1="100" x2="176" y2="100" stroke="#1A1A1A"/>
+        <path d="M176 100 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+        <text x="120" y="196" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">y vuelve a comprobar</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Comprobar, ejecutar, incrementar, volver a comprobar.</figcaption>
+    </figure>
+
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ chmod u+x contador.sh
+$ contador.sh
+El valor es: 1
+El valor es: 2
+...
+El valor es: 10</code></pre>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Si olvidas el incremento, el bucle no para nunca</p>
+      <p class="!mt-0">Es el error clásico de <code>while</code>: si <code>contador</code> nunca cambia, la condición se cumple siempre y el programa imprime «El valor es: 1» hasta el fin de los tiempos. <strong>Se corta con <code>Ctrl+C</code></strong>, el mismo de <a href="/Linux-course/lecciones/30-senales-y-kill">señales y kill</a>. Antes de ejecutar un <code>while</code>, comprueba que algo dentro modifica la variable de la condición.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Escribe <code>contador.sh</code> y ejecútalo. Después comenta la línea del incremento poniéndole una <code>#</code> delante y vuelve a lanzarlo: córtalo con <code>Ctrl+C</code>. <strong>Meta:</strong> ver el bucle infinito una vez, de forma controlada, para reconocerlo en el futuro.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cuál usar</h2>
+    <p class="mt-4">La regla práctica es sencilla:</p>
+    <ul class="mt-4 space-y-2">
+      <li>Si <strong>ya sabes sobre qué vas a iterar</strong> —unos ficheros, un rango de números, la salida de un comando—, usa <a href="/Linux-course/lecciones/79-el-bucle-for">for</a>.</li>
+      <li>Si <strong>dependes de que algo cambie</strong> —un contador, una respuesta del usuario, un fichero que aparezca—, usa <code>while</code>.</li>
+    </ul>
+    <p class="mt-4">Y aquí se cierra un asunto pendiente: el menú de <a href="/Linux-course/lecciones/77-la-clausula-case">monitor.sh</a> se ejecutaba una vez y terminaba. Con <code>while</code> ya tienes la herramienta para que <strong>se repita hasta que el usuario elija salir</strong>: envolver el menú en un bucle que se cumpla siempre y dejar que la opción 4 haga <code>exit</code>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Modifica <code>contador.sh</code> para que cuente de 10 a 1 en lugar de 1 a 10: cambia el valor inicial, el comparador y la operación aritmética. <strong>Meta:</strong> comprobar que entiendes las tres piezas y no solo has copiado el ejemplo.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: repetir mientras haga falta</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Escribe <code>contador.sh</code> del 1 al 10, dale permisos y ejecútalo. Lee el código con <code>cat</code> y localiza las tres piezas.</li>
+        <li>Provoca un bucle infinito quitando el incremento y córtalo con <code>Ctrl+C</code>. Vuelve a ponerlo.</li>
+        <li>Haz la versión descendente, del 10 al 1, y otra que cuente de 2 en 2 hasta 20.</li>
+        <li><strong>Reto:</strong> arregla el menú. Envuelve todo el contenido de <code>monitor.sh</code> —desde el primer <code>echo</code> hasta el <code>esac</code>— dentro de un <code>while [ 1 -eq 1 ]</code> … <code>done</code>, de modo que el menú se muestre una y otra vez y solo termine cuando la opción 4 ejecute su <code>exit</code>. Pruébalo encadenando varias consultas seguidas.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>while [ condición ]</code>, <code>do</code>, los comandos, <code>done</code>: repite <strong>mientras</strong> la condición se cumpla. A diferencia de <code>for</code>, el número de vueltas no se conoce de antemano.</p>
+      <p>Un contador necesita tres piezas: inicializar la variable antes del bucle, comprobarla en la condición (por ejemplo con <code>-le</code>) e incrementarla dentro con <code>contador=$(($contador+1))</code>.</p>
+      <p>Si nada modifica la variable de la condición, el bucle es infinito y hay que cortarlo con <code>Ctrl+C</code>. Usa <code>for</code> cuando sabes sobre qué iteras y <code>while</code> cuando dependes de que algo cambie —como un menú que se repite hasta que el usuario elige salir—.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Tu <code>while</code> imprime la misma línea sin parar. ¿Qué falta y cómo lo cortas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Falta modificar dentro del bucle la variable que se comprueba en la condición: sin incremento, la condición se cumple siempre. Se corta con <code>Ctrl+C</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Tienes que procesar los ficheros <code>.txt</code> de una carpeta. ¿<code>for</code> o <code>while</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>for f in *.txt</code>. Ya sabes sobre qué vas a iterar y la lista es conocida; <code>while</code> es para cuando el final depende de que algo cambie durante la ejecución.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué hace exactamente <code>contador=$(($contador+1))</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Coge el valor actual de <code>contador</code>, le suma 1 y guarda el resultado en la misma variable. La doble paréntesis es lo que fuerza la operación aritmética; sin ella, la shell trataría el contenido como texto.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/79-el-bucle-for" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/" class="btn-primario">Volver al inicio</a>
+    </nav>
+
+  </article>
+</Layout>

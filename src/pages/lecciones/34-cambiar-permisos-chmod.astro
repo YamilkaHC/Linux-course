@@ -1,0 +1,148 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 34. Fuente: transcripciones/video_27.md (parte 1: pruebas de permisos denegados + chmod simbólico u/g/o/a +/- rwx)
+---
+
+<Layout titulo="Cambiar permisos con chmod (modo simbólico) — Curso Linux" descripcion="Comprueba por qué se deniegan permisos y cámbialos con chmod en modo simbólico: u/g/o/a, + y -, r/w/x, combinaciones y comas.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 34</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Cambiar permisos con chmod (modo simbólico)</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Ya sabes <a href="/Linux-course/lecciones/33-permisos-rwx">leer los permisos</a>. Ahora, a modificarlos. Primero verás en la práctica por qué el sistema te deniega cosas, y luego usarás <code>chmod</code> para conceder y quitar permisos con letras.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Por qué se te deniega leer o entrar en ciertos ficheros y directorios, comprobándolo con casos reales.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A usar <strong><code>chmod</code></strong> (<em>change mode</em>) con <code>u</code>/<code>g</code>/<code>o</code>/<code>a</code>, <code>+</code>/<code>-</code> y <code>r</code>/<code>w</code>/<code>x</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A combinar varios cambios en un solo comando con comas.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Comprobar por qué se deniega</h2>
+    <p class="mt-4">Como usuario normal (<code>user001</code>), muchos ficheros no te dejan tocarlos. Míralo con <code>/etc/shadow</code>, que solo puede leer y escribir su dueño (root) y leer su grupo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -l /etc/shadow     # -rw-r-----  dueño: root, grupo: shadow
+$ touch /etc/shadow     # permiso denegado: no eres dueño ni del grupo
+$ cat /etc/shadow       # permiso denegado: tampoco tienes lectura</code></pre>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">El directorio decide el acceso</p>
+      <p class="!mt-2 text-cream/90">¿Por qué sí puedes hacer <code>ls /etc</code> aunque no puedas leer <code>shadow</code>? Porque eso lo decide el <strong>directorio</strong> <code>/etc</code>, que tiene <code>r-x</code> para otros: la <code>r</code> te deja listarlo y la <code>x</code> entrar. En cambio <code>/root</code> no tiene permisos para otros, así que ni <code>cd /root</code> ni <code>ls /root</code> te dejan.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Intenta <code>cd /root</code> y <code>ls /root</code> (te lo denegará), y compáralo con <code>cd /etc</code> y <code>ls /etc</code> (funciona). <strong>Meta:</strong> conectar cada resultado con los <code>rwx</code> del directorio en <code>ls -l</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">chmod: la sintaxis simbólica</h2>
+    <p class="mt-4"><code>chmod</code> (<em>change mode</em>) cambia los permisos de tus ficheros. En modo simbólico, indicas <strong>a quién</strong>, si <strong>añades o quitas</strong>, y <strong>qué</strong> permiso. Crea un fichero de prueba:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ touch permisos
+$ ls -l permisos        # -rw-r--r--  (lo típico por defecto)</code></pre>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 155" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">chmod  g +w  permisos</text>
+        <rect x="20" y="45" width="150" height="65" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="95" y="72" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">a quién</text>
+        <text x="95" y="94" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">u g o a</text>
+        <rect x="185" y="45" width="150" height="65" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="72" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">acción</text>
+        <text x="260" y="94" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">+ añade / - quita</text>
+        <rect x="350" y="45" width="150" height="65" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="425" y="72" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">permiso</text>
+        <text x="425" y="94" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">r w x</text>
+        <text x="260" y="140" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">u=usuario · g=grupo · o=otros · a=todos</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">A quién, la acción y el permiso: las tres piezas de <code>chmod</code> simbólico.</figcaption>
+    </figure>
+
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ chmod g+w permisos    # da permiso de ESCRITURA al grupo
+$ chmod o+x permisos    # da EJECUCIÓN a otros
+$ chmod a+x permisos    # da ejecución a TODOS (u, g y o)</code></pre>
+    <p class="mt-4">Con <code>-</code> quitas en vez de dar. Si no pones a quién delante del <code>-</code>/<code>+</code>, afecta a todos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ chmod -x permisos     # quita la ejecución a todos
+$ chmod g-w permisos    # quita la escritura solo al grupo</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Ejecutable no es lo mismo que ejecutar</p>
+      <p class="!mt-2">Dar <code>+x</code> a un fichero de texto no lo convierte en programa: si intentas correrlo, dará error. La <code>x</code> solo <em>habilita</em> la ejecución; el fichero debe ser un binario o un script para ejecutarse de verdad.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Sobre <code>permisos</code>, ejecuta <code>chmod g+w permisos</code> y comprueba con <code>ls -l</code> que apareció la <code>w</code> en el bloque del grupo. Luego quítala con <code>chmod g-w permisos</code>. <strong>Meta:</strong> ver el cambio reflejarse al instante.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Combinar cambios</h2>
+    <p class="mt-4">Puedes juntar varios destinatarios y permisos, e incluso varios cambios separados por <strong>comas</strong> (¡sin espacios!):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ chmod go+w permisos      # escritura a grupo Y otros de una vez
+$ chmod g+rw permisos      # lectura Y escritura al grupo
+$ chmod go-rwx permisos    # quita TODO a grupo y otros (queda "blindado" salvo el dueño)
+$ chmod g+rw,o+r permisos  # varios cambios: al grupo rw, a otros r (comas, sin espacios)</code></pre>
+    <p class="mt-4">Con directorios funciona igual, recordando que ahí <code>x</code> es entrar y <code>w</code> es crear/borrar dentro. Por ejemplo, <code>chmod o-x dir-permisos</code> impide que otros entren en el directorio.</p>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: conceder y quitar</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Comprueba una denegación real: <code>ls -l /etc/shadow</code> y luego <code>cat /etc/shadow</code>. Relaciona el error con los permisos que ves.</li>
+        <li>Crea <code>touch permisos</code> y dale escritura al grupo con <code>chmod g+w permisos</code>. Verifícalo con <code>ls -l</code>.</li>
+        <li>Da ejecución a todos con <code>chmod a+x permisos</code>, luego quítasela con <code>chmod -x permisos</code>.</li>
+        <li>Aplica varios cambios de una vez: <code>chmod g+rw,o+r permisos</code>. <strong>Reto:</strong> crea <code>mkdir dir-permisos</code>, quítale la entrada a otros con <code>chmod o-x dir-permisos</code> y explica qué ya no podrán hacer.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Que se te deniegue leer un fichero o entrar en un directorio depende de sus <code>rwx</code>. El acceso a un directorio lo decide el propio directorio (<code>r</code> para listar, <code>x</code> para entrar), independientemente de los ficheros que contenga.</p>
+      <p><code>chmod</code> cambia permisos. En modo simbólico: a quién (<code>u</code>, <code>g</code>, <code>o</code>, <code>a</code>), la acción (<code>+</code> añade, <code>-</code> quita) y el permiso (<code>r</code>, <code>w</code>, <code>x</code>). Sin destinatario, el <code>+</code>/<code>-</code> afecta a todos.</p>
+      <p>Se pueden combinar destinatarios y permisos (<code>go+w</code>, <code>g+rw</code>) y encadenar cambios con comas sin espacios (<code>g+rw,o+r</code>). En directorios vale igual, con el significado propio de <code>x</code> y <code>w</code>.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Puedes hacer <code>ls /etc</code> pero no <code>cat /etc/shadow</code>. ¿Por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque son dos permisos distintos. El directorio <code>/etc</code> te da <code>r-x</code> para listar y entrar, así que <code>ls</code> funciona. Pero el fichero <code>shadow</code> no te da lectura (no eres su dueño ni de su grupo), por eso <code>cat</code> falla.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué hace <code>chmod g+w archivo</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Añade (<code>+</code>) permiso de escritura (<code>w</code>) al grupo (<code>g</code>) del fichero. Los usuarios del grupo podrán modificarlo y borrarlo.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué diferencia hay entre <code>chmod g+rw,o+r</code> y poner un espacio tras la coma?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>g+rw,o+r</code> aplica dos cambios en un solo comando. Si dejas un espacio tras la coma, la shell interpreta lo que sigue como otro argumento y puede dar error. Las comas de <code>chmod</code> van sin espacios.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/33-permisos-rwx" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/35-permisos-octal-y-umask" class="btn-primario">Siguiente: permisos octales y umask</a>
+    </nav>
+
+  </article>
+</Layout>

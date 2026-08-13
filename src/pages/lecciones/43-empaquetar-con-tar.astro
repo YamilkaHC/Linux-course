@@ -1,0 +1,206 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 43. Fuente: transcripciones/video_35.md (tar: empaquetar, listar, extraer)
+---
+
+<Layout titulo="Empaquetar con tar — Curso Linux" descripcion="tar empaqueta, no comprime: crea backups con c, lista con t, extrae con x, y entiende por qué guarda rutas relativas.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 43</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Empaquetar con tar</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      El comando de backup más antiguo y más usado de Linux. Y el que más se malinterpreta: tar no comprime.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>La diferencia entre <strong>empaquetar</strong> y <strong>comprimir</strong>. Es el error más común de quien empieza con Linux y condiciona cómo entiendes todos los backups.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Las tres operaciones de <code>tar</code>: <code>c</code> crear, <code>t</code> listar y <code>x</code> extraer, más las opciones <code>v</code> y <code>f</code> que las acompañan siempre.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Por qué <code>tar</code> guarda rutas relativas, y por qué eso es justo lo que te permite restaurar el paquete en otro directorio o en otra máquina.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Tu primer backup, en un comando</h2>
+    <p class="mt-4">Estás en tu home con todos los ficheros del curso y quieres guardarlos en un solo paquete:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ tar cvf copia_ficheros.tar *
+documento1.txt
+ejecutable/
+ejecutable/listar.sh
+ejemplo.txt
+...
+
+$ ls -l copia_ficheros.tar
+-rw-r--r-- 1 user001 user001 194560 ago  4 15:20 copia_ficheros.tar</code></pre>
+    <p class="mt-4">Ya está: un único fichero con todo dentro. Ahora puedes llevártelo a donde haga falta con un <a href="/Linux-course/lecciones/09-crear-y-copiar">cp</a> normal y corriente:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cp copia_ficheros.tar /media/usb</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">tar empaqueta, no comprime</h2>
+    <p class="mt-4">Aquí está la confusión clásica. Un <strong>compresor</strong> coge ficheros y genera otro fichero con todos ellos <em>reducidos de tamaño</em>. <code>tar</code> coge ficheros y los guarda en uno solo, pero <strong>conservan su tamaño original</strong>. Los mete en un paquete, como quien mete papeles en una caja: siguen ocupando lo mismo.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Empaquetar no es comprimir</text>
+
+        <text x="140" y="48" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">EMPAQUETAR (tar)</text>
+        <rect x="40" y="60" width="30" height="30" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <rect x="76" y="60" width="30" height="30" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <rect x="112" y="60" width="30" height="30" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <line x1="152" y1="75" x2="176" y2="75" stroke="#1A1A1A"/>
+        <path d="M176 75 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+        <rect x="184" y="52" width="56" height="46" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="212" y="79" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">.tar</text>
+        <text x="140" y="114" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">mismo tamaño total</text>
+
+        <line x1="290" y1="45" x2="290" y2="180" stroke="#E5E1D8"/>
+
+        <text x="420" y="48" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">COMPRIMIR</text>
+        <rect x="320" y="60" width="30" height="30" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <rect x="356" y="60" width="30" height="30" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <rect x="392" y="60" width="30" height="30" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <line x1="432" y1="75" x2="456" y2="75" stroke="#1A1A1A"/>
+        <path d="M456 75 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+        <rect x="464" y="64" width="34" height="22" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="481" y="79" font-family="Inter, sans-serif" font-size="8" fill="#1A1A1A" stroke="none" text-anchor="middle">.gz</text>
+        <text x="420" y="114" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">tamaño reducido</text>
+
+        <line x1="30" y1="140" x2="530" y2="140" stroke="#E5E1D8"/>
+        <text x="280" y="162" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">tar mete los ficheros en una caja; el compresor además los encoge</text>
+        <text x="280" y="180" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">las versiones actuales de tar pueden llamar a un compresor, pero por defecto solo empaquetan</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">La caja pesa lo mismo que lo que metes dentro.</figcaption>
+    </figure>
+
+    <p class="mt-4">¿De dónde viene entonces la confusión? De que <code>tar</code>, desde hace muchísimas versiones, <em>puede</em> llamar a un compresor externo y generar esos ficheros <code>.tar.gz</code> que habrás visto por ahí. Pero eso es una opción añadida: por defecto, <code>tar</code> solo empaqueta y desempaqueta.</p>
+    <p class="mt-4">El uso original explica el nombre y la lógica del comando. Antes de los pendrives y los discos sólidos, un backup significaba una cinta de almacenamiento: se juntaban todos los ficheros en un único paquete con <code>tar</code> y se volcaban a la cinta. Hoy la cinta es una memoria USB, un disco externo o una unidad compartida en red, pero el comando sigue siendo exactamente el mismo.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Desde tu home ejecuta <code>tar cvf copia_ficheros.tar *</code> y luego <code>ls -l</code>. <strong>Meta:</strong> comparar el tamaño del <code>.tar</code> con el de los ficheros originales y comprobar por ti mismo que no ha encogido nada.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Las tres letras que tienes que recordar</h2>
+    <p class="mt-4">Todo <code>tar</code> empieza eligiendo <strong>qué operación</strong> quieres hacer:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Letra</th>
+            <th class="text-left p-3 border-b border-line font-bold">Operación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>c</code></td><td class="p-3 border-b border-line"><strong>Crear</strong> el paquete</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>t</code></td><td class="p-3 border-b border-line"><strong>Listar</strong> lo que hay dentro</td></tr>
+          <tr><td class="p-3"><code>x</code></td><td class="p-3"><strong>Extraer</strong> el contenido</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">Y a esa letra se le añaden casi siempre otras dos:</p>
+    <ul class="mt-4 space-y-2">
+      <li><code>v</code> — de <em>verbose</em>: va contando lo que hace. Así compruebas si el proceso falla o no. Muchos comandos de Linux usan esta misma opción, como el <a href="/Linux-course/lecciones/09-crear-y-copiar">mkdir -v</a> que ya viste.</li>
+      <li><code>f</code> — de <em>file</em>: el fichero donde quieres empaquetar o desde el que quieres desempaquetar. Va justo antes del nombre del <code>.tar</code>.</li>
+    </ul>
+    <p class="mt-4">Un detalle de sintaxis: en <code>tar</code> las opciones se pueden escribir <strong>con guion o sin él</strong>. <code>tar cvf</code> y <code>tar -cvf</code> hacen lo mismo. Es uno de esos comandos antiguos que admite las dos formas.</p>
+    <p class="mt-4">Sobre el nombre del paquete: en Linux la extensión no es obligatoria —eso ya lo sabes—, pero poner <code>.tar</code> es una buena práctica que te ahorra disgustos cuando revises tus backups meses después.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Ver qué hay dentro antes de tocar nada</h2>
+    <p class="mt-4">Te pasan un <code>.tar</code> y quieres saber qué contiene sin extraerlo. Esa es la <code>t</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ tar tvf copia_ficheros.tar
+-rw-r--r-- user001/user001   1024 2026-08-04 15:10 documento1.txt
+drwxr-xr-x user001/user001      0 2026-08-04 15:11 ejecutable/
+-rwxr-xr-x user001/user001      6 2026-08-04 15:11 ejecutable/listar.sh</code></pre>
+    <p class="mt-4">Fíjate bien en las rutas: <code>documento1.txt</code>, no <code>/home/user001/documento1.txt</code>. <code>tar</code> guarda las rutas <strong>a partir del directorio en el que estabas</strong> cuando lo creaste, igual que las <a href="/Linux-course/lecciones/07-navegar-ficheros">rutas relativas</a>. Eso no es un capricho: es lo que permite restaurar el paquete en cualquier otro sitio.</p>
+    <p class="mt-4">Y observa que también conserva permisos, dueño y grupo de cada fichero, tal como los viste en <a href="/Linux-course/lecciones/33-permisos-rwx">permisos rwx</a>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lanza <code>tar tvf copia_ficheros.tar</code> y, si la lista es larga, encadénalo con <code>| less</code>. <strong>Meta:</strong> localizar en la salida un subdirectorio y comprobar que su ruta no empieza por <code>/</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Restaurar donde tú quieras</h2>
+    <p class="mt-4">Ahora la prueba de fuego: recuperar el backup en un directorio completamente distinto.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /tmp
+$ mkdir restore
+$ cd restore
+$ tar xvf /home/user001/copia_ficheros.tar
+documento1.txt
+ejecutable/
+ejecutable/listar.sh
+...
+
+$ ls
+documento1.txt  ejecutable  ejemplo.txt  ...</code></pre>
+    <p class="mt-4">Ahí tienes una copia exacta de tu home dentro de <code>/tmp/restore</code>. <strong><code>tar</code> extrae siempre en el directorio donde estás</strong>, no en el sitio de origen. Por eso el orden importa: primero <code>cd</code> a donde quieres que aterrice todo, después el <code>tar xvf</code>.</p>
+    <p class="mt-4">Aquí lo hemos hecho en <code>/tmp/restore</code> para verlo con claridad. En un caso real la restauración se hace donde de verdad hace falta, porque ha habido un problema. Pero la mecánica es idéntica si te llevas el <code>.tar</code> a otra máquina: allí también extraerá donde tú le digas.</p>
+    <p class="mt-4">Un último apunte: <code>tar</code> <strong>siempre es recursivo</strong>. Con <code>*</code> se lleva todo lo del directorio actual y todos sus subdirectorios sin que tengas que pedírselo, igual que hace <code>cp -r</code>. No hay que preocuparse de nada.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>/tmp/restore</code>, entra en él y extrae ahí tu paquete con <code>tar xvf /home/TU_USUARIO/copia_ficheros.tar</code>. <strong>Meta:</strong> ver aparecer los ficheros en un directorio distinto del original sin haber tocado nada del home.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: un backup completo de principio a fin</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Empaqueta tu home con <code>tar cvf copia_ficheros.tar *</code> y comprueba el resultado con <code>ls -l copia_ficheros.tar</code>.</li>
+        <li>Lista el contenido con <code>tar tvf copia_ficheros.tar</code> y cuenta cuántas entradas tiene encadenándolo con <code>| wc -l</code>, como aprendiste en <a href="/Linux-course/lecciones/22-contar-y-tee">contar con wc</a>.</li>
+        <li>Crea <code>/tmp/restore</code>, entra y extrae ahí el paquete con <code>tar xvf</code>. Compara las dos listas con <code>ls</code> para verificar que están todos.</li>
+        <li><strong>Reto:</strong> usa <a href="/Linux-course/lecciones/14-espacio-en-disco">du</a> para medir el tamaño del <code>.tar</code> y el del directorio original: <code>du -k copia_ficheros.tar</code> y <code>du -sk /tmp/restore</code>. Confirma con tus propios números que <code>tar</code> no ha comprimido nada.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>tar</code> empaqueta, no comprime: mete varios ficheros en uno solo conservando su tamaño original. Puede llamar a un compresor externo, pero por defecto solo empaqueta y desempaqueta.</p>
+      <p>Tres operaciones: <code>c</code> crear, <code>t</code> listar y <code>x</code> extraer. Se acompañan de <code>v</code> (va contando lo que hace) y <code>f</code> (el fichero de destino u origen). Las opciones admiten guion o no: <code>tar cvf</code> = <code>tar -cvf</code>.</p>
+      <p>El paquete guarda rutas relativas al directorio donde lo creaste, y <code>tar x</code> extrae siempre en el directorio actual. Por eso puedes restaurarlo en otra carpeta o en otra máquina; y por eso conviene hacer <code>cd</code> al destino antes de extraer.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Has empaquetado 200 MB de ficheros con <code>tar cvf</code>. ¿Cuánto ocupa el <code>.tar</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Prácticamente lo mismo: unos 200 MB. <code>tar</code> empaqueta pero no comprime, así que los ficheros conservan su tamaño original dentro del paquete. Para reducirlo hace falta un compresor.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Te pasan un <code>backup.tar</code> y quieres saber qué contiene sin desempaquetarlo. ¿Qué escribes?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>tar tvf backup.tar</code>. La <code>t</code> lista el contenido, la <code>v</code> muestra el detalle (permisos, dueño, tamaño, fecha) y la <code>f</code> indica de qué fichero leer. Nada se extrae al disco.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Quieres restaurar un backup en <code>/tmp/restore</code> en vez de en su sitio original. ¿Cómo lo haces?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Primero <code>cd /tmp/restore</code> y después <code>tar xvf /ruta/al/copia_ficheros.tar</code>. Como el paquete guarda rutas relativas, <code>tar</code> extrae en el directorio donde estás en ese momento. El orden es lo que decide dónde aterriza todo.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/42-find-tipo-fecha-y-tamano" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/44-comprimir-gzip-y-bzip2" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

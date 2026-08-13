@@ -1,0 +1,160 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 35. Fuente: transcripciones/video_27.md (parte 2: chmod octal 4/2/1, umask permisos por defecto)
+---
+
+<Layout titulo="Permisos octales y umask — Curso Linux" descripcion="Domina chmod en modo octal (r=4, w=2, x=1) y controla los permisos por defecto con umask, restando sobre 666 (ficheros) y 777 (directorios).">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 35</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">9 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Permisos octales y por defecto: chmod numérico y umask</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      El modo <a href="/Linux-course/lecciones/34-cambiar-permisos-chmod">simbólico</a> es intuitivo, pero el <strong>octal</strong> te deja fijar todos los permisos de golpe con tres cifras. Y con <code>umask</code> controlas los permisos que reciben los ficheros nuevos.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>La notación <strong>octal</strong>: <code>r</code>=4, <code>w</code>=2, <code>x</code>=1, y cómo sumarlas por bloque.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A aplicar permisos de golpe con <code>chmod 644</code>, <code>750</code>, <code>777</code> o <code>000</code> (blindar un fichero).</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Qué son los <strong>permisos por defecto</strong> y cómo cambiarlos con <strong><code>umask</code></strong>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">La notación octal: 4, 2, 1</h2>
+    <p class="mt-4">Cada permiso vale un número: <strong><code>r</code>=4</strong>, <strong><code>w</code>=2</strong>, <strong><code>x</code>=1</strong>. Sumas los de cada bloque y obtienes una cifra del 0 al 7. Usas <strong>tres</strong> cifras: usuario, grupo y otros.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">rw-  r--  r--  =  6 4 4</text>
+        <rect x="55" y="40" width="130" height="70" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="120" y="65" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">usuario  rw-</text>
+        <text x="120" y="88" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">4 + 2 = 6</text>
+        <rect x="195" y="40" width="130" height="70" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="65" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">grupo  r--</text>
+        <text x="260" y="88" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">4 = 4</text>
+        <rect x="335" y="40" width="130" height="70" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="400" y="65" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">otros  r--</text>
+        <text x="400" y="88" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">4 = 4</text>
+        <text x="260" y="135" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">r=4 · w=2 · x=1  →  se suman en cada bloque</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Un ejemplo: <code>-rw-r--r--</code> es <code>644</code>. Sumas dentro de cada bloque.</figcaption>
+    </figure>
+
+    <p class="mt-4">Combinaciones habituales: <code>7</code> = <code>rwx</code> (4+2+1), <code>6</code> = <code>rw-</code> (4+2), <code>5</code> = <code>r-x</code> (4+1), <code>4</code> = <code>r--</code>, <code>0</code> = <code>---</code>. Con eso, <code>chmod</code> fija todo de una vez:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ touch octal
+$ chmod 644 octal       # rw- r-- r--  (dueño rw, grupo y otros solo r)
+$ chmod 750 octal       # rwx r-x ---  (dueño todo, grupo entra/lee, otros nada)
+$ chmod 777 octal       # rwx rwx rwx  (todos, todo)</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>touch octal</code> y aplica <code>chmod 644 octal</code>, luego <code>chmod 750 octal</code>, comprobando cada vez con <code>ls -l octal</code>. <strong>Meta:</strong> traducir mentalmente cada número a su <code>rwx</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Blindar con 000</h2>
+    <p class="mt-4"><code>chmod 000</code> quita <strong>todos</strong> los permisos: nadie puede leer, escribir ni ejecutar. Es una forma de proteger un fichero contra borrados accidentales.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ chmod 000 octal       # --- --- ---  fichero "blindado"
+$ cat octal             # permiso denegado, ¡incluso siendo el dueño!
+$ chmod 777 octal       # pero el DUEÑO sí puede volver a cambiar los permisos</code></pre>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">El dueño siempre manda sobre los permisos</p>
+      <p class="!mt-2 text-cream/90">Con <code>000</code>, ni tú mismo puedes leer el fichero. Pero como <strong>propietario</strong> sí puedes volver a cambiar sus permisos (<code>chmod 777</code>) y recuperar el acceso. El bloqueo protege del resto y de borrados por descuido, no del dueño.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Permisos por defecto: umask</h2>
+    <p class="mt-4">¿Por qué un fichero nuevo nace con <code>-rw-r--r--</code> y un directorio con <code>drwxr-xr-x</code>? Lo decide <code>umask</code>. Míralo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ umask                 # p. ej. 0022 (ignora el primer 0: es 022)</code></pre>
+    <p class="mt-4">Funciona <strong>al revés</strong> que <code>chmod</code>: en vez de sumar, <strong>resta</strong>. Se parte de una base —<code>666</code> para ficheros (nunca nacen ejecutables) y <code>777</code> para directorios— y se le quita el umask:</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 130" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">umask 022 resta sobre la base</text>
+        <rect x="30" y="40" width="220" height="70" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="140" y="65" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">ficheros: 666 - 022</text>
+        <text x="140" y="90" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">= 644  (rw-r--r--)</text>
+        <rect x="270" y="40" width="220" height="70" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="380" y="65" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">directorios: 777 - 022</text>
+        <text x="380" y="90" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">= 755  (rwxr-xr-x)</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Con umask <code>022</code>: ficheros <code>644</code>, directorios <code>755</code>.</figcaption>
+    </figure>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cambiar umask</h2>
+    <p class="mt-4">Para que tus ficheros nuevos tengan otros permisos, calculas el umask al revés: <strong>base − permiso deseado</strong>. ¿Quieres ficheros <code>664</code> (que el grupo también escriba)? Entonces <code>666 − 664 = 002</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ umask 002             # a partir de ahora, ficheros nacen 664 y directorios 775
+$ touch documento1
+$ ls -l documento1      # -rw-rw-r--  (664: el grupo ya puede escribir)
+$ mkdir directorio1
+$ ls -ld directorio1    # drwxrwxr-x  (775)</code></pre>
+    <p class="mt-4">Otro ejemplo: si quieres que todo nazca de solo lectura (<code>444</code>), el umask es <code>666 − 444 = 222</code>.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ umask 222             # ficheros nacen 444 (r--r--r--), directorios 555 (r-xr-xr-x)</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>umask 002</code>, crea <code>touch nuevo</code> y <code>mkdir carpeta</code>, y comprueba sus permisos con <code>ls -l</code> y <code>ls -ld</code>. <strong>Meta:</strong> ver que el fichero nace <code>664</code> y el directorio <code>775</code>, tal como predice la resta.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL DE MÓDULO ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: permisos numéricos</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Crea <code>touch octal</code> y aplícale <code>chmod 644</code>, <code>chmod 750</code> y <code>chmod 777</code>, traduciendo cada número a <code>rwx</code> con <code>ls -l</code>.</li>
+        <li>Blinda el fichero con <code>chmod 000 octal</code>, comprueba que <code>cat octal</code> falla, y recupéralo con <code>chmod 644 octal</code> (solo el dueño puede).</li>
+        <li>Mira tu <code>umask</code> actual y predice con qué permisos nacerán un fichero y un directorio. Créalos y verifícalo.</li>
+        <li><strong>Reto:</strong> configura <code>umask</code> para que tus ficheros nuevos nazcan <code>640</code> (dueño rw, grupo r, otros nada). Pista: <code>666 − 640</code>. Crea un fichero y compruébalo.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>En octal cada permiso vale <code>r</code>=4, <code>w</code>=2, <code>x</code>=1; se suman por bloque y se usan tres cifras (usuario, grupo, otros). Así <code>chmod 644</code> es <code>rw-r--r--</code> y <code>chmod 750</code> es <code>rwxr-x---</code>. <code>chmod 000</code> blinda un fichero, aunque el dueño siempre puede volver a cambiar sus permisos.</p>
+      <p>Los permisos por defecto los fija <code>umask</code>, que <strong>resta</strong> sobre una base: <code>666</code> para ficheros y <code>777</code> para directorios. Con umask <code>022</code>, salen <code>644</code> y <code>755</code>.</p>
+      <p>Para elegir otros valores por defecto, calculas <code>base − permiso deseado</code>: para ficheros <code>664</code> usas <code>umask 002</code>; para <code>444</code>, <code>umask 222</code>.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué permisos deja <code>chmod 640 archivo</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>rw-r-----</code>: dueño 6 = <code>rw-</code>, grupo 4 = <code>r--</code>, otros 0 = <code>---</code>. Es decir, el dueño lee y escribe, el grupo solo lee y los demás no tienen nada.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Haces <code>chmod 000</code> a tu propio fichero y no puedes leerlo. ¿Lo has perdido?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No. Como propietario, aunque no puedas leerlo ni escribirlo, sí puedes volver a cambiar sus permisos (<code>chmod 644</code>, por ejemplo) y recuperar el acceso. El <code>000</code> protege del resto y de borrados accidentales.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Con <code>umask 022</code>, ¿con qué permisos nace un directorio nuevo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>755</code> (<code>rwxr-xr-x</code>). Los directorios parten de la base <code>777</code> y se les resta el umask: <code>777 − 022 = 755</code>. Los ficheros parten de <code>666</code>, así que salen <code>644</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/34-cambiar-permisos-chmod" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/36-cambiar-propietario-chown-chgrp" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

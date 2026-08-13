@@ -1,0 +1,148 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 53. Fuente: transcripciones/video_42.md (primera parte: passwd de usuario y de administrador)
+---
+
+<Layout titulo="Contraseñas con passwd — Curso Linux" descripcion="Cambia tu clave con passwd, entiende las reglas de complejidad y usa las opciones de administrador: -S estado, -l bloquear, -u desbloquear y -x caducidad.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 53</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">4 min de lectura</span>
+      <span class="etiqueta-arribita">Por arribita</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Contraseñas con passwd</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Dos caras: la del usuario que cambia su clave y la del administrador que gobierna las de todos.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Cambiar tu clave y entender los dos errores típicos.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Consultar estado con <code>passwd -S</code>: qué significan <strong>P</strong> y <strong>L</strong>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Bloquear/desbloquear con <code>-l</code>/<code>-u</code> y fijar caducidad con <code>-x</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Cambiar tu propia clave</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ passwd
+Cambiando la contraseña de user001.
+Contraseña actual:
+Nueva contraseña:
+Vuelva a escribir la nueva contraseña:
+contraseña actualizada correctamente</code></pre>
+    <p class="mt-4">Tres pasos: actual, nueva, confirmar. La terminal no muestra nada al escribir (ni asteriscos). Es intencionado.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Los dos errores típicos</h2>
+    <ul class="mt-4 space-y-2">
+      <li><strong>«La clave no ha sido cambiada»</strong> → repites la anterior. Linux no lo permite.</li>
+      <li><strong>«Error de manipulación de testigos»</strong> → las dos confirmaciones no coinciden.</li>
+    </ul>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Como administrador: estado con -S</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo passwd -S user001
+user001 P 08/04/2026 0 99999 7 -1</code></pre>
+    <p class="mt-4">Son los campos de <a href="/Linux-course/lecciones/49-shadow-y-caducidad-de-claves">/etc/shadow</a>. La letra: <strong>P</strong> = puede entrar, <strong>L</strong> = bloqueada.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Bloquear y desbloquear: -l y -u</h2>
+    <p class="mt-4">Cerrar acceso sin borrar nada:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo passwd -l prueba
+$ sudo passwd -S prueba
+prueba L 08/04/2026 0 99999 7 -1
+
+$ sudo passwd -u prueba
+$ sudo passwd -S prueba
+prueba P 08/04/2026 0 99999 7 -1</code></pre>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 170" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Bloquear sin borrar</text>
+
+        <rect x="50" y="52" width="160" height="70" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="130" y="82" font-family="Inter, sans-serif" font-size="18" fill="#1A1A1A" stroke="none" text-anchor="middle">P</text>
+        <text x="130" y="104" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">puede entrar</text>
+
+        <rect x="350" y="52" width="160" height="70" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="430" y="82" font-family="Inter, sans-serif" font-size="18" fill="#1A1A1A" stroke="none" text-anchor="middle">L</text>
+        <text x="430" y="104" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">bloqueada</text>
+
+        <line x1="215" y1="72" x2="345" y2="72" stroke="#1A1A1A"/>
+        <path d="M345 72 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+        <text x="280" y="66" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">passwd -l</text>
+
+        <line x1="345" y1="104" x2="215" y2="104" stroke="#1A1A1A"/>
+        <path d="M215 104 l6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+        <text x="280" y="120" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">passwd -u</text>
+
+        <line x1="50" y1="140" x2="510" y2="140" stroke="#E5E1D8"/>
+        <text x="280" y="160" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">la cuenta y sus ficheros siguen intactos · lo ves con passwd -S</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Cerrar la puerta no es tirar la casa.</figcaption>
+    </figure>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Caducidad: -x</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo passwd -x 10 prueba
+
+$ sudo passwd -S prueba
+prueba P 08/04/2026 0 10 7 -1</code></pre>
+    <p class="mt-4">Validez máxima pasa de 99999 a 10 días. <code>-n</code> (mínimo entre cambios) y <code>-w</code> (días de aviso) funcionan igual. Siempre necesitan el número como argumento.</p>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: gestionar claves</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Cambia tu clave con <code>passwd</code>. Provoca los dos errores: repite la anterior y luego escribe confirmaciones distintas.</li>
+        <li>Bloquea <code>prueba</code> con <code>-l</code>, verifica la <code>L</code>, desbloquea con <code>-u</code>, verifica la <code>P</code>.</li>
+        <li><strong>Reto:</strong> pon validez de 10 días (<code>-x 10</code>) y aviso de 3 días (<code>-w 3</code>). Comprueba con <code>passwd -S</code> y <code>chage -l</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>passwd</code> sin argumentos cambia tu clave (actual → nueva → confirmar). «Clave no cambiada» = repites la anterior; «error de testigos» = confirmaciones no coinciden.</p>
+      <p>Con <code>sudo</code>, <code>passwd -S usuario</code> muestra estado: <strong>P</strong> utilizable, <strong>L</strong> bloqueada, más los plazos de shadow.</p>
+      <p><code>-l</code> bloquea, <code>-u</code> desbloquea (sin borrar nada). <code>-x DÍAS</code> fija validez máxima; <code>-n</code> mínimo entre cambios; <code>-w</code> días de aviso.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Al cambiar tu clave no aparece nada en pantalla. ¿Está colgada la terminal?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No. <code>passwd</code> oculta la entrada a propósito. Sigue tecleando y pulsa Enter.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. <code>passwd -S</code> devuelve <code>L</code>. ¿Qué significa y cómo revertirlo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Contraseña bloqueada: no puede acceder. Se desbloquea con <code>sudo passwd -u usuario</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. <code>sudo passwd -x prueba</code> da «argumento incorrecto». ¿Por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Falta el número de días: <code>sudo passwd -x 10 prueba</code>. Igual con <code>-n</code> y <code>-w</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/52-modificar-usuarios-y-grupos" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/54-borrar-usuarios-y-grupos" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

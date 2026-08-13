@@ -1,0 +1,161 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 65. Fuente: transcripciones/video_48.md (segunda parte: set nu, :N, G, set all, J, . y ~)
+---
+
+<Layout titulo="Trucos de vi que ahorran tiempo — Curso Linux" descripcion="Numera líneas con :set nu, salta a cualquier línea con :N y G, une líneas con J, repite el último comando con el punto y cambia mayúsculas con ~.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 65</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">6 min de lectura</span>
+      <span class="etiqueta-saltar">Saltar</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Trucos de vi que ahorran tiempo</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Cinco comandos sueltos que no encajaban en ninguna lección y que vas a usar todos los días.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A numerar líneas con <code>:set nu</code> y a saltar directamente a cualquiera de ellas. Imprescindible cuando un error te dice «línea 340».</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A repetir el último comando con <code>.</code>, el atajo que multiplica todo lo que ya sabes.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A unir líneas con <code>J</code> y a cambiar mayúsculas y minúsculas con <code>~</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Numerar las líneas: :set nu</h2>
+    <p class="mt-4">En el <a href="/Linux-course/lecciones/62-buscar-y-reemplazar-en-vi">modo ex</a>, el comando <code>set</code> activa y desactiva opciones del editor:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>:set nu        → aparece una columna con el número de cada línea
+:set nonu      → la quita</code></pre>
+    <p class="mt-4">El patrón <code>no</code> delante para desactivar se repite en casi todas las opciones de <code>vi</code>. Y si quieres ver el catálogo completo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>:set all       → lista todas las opciones disponibles</code></pre>
+    <p class="mt-4">Verás decenas de ajustes —tabuladores, sangrado, colores de sintaxis— pensados sobre todo para programar. Los útiles para eso llegarán cuando toque escribir scripts.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Saltar a una línea concreta</h2>
+    <p class="mt-4">Con la numeración activada, moverse deja de ser un viaje:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>:30      → salta a la línea 30
+:2       → salta a la línea 2
+G        → salta a la ÚLTIMA línea del fichero</code></pre>
+    <p class="mt-4">La <code>G</code> es mayúscula (<code>Shift+G</code>) y no necesita que sepas cuántas líneas tiene el documento: te lleva al final tenga 31 o 600.</p>
+    <p class="mt-4">Este es el uso real: cuando un script falla, Linux te dice en qué línea. Abres el fichero, <code>:340</code>, y estás encima del problema sin buscar nada.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Activa la numeración con <code>:set nu</code>, salta a la línea 15 con <code>:15</code>, vete al final con <code>G</code> y vuelve arriba con <code>:1</code>. <strong>Meta:</strong> recorrer el fichero entero sin tocar las flechas ni una vez.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Unir líneas: J</h2>
+    <p class="mt-4">Colócate en una línea corta y pulsa <code>J</code> mayúscula (<code>Shift+J</code>):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>tierra
+del sistema solar
+
+J  →  tierra del sistema solar</code></pre>
+    <p class="mt-4">La línea de abajo sube y se pega a continuación de la actual. Púlsala otra vez y subirá la siguiente. Es la operación inversa de partir un párrafo, y resulta muy cómoda al reordenar texto.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El punto: repite el último comando</h2>
+    <p class="mt-4">Este merece atención especial, porque no es un comando más: es un multiplicador de todo lo que ya sabes.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>dd     → borras la línea 13
+.      → borra la línea 14 (repite dd)
+.      → borra la línea 15</code></pre>
+    <p class="mt-4">El punto <strong>repite el comando más reciente</strong>. Funciona con <code>dd</code>, con <code>dw</code>, con <code>x</code>, con una inserción… con casi cualquier cosa que hayas hecho.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 175" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Dos formas de repetir</text>
+
+        <rect x="30" y="46" width="230" height="76" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="145" y="72" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">3dd</text>
+        <line x1="55" y1="84" x2="235" y2="84" stroke="#E5E1D8"/>
+        <text x="145" y="102" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">3 líneas seguidas, de golpe</text>
+
+        <rect x="300" y="46" width="230" height="76" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="415" y="72" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">dd  .  .</text>
+        <line x1="325" y1="84" x2="505" y2="84" stroke="#E5E1D8"/>
+        <text x="415" y="102" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">donde tú decidas, una a una</text>
+
+        <text x="280" y="150" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">el número repite aquí mismo · el punto repite donde te muevas</text>
+        <text x="280" y="168" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">combínalos con la búsqueda: n para saltar, . para repetir</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">El multiplicador numérico y el punto resuelven casos distintos.</figcaption>
+    </figure>
+
+    <p class="mt-4">La combinación potente es esta: busca con <code>/patron</code>, arregla la primera aparición, y luego alterna <code>n</code> para saltar a la siguiente y <code>.</code> para repetir el arreglo. Es la forma manual —y controlada— de hacer lo que <code>:%s</code> hace en masa.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Borra una línea con <code>dd</code>, baja dos líneas y pulsa <code>.</code>; repite tres veces. Después prueba <code>dw</code> seguido de <code>n</code> y <code>.</code> sobre una búsqueda. <strong>Meta:</strong> corregir varias apariciones sin escribir el comando más de una vez.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cambiar mayúsculas: ~</h2>
+    <p class="mt-4">Colócate encima de una letra y pulsa la virgulilla, <code>~</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>sistema   →  ~  →  Sistema
+SISTEMA   →  ~  →  sISTEMA</code></pre>
+    <p class="mt-4">Invierte el caso del carácter: si está en minúscula lo pasa a mayúscula y al revés. Además <strong>avanza el cursor</strong>, así que pulsándola varias veces vas transformando letra a letra.</p>
+    <p class="mt-4">En teclados en inglés la <code>~</code> está junto al número 1; en los españoles hay que buscar la combinación. Es el mismo asunto de siempre con estos símbolos.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Fin del editor, empieza la programación</p>
+      <p class="!mt-0">Con esto cierras la sección de <code>vi</code>. Ya sabes moverte, insertar, borrar, copiar, buscar, sustituir, guardar y recuperar: lo suficiente para trabajar en cualquier servidor sin entorno gráfico. Y llega justo a tiempo, porque lo siguiente es <strong>escribir scripts</strong>, y para eso hace falta exactamente esto.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: velocidad en el editor</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Genera un fichero largo con <code>man bash &gt; manual.txt</code>, ábrelo y activa <code>:set nu</code>. Salta a las líneas 50, 200 y al final con <code>G</code>.</li>
+        <li>Une tres líneas cortas en una sola usando <code>J</code> varias veces seguidas.</li>
+        <li>Borra cinco líneas no consecutivas usando <code>dd</code> una vez y el punto las otras cuatro, moviéndote entre medias.</li>
+        <li><strong>Reto:</strong> combina búsqueda y repetición. Busca <code>/set</code>, borra esa palabra con <code>dw</code>, y luego alterna <code>n</code> y <code>.</code> cinco veces. Comprueba con <code>:set all</code> qué otras opciones existen y sal sin guardar con <code>:q!</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>:set nu</code> numera las líneas y <code>:set nonu</code> quita la numeración; <code>:set all</code> lista todas las opciones. Con los números a la vista, <code>:30</code> salta a esa línea y <code>G</code> va directo al final del fichero.</p>
+      <p><code>J</code> une la línea siguiente con la actual. <code>~</code> invierte mayúscula y minúscula del carácter bajo el cursor y avanza, así que sirve para transformar varias letras seguidas.</p>
+      <p>El punto <code>.</code> repite el último comando ejecutado. Combinado con <code>n</code> tras una búsqueda, permite aplicar el mismo arreglo a varias apariciones controlando una por una.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Un script falla y el error dice «línea 340». ¿Cómo llegas hasta ahí?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Abres el fichero y escribes <code>:340</code>. Si quieres ver los números mientras trabajas, actívalos antes con <code>:set nu</code>. Para ir al final del fichero, <code>G</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué diferencia hay entre <code>3dd</code> y <code>dd</code> seguido de dos puntos <code>.</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>3dd</code> borra tres líneas <strong>consecutivas</strong> desde donde estás. Con <code>dd</code> y el punto borras una, te mueves a donde quieras y repites: sirve para líneas <strong>salteadas</strong>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Quieres poner en mayúscula la primera letra de cinco palabras distintas. ¿Cómo lo haces rápido?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Colocándote sobre cada inicial y pulsando <code>~</code>, que invierte el caso del carácter. Para moverte entre palabras usa <code>w</code>, así encadenas <code>w</code> y <code>~</code> sin salir del modo comando.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/64-recuperar-un-fichero-en-vi" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/66-tu-primer-script" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

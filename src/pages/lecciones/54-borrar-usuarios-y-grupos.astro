@@ -1,0 +1,174 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 54. Fuente: transcripciones/video_42.md (segunda parte: userdel y groupdel)
+---
+
+<Layout titulo="Borrar usuarios y grupos — Curso Linux" descripcion="Elimina cuentas con userdel (-r borra el home, -f fuerza) y grupos con groupdel (-f), y aprende por qué el orden correcto es siempre usuarios antes que grupos.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 54</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+      <span class="etiqueta-saltar">Saltar</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Borrar usuarios y grupos</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      La parte más peligrosa de la administración de usuarios. Dos comandos cortos y ninguna papelera detrás.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A borrar una cuenta con <code>userdel</code>, y qué se lleva por delante la opción <code>-r</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Por qué <code>groupdel</code> se niega a borrar un grupo que es principal de alguien, y qué hace <code>-f</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>El orden correcto: <strong>primero los usuarios, después los grupos</strong>. Al revés se generan inconsistencias.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">userdel: quitar una cuenta</h2>
+    <p class="mt-4">Mismo patrón administrativo de siempre:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ userdel --help
+userdel: orden no encontrada
+
+$ sudo userdel --help
+Modo de empleo: userdel [opciones] LOGIN
+  -f, --force    fuerza la eliminación de ficheros, incluso si no es el propietario
+  -r, --remove   borra el directorio personal y el buzón de correo</code></pre>
+    <p class="mt-4">Solo dos opciones importan, y las dos hay que entenderlas antes de teclearlas.</p>
+    <p class="mt-4">Empieza mirando a quién tienes:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat /etc/passwd | grep dsa
+dsa1:x:1002:3000:usuario desarrollo 1:/home/dsa1:/bin/bash
+dsa2:x:3000:1002:usuario desarrollo 2:/home/dsa2:/bin/bash</code></pre>
+    <p class="mt-4">Y borra uno:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo userdel dsa1
+
+$ cat /etc/passwd | grep dsa
+dsa2:x:3000:1002:usuario desarrollo 2:/home/dsa2:/bin/bash</code></pre>
+    <p class="mt-4">Sin preguntas, sin confirmación, sin mensaje. La cuenta ha desaparecido de <code>/etc/passwd</code>. Ese silencio es la norma en Linux: si no dice nada, es que lo ha hecho.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Cuidado con userdel -r</p>
+      <p class="!mt-0">La opción <code>-r</code> no borra solo la cuenta: <strong>borra también su directorio personal completo y su buzón de correo</strong>. Todo lo que esa persona tuviera en su home desaparece, sin papelera y sin vuelta atrás. Antes de usarla, asegúrate de que existe un backup —para eso aprendiste <a href="/Linux-course/lecciones/43-empaquetar-con-tar">tar</a>—. Sin <code>-r</code>, el home se queda en el disco y puedes recuperarlo después.</p>
+    </div>
+
+    <p class="mt-4">Lo del buzón de correo suena raro hoy, pero era muy habitual hace años en la administración de sistemas Unix: cada usuario tenía su buzón local. Hoy la mayoría ni lo usa, pero la opción sigue ahí y sigue borrándolo.</p>
+    <p class="mt-4">La otra opción, <code>-f</code>, <strong>fuerza</strong> la eliminación de los ficheros cuando por algún motivo no se pueden borrar por las vías normales.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Borra <code>dsa1</code> con <code>sudo userdel dsa1</code> (sin <code>-r</code>) y comprueba dos cosas: que ya no está en <code>cat /etc/passwd</code> y que su directorio <strong>sí sigue</strong> ahí con <code>ls -l /home</code>. <strong>Meta:</strong> ver con tus ojos la diferencia que marca la <code>-r</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">groupdel: quitar un grupo</h2>
+    <p class="mt-4">El equivalente para grupos. Mira primero qué tienes:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat /etc/group | tail -n 4
+user001:x:1000:
+prueba:x:1001:
+dsa:x:3005:dsa2
+testing:x:3000:</code></pre>
+    <p class="mt-4">Intenta borrar el grupo <code>dsa</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo groupdel dsa
+groupdel: no se puede eliminar el grupo primario del usuario existente 'dsa2'</code></pre>
+    <p class="mt-4">Se niega, y con razón: <strong>hay un usuario cuyo grupo principal es ese</strong>. Si lo borrase, <code>dsa2</code> quedaría apuntando en <code>/etc/passwd</code> a un GID que ya no existe. Linux te está protegiendo de dejar el sistema inconsistente.</p>
+    <p class="mt-4">Si estás seguro de lo que haces, <code>-f</code> lo fuerza:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo groupdel -f dsa
+
+$ cat /etc/group | grep dsa
+$</code></pre>
+    <p class="mt-4">Otra vez sin mensajes: hecho.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El orden importa</h2>
+    <p class="mt-4">De ese error se saca la regla práctica:</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 170" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">El orden de las bajas</text>
+
+        <rect x="60" y="50" width="170" height="60" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="145" y="76" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">1. usuarios</text>
+        <text x="145" y="96" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">userdel</text>
+
+        <line x1="235" y1="80" x2="325" y2="80" stroke="#1A1A1A"/>
+        <path d="M325 80 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+
+        <rect x="330" y="50" width="170" height="60" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="415" y="76" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">2. grupos</text>
+        <text x="415" y="96" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">groupdel</text>
+
+        <line x1="60" y1="130" x2="500" y2="130" stroke="#E5E1D8"/>
+        <text x="280" y="152" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">al revés que el alta: allí los grupos iban primero</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Se crea de fuera hacia dentro; se borra de dentro hacia fuera.</figcaption>
+    </figure>
+
+    <p class="mt-4">Fíjate en la simetría con lo que aprendiste al dar de alta: para <strong>crear</strong> ibas primero al grupo y luego a los usuarios; para <strong>borrar</strong> es justo al revés. Primero quitas a la gente, y cuando el grupo está vacío, lo quitas también. Así nunca necesitas el <code>-f</code>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Intenta <code>sudo groupdel dsa</code> con <code>dsa2</code> todavía dentro y lee el error completo. Después borra el usuario y vuelve a intentarlo <strong>sin</strong> <code>-f</code>. <strong>Meta:</strong> comprobar que en el orden correcto la opción de forzar sobra.</p>
+    </div>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Esto es trabajo de administrador</p>
+      <p class="!mt-0">Un usuario final no debería poder borrar cuentas —ni siquiera la suya— ni grupos. Estás practicando en tu máquina virtual, que es exactamente donde hay que equivocarse. En un sistema real, cada <code>userdel</code> se piensa dos veces y se hace con un backup delante.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: dar de baja limpiamente</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Haz inventario antes de tocar nada: <code>cat /etc/passwd | grep dsa</code>, <code>cat /etc/group | tail -n 5</code> y <code>ls -l /home</code>.</li>
+        <li>Borra <code>dsa1</code> sin <code>-r</code> y comprueba que su home sigue en <code>/home</code>. Recupera después ese directorio o bórralo tú a mano con <code>sudo rm -r</code>.</li>
+        <li>Intenta borrar su grupo principal con <code>sudo groupdel</code> mientras aún hay usuarios dentro y lee el mensaje de error entero.</li>
+        <li><strong>Reto:</strong> haz la baja completa en el orden correcto. Empaqueta primero el home con <code>sudo tar czvf /tmp/dsa2.tar.gz /home/dsa2</code>, luego <code>sudo userdel -r dsa2</code> y por último <code>sudo groupdel dsa</code> —esta vez sin <code>-f</code>—. Verifica con <code>ls /home</code> y <code>cat /etc/group</code> que no queda rastro, y que tu backup sí está.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>sudo userdel usuario</code> elimina la cuenta de <code>/etc/passwd</code> sin pedir confirmación y sin mensajes. <code>-r</code> borra además su directorio personal y su buzón de correo, sin vuelta atrás; <code>-f</code> fuerza la eliminación de ficheros.</p>
+      <p><code>sudo groupdel grupo</code> borra un grupo, pero se niega si es el grupo principal de algún usuario existente. <code>-f</code> lo fuerza, a costa de dejar usuarios apuntando a un GID inexistente.</p>
+      <p>El orden correcto es <strong>primero los usuarios y después los grupos</strong>, justo al revés que al crearlos. Hecho así, nunca hace falta forzar nada.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué diferencia hay entre <code>userdel dsa1</code> y <code>userdel -r dsa1</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Sin <code>-r</code> se borra la cuenta pero su directorio personal se queda en el disco, así que puedes recuperar los ficheros. Con <code>-r</code> se borra también el home completo y el buzón de correo, sin papelera.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. <code>groupdel</code> te dice que no puede eliminar el grupo primario de un usuario existente. ¿Qué significa?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Que aún hay una cuenta cuyo GID principal apunta a ese grupo. Si lo borrases, ese usuario quedaría señalando a un grupo inexistente. Lo correcto es borrar antes al usuario, no forzar con <code>-f</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Tienes que dar de baja a un equipo entero, usuarios y grupo. ¿Por dónde empiezas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Por los usuarios, con <code>userdel</code> (haciendo antes copia de sus homes si hace falta). Cuando el grupo se queda vacío, lo borras con <code>groupdel</code> sin necesidad de forzar. Al crear se hace al revés: primero el grupo.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/53-contrasenas-con-passwd" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/55-sudo-y-el-grupo-sudo" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

@@ -1,0 +1,199 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 37. Fuente: transcripciones/video_30.md (variables de entorno y de shell: printenv, set, echo $VAR)
+---
+
+<Layout titulo="Variables de entorno: printenv, set y $VAR — Curso Linux" descripcion="Descubre las variables de entorno de Linux: lístalas con printenv y set, léelas con echo $VAR y conoce las más útiles como HOME, PATH, TERM y LANG.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 37</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Variables de entorno: printenv, set y $VAR</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Empieza una sección nueva: el <strong>entorno</strong>. Linux guarda su configuración en variables, y a partir de aquí vas a leerlas, usarlas y (más adelante) cambiarlas.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A listar tus variables con <code>printenv</code> (solo entorno) y <code>set</code> (entorno + shell), y a leer una sola con <code>echo $VARIABLE</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>La diferencia entre variables de <strong>entorno</strong> y variables de <strong>shell</strong>, y por qué unas cambian con el terminal y otras no.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Las variables que usarás a diario: <code>HOME</code>, <code>PWD</code>, <code>PATH</code>, <code>TERM</code>, <code>DISPLAY</code>, <code>SHELL</code>, <code>LANG</code> y <code>USER</code>. Sobre todo <code>PATH</code>: es donde Linux busca los comandos.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Primero míralas: printenv</h2>
+    <p class="mt-4">Abre la terminal y escribe esto. No hace falta entender nada todavía:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ printenv | less
+LANG=es_ES.UTF-8
+HOME=/home/user001
+USER=user001
+PATH=/usr/local/bin:/usr/bin:/bin
+...</code></pre>
+    <p class="mt-4">Eso es tu <strong>entorno</strong>: una lista de parejas <code>NOMBRE=valor</code>. Cada variable es un nombre y un valor, y determinan el comportamiento de Linux y de muchos programas. Salimos del paginador con <code>q</code>, igual que en <a href="/Linux-course/lecciones/12-ver-mas-y-explorar">less</a>.</p>
+    <p class="mt-4"><code>printenv</code> significa <em>print environment</em>. Fíjate en que los nombres van en <strong>mayúsculas</strong>: no es obligatorio, pero es la buena práctica universal, así cualquiera que lea el nombre sabe al instante que es una variable configurada.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>printenv | less</code> y recorre la lista hasta el final. <strong>Meta:</strong> ver de golpe cuántas variables tiene tu sistema y reconocer el formato <code>NOMBRE=valor</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Dos tipos: entorno y shell</h2>
+    <p class="mt-4">En Linux hay <strong>dos clases</strong> de variables:</p>
+    <ul class="mt-4 space-y-2">
+      <li><strong>De entorno:</strong> están asociadas al usuario, sin importar cómo entre al sistema. Son las mismas para todos los intérpretes.</li>
+      <li><strong>De shell:</strong> pertenecen al intérprete concreto que estás usando (en tu caso, <code>bash</code>: compruébalo con <code>ps</code>). Si cambias de shell, estas pueden cambiar; las de entorno no.</li>
+    </ul>
+    <p class="mt-4">Y hay un comando para cada alcance:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ printenv | less    # solo variables de ENTORNO
+$ set | less         # entorno + variables de SHELL (lista mucho más larga)</code></pre>
+    <p class="mt-4">Compara las dos salidas: la de <code>set</code> es claramente mayor, porque incluye todo lo anterior más lo propio de bash.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 170" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Qué ve cada comando</text>
+        <rect x="40" y="40" width="440" height="100" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="60" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">set</text>
+        <rect x="70" y="72" width="230" height="52" fill="#FDFCFB" stroke="#1A1A1A"/>
+        <text x="185" y="93" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">variables de ENTORNO</text>
+        <text x="185" y="111" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">printenv</text>
+        <text x="395" y="93" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">variables de SHELL</text>
+        <text x="395" y="111" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">propias de bash</text>
+        <text x="260" y="160" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">printenv es un subconjunto de set</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2"><code>set</code> lo muestra todo; <code>printenv</code> solo la parte de entorno.</figcaption>
+    </figure>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Leer una sola variable: el signo $</h2>
+    <p class="mt-4">Puedes pedirle a <code>printenv</code> una variable concreta, pero la forma que usarás siempre es otra:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ printenv USER          # funciona, pero no sirve dentro de scripts
+user001
+
+$ echo $USER             # ESTA es la forma habitual
+user001
+
+$ echo USER              # sin el $ no es una variable: es texto plano
+USER</code></pre>
+    <p class="mt-4">La regla es corta y no tiene excepción: para <strong>acceder al valor</strong> de una variable, escribe su nombre precedido del signo <code>$</code>. Sin <code>$</code>, Linux lo trata como una cadena cualquiera, como ya viste con <a href="/Linux-course/lecciones/19-entrada-salida-y-redirecciones">echo</a>. Y recuerda las mayúsculas: los nombres distinguen mayúsculas de minúsculas.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>echo $USER</code> y después <code>echo USER</code>. <strong>Meta:</strong> ver con tus ojos que el <code>$</code> es lo único que separa un valor de un texto.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Las variables que vas a usar</h2>
+
+    <h3 class="font-display text-xl font-bold mt-8">HOME y PWD: no las confundas</h3>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo $HOME
+/home/user001            # tu directorio home: NO cambia
+
+$ cd /tmp
+$ echo $PWD
+/tmp                     # dónde estás AHORA: cambia al moverte
+$ echo $HOME
+/home/user001            # sigue igual aunque estés en /tmp</code></pre>
+    <p class="mt-4"><code>HOME</code> dice a qué directorio <strong>perteneces</strong>; <code>PWD</code> dice en cuál <strong>estás</strong>, como el comando <a href="/Linux-course/lecciones/07-navegar-ficheros">pwd</a>. Y aquí llega la parte útil: una variable se puede usar como argumento de un comando.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /tmp
+$ cd $HOME       # el shell sustituye $HOME por su valor real
+$ pwd
+/home/user001    # te ha llevado a tu home</code></pre>
+
+    <h3 class="font-display text-xl font-bold mt-8">TERM y DISPLAY: dónde estás conectado</h3>
+    <p class="mt-4"><code>DISPLAY</code> te dice el terminal gráfico al que estás conectado. Compruébalo saltando entre sesiones con <code>Ctrl+Alt+F3</code> y <code>Ctrl+Alt+F2</code>, como en <a href="/Linux-course/lecciones/15-autocompletado-e-historial">sesiones virtuales</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code># en el escritorio gráfico:
+$ echo $DISPLAY
+:0                       # estás en un terminal X Window
+
+# tras Ctrl+Alt+F3 y entrar como user001:
+$ echo $DISPLAY
+                         # vacío: la consola de texto no es gráfica
+$ echo $TERM
+linux                    # tipo de terminal: consola del sistema</code></pre>
+    <p class="mt-4">Vuelve con <code>Ctrl+Alt+F2</code> y repite <code>echo $TERM</code>: el valor será otro, porque ahora sí estás en un terminal gráfico. Eso es exactamente lo que significa "de entorno": <strong>varían según dónde trabajas</strong>. Si <code>DISPLAY</code> muestra algo distinto de <code>:0</code>, suele ser la máquina a la que estás conectado en remoto.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Anota <code>echo $TERM</code> en tu terminal gráfica, pasa a <code>Ctrl+Alt+F3</code>, entra con tu usuario y repítelo. Vuelve con <code>Ctrl+Alt+F2</code>. <strong>Meta:</strong> comprobar que la misma variable da valores distintos según el entorno.</p>
+    </div>
+
+    <h3 class="font-display text-xl font-bold mt-8">PATH: dónde busca Linux los comandos</h3>
+    <p class="mt-4">Si alguna vez te preguntaste cómo encuentra Linux un comando cuando escribes <code>ls</code>, la respuesta está aquí:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo $PATH
+/usr/local/bin:/usr/bin:/bin:/usr/local/games</code></pre>
+    <p class="mt-4">Son los directorios donde deben estar los ejecutables, <strong>separados por dos puntos</strong>. Linux busca en el primero, luego en el segundo, y así hasta encontrarlo. Si un programa no está en ninguno de esos directorios, no lo encuentra aunque exista. Enlaza directamente con lo que viste en <a href="/Linux-course/lecciones/16-editar-y-localizar-comandos">which y whereis</a>: <code>which</code> busca precisamente dentro de <code>PATH</code>. Es una de las variables que más se modifican, y lo harás en próximas lecciones.</p>
+
+    <h3 class="font-display text-xl font-bold mt-8">SHELL, LANG, USER y PS1</h3>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo $SHELL
+/bin/bash                # el intérprete que estás ejecutando
+
+$ echo $LANG
+es_ES.UTF-8              # idioma y juego de caracteres
+
+$ echo $USER
+user001                  # con qué usuario trabajas
+
+$ echo $PS1
+\u@\h:\w\$               # la forma de tu prompt (esos códigos raros)</code></pre>
+    <p class="mt-4"><code>LANG</code> puede darte un valor distinto al del ejemplo: depende de tu distribución y del idioma que elegiste al <a href="/Linux-course/lecciones/03-instalar-debian">instalar</a>. <code>PS1</code> son los caracteres que dibujan el prompt que ves a la izquierda; se puede personalizar y lo verás más adelante.</p>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: recorre tu entorno</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Lista tus variables con <code>printenv | less</code> y después con <code>set | less</code>. Cuenta cuántas líneas tiene cada una usando <code>printenv | wc -l</code> y <code>set | wc -l</code>: ahí ves la diferencia de tamaño en números.</li>
+        <li>Muestra tu usuario con <code>echo $USER</code> y tu home con <code>echo $HOME</code>. Después haz <code>cd /tmp</code> y compara <code>echo $PWD</code> con <code>echo $HOME</code>.</li>
+        <li>Desde <code>/tmp</code>, vuelve a tu carpeta con <code>cd $HOME</code> y confirma con <code>pwd</code>. Estás usando una variable como argumento de un comando.</li>
+        <li><strong>Reto:</strong> mira tu <code>echo $PATH</code> y localiza el ejecutable de <code>ls</code> con <code>which ls</code>. Comprueba que la ruta que devuelve <code>which</code> está dentro de alguno de los directorios de <code>PATH</code>. Como extra, cuenta los directorios de tu PATH con <code>echo $PATH | tr ":" "\n" | wc -l</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Una variable es una pareja <code>NOMBRE=valor</code> que configura el comportamiento del sistema. <code>printenv</code> lista las de entorno; <code>set</code> lista esas y además las de shell.</p>
+      <p>Para leer el valor de una variable se escribe <code>echo $NOMBRE</code>: el signo <code>$</code> es obligatorio, y sin él solo obtienes texto plano. Los nombres van en mayúsculas por convención y distinguen mayúsculas de minúsculas.</p>
+      <p>Las más útiles: <code>HOME</code> (a qué directorio perteneces), <code>PWD</code> (dónde estás), <code>PATH</code> (dónde busca Linux los ejecutables), <code>TERM</code> y <code>DISPLAY</code> (qué terminal usas), <code>SHELL</code>, <code>LANG</code>, <code>USER</code> y <code>PS1</code>.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué diferencia hay entre <code>printenv</code> y <code>set</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>printenv</code> muestra solo las variables de <strong>entorno</strong> (las asociadas al usuario). <code>set</code> muestra esas y además las variables de <strong>shell</strong>, propias del intérprete que usas, por lo que su salida es bastante más larga.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Estás en <code>/tmp</code>. ¿Qué devuelven <code>echo $HOME</code> y <code>echo $PWD</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>$HOME</code> devuelve tu directorio home (<code>/home/user001</code>), que no cambia al moverte. <code>$PWD</code> devuelve <code>/tmp</code>, el directorio en el que estás en ese momento. Una dice a dónde perteneces; la otra, dónde estás.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Para qué sirve la variable <code>PATH</code> y cómo está escrita?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Contiene la lista de directorios donde Linux busca los ejecutables cuando escribes un comando, <strong>separados por dos puntos</strong> (<code>:</code>). Los recorre en orden hasta encontrar el programa; si no está en ninguno, no lo encuentra aunque exista en el disco.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/36-cambiar-propietario-chown-chgrp" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/38-crear-variables-y-modificar-path" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

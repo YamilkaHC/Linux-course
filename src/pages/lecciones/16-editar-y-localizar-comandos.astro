@@ -1,0 +1,155 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 16. Fuente: transcripciones/video_13.md (editor edit, comandos internos vs externos, type, which, whereis)
+---
+
+<Layout titulo="Editar ficheros y tipos de comando: edit, type, which, whereis — Curso Linux" descripcion="Crea ficheros con el editor gráfico edit, distingue comandos internos de externos con type y help, y localiza ejecutables con which y whereis.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 16</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">5 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Editar ficheros y saber qué es cada comando</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Para las prácticas que vienen necesitas crear ficheros con texto: el editor gráfico <code>edit</code> te lo pone fácil. Y de paso descubres una distinción clave de Linux: unos comandos son ejecutables en disco, otros viven dentro de la propia shell.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A crear y editar ficheros de texto con <strong><code>edit</code></strong>, un editor gráfico tipo Notepad para las prácticas del curso.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A distinguir <strong>comandos internos</strong> (integrados en la shell, como <code>cd</code>) de <strong>externos</strong> (ejecutables en disco, como <code>ls</code>) con <code>help</code> y <code>type</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A localizar dónde vive un ejecutable con <strong><code>which</code></strong> y su ruta, manual y configuración con <strong><code>whereis</code></strong>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">edit: un bloc de notas para tus prácticas</h2>
+    <p class="mt-4">Necesitas un fichero <code>practica1.txt</code> con algo dentro. Escribe <code>edit</code> seguido del nombre: se abre una ventana gráfica, parecida al Notepad de Windows, donde escribes y le das a <em>Guardar</em>. Luego lo revisas con <a href="/Linux-course/lecciones/11-ver-contenido-cat"><code>cat</code></a>; para reabrirlo, otra vez <code>edit practica1.txt</code>.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ edit practica1.txt    # abre el editor gráfico; escribe, guarda y cierra
+$ cat practica1.txt     # comprueba el contenido con cat</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Solo para el escritorio</p>
+      <p class="!mt-2"><code>edit</code> pertenece al entorno gráfico X Window, así que solo funciona con escritorio. En un servidor sin gráficos usarás editores de terminal como <strong>nano</strong> o <strong>vi</strong>, que verás más adelante. Aquí <code>edit</code> es solo una ayuda didáctica.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>practica1.txt</code> con <code>edit</code>, escribe una línea y guarda. Luego ejecuta <code>cat practica1.txt</code>. <strong>Meta:</strong> ver en la terminal lo que escribiste en la ventana gráfica.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Comandos internos y externos</h2>
+    <p class="mt-4">Un comando <strong>externo</strong> es un fichero ejecutable (un binario) que vive en el disco: <a href="/Linux-course/lecciones/09-crear-y-copiar"><code>mkdir</code></a>, <a href="/Linux-course/lecciones/07-navegar-ficheros"><code>ls</code></a>… Un comando <strong>interno</strong> (o <em>built-in</em>) no tiene ejecutable propio: está integrado dentro de la shell. El ejemplo estrella es <a href="/Linux-course/lecciones/07-navegar-ficheros"><code>cd</code></a>: no existe como fichero, forma parte de la shell.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 190" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Dónde vive cada comando</text>
+        <rect x="20" y="45" width="220" height="125" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="130" y="70" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">Externo</text>
+        <text x="130" y="95" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">binario en disco (/bin)</text>
+        <text x="130" y="120" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">ls · mkdir · file</text>
+        <text x="130" y="150" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">lo localiza which</text>
+        <rect x="280" y="45" width="220" height="125" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="390" y="70" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">Interno (built-in)</text>
+        <text x="390" y="95" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">dentro de la shell</text>
+        <text x="390" y="120" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">cd · echo · help</text>
+        <text x="390" y="150" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">más rápido, sin fichero</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Los externos son ficheros en disco; los internos van dentro de la shell.</figcaption>
+    </figure>
+
+    <p class="mt-4">Con <code>ps</code> compruebas qué shell usas (normalmente <strong>bash</strong>). Cada shell trae su propio juego de built-ins, y los listas todos con <code>help</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps                    # ver tu shell actual (p. ej. bash)
+$ help                  # lista todos los comandos internos de la shell</code></pre>
+
+    <p class="mt-4">Para saber si un comando concreto es interno o externo, pregúntaselo a <code>type</code>: te responde si es una orden interna, o la ruta del ejecutable si es externo.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ type cd               # "cd is a shell builtin"  → interno
+$ type mkdir            # "mkdir is /bin/mkdir"      → externo, con su ruta
+$ type echo             # echo también es interno</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">¿Por qué importa?</p>
+      <p class="!mt-2">Los internos son más rápidos (no cargan un fichero). En el día a día da igual; pero si cambias de shell (de <em>bash</em> a <em>ksh</em>, por ejemplo), sus built-ins cambian y un comando que antes existía puede «no encontrarse».</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>type cd</code>, <code>type ls</code> y <code>type echo</code>. <strong>Meta:</strong> clasificar cada uno como interno o externo y, en los externos, leer su ruta en disco.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">which y whereis: ¿dónde está el comando?</h2>
+    <p class="mt-4"><code>which</code> te dice la ruta del <strong>ejecutable</strong> dentro del PATH del sistema (los directorios donde Linux busca los binarios). Rápido y directo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ which pwd             # /usr/bin/pwd
+$ which ls              # ruta del binario ls
+$ which java            # si no está instalado, no muestra NADA</code></pre>
+    <p class="text-sm text-ink/60">Ojo: si un comando no existe o no está instalado, <code>which</code> no da error; simplemente no devuelve nada.</p>
+
+    <p class="mt-4"><code>whereis</code> va más allá: además del ejecutable, muestra dónde están el <strong>manual</strong> y, si existe, el código fuente o los ficheros de configuración asociados.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ whereis ls            # ejecutable + página de manual
+$ whereis firefox       # binario + librería + fichero de configuración</code></pre>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">which contra whereis</p>
+      <p class="!mt-2 text-cream/90"><strong>which</strong> es rápido: solo busca el ejecutable en el PATH. <strong>whereis</strong> es más completo: saca ejecutable, manual y fuente/configuración. Usa <code>which</code> para «¿dónde está el binario?» y <code>whereis</code> para «¿qué hay asociado a este comando?».</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: crear y localizar</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Crea <code>practica1.txt</code> con <code>edit</code>, escribe dos líneas y guárdalo. Míralo con <code>cat practica1.txt</code> y vuelve a abrirlo con <code>edit practica1.txt</code>.</li>
+        <li>Ejecuta <code>help</code> y busca en la lista <code>cd</code> y <code>echo</code>. Luego confírmalo con <code>type cd</code> y <code>type echo</code>.</li>
+        <li>Con <code>type mkdir</code> averigua la ruta del ejecutable de <code>mkdir</code>, y compárala con lo que devuelve <code>which mkdir</code>.</li>
+        <li>Ejecuta <code>whereis ls</code> y localiza su manual. <strong>Reto:</strong> compara <code>which firefox</code> con <code>whereis firefox</code> y explica qué información extra te da el segundo.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>El editor gráfico <code>edit archivo.txt</code> abre una ventana tipo Notepad para crear ficheros durante las prácticas. Solo funciona con escritorio; en servidores usarás nano o vi. Tras guardar, revisa el contenido con <code>cat</code>.</p>
+      <p>Los comandos <strong>externos</strong> son ejecutables en disco (<code>ls</code>, <code>mkdir</code>); los <strong>internos</strong> viven dentro de la shell (<code>cd</code>, <code>echo</code>) y son más rápidos. Listas los internos con <code>help</code> y clasificas cualquier comando con <code>type</code>.</p>
+      <p><code>which</code> te da la ruta del ejecutable en el PATH (nada si no existe); <code>whereis</code> añade manual, fuente y configuración. Uno es rápido, el otro más completo.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Por qué <code>edit</code> no te servirá en un servidor sin entorno gráfico?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque <code>edit</code> pertenece al entorno gráfico X Window y necesita escritorio para abrir su ventana. En un servidor sin gráficos usarás editores de terminal como nano o vi.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué diferencia hay entre un comando interno y uno externo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Un comando externo es un fichero ejecutable (binario) que vive en el disco, como <code>ls</code> o <code>mkdir</code>. Un comando interno está integrado dentro de la shell y no tiene ejecutable propio, como <code>cd</code> o <code>echo</code>; por eso es más rápido. Los distingues con <code>type</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Cuándo usarías <code>whereis</code> en vez de <code>which</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>which</code> solo da la ruta del ejecutable y es más rápido. Usas <code>whereis</code> cuando además quieres saber dónde está el manual, el código fuente o los ficheros de configuración asociados al comando.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/15-autocompletado-e-historial" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/17-alias-time-y-calendario" class="btn-primario">Siguiente: alias, time y calendario</a>
+    </nav>
+
+  </article>
+</Layout>

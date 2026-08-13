@@ -1,0 +1,201 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 44. Fuente: transcripciones/video_36.md (primera mitad: gzip, gunzip, bzip2)
+---
+
+<Layout titulo="Comprimir con gzip y bzip2 — Curso Linux" descripcion="Comprime ficheros con gzip y bzip2: por qué borran el original, cómo conservarlo con -k, ver estadísticas con -l y descomprimir con gunzip y bunzip2.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 44</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+      <span class="etiqueta-arribita">Por arribita</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Comprimir con gzip y bzip2</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Ahora sí: comprimir de verdad. Pero cuidado, porque gzip se lleva por delante tu fichero original.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Que <code>gzip</code> <strong>borra el fichero original</strong> al comprimir, y cómo evitarlo con <code>-k</code>. Es la sorpresa más desagradable del comando.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Que <code>gzip</code> y <code>bzip2</code> comprimen <strong>ficheros sueltos, nunca directorios</strong>: por eso van siempre de la mano de <a href="/Linux-course/lecciones/43-empaquetar-con-tar">tar</a>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A descomprimir con <code>gunzip</code> y <code>bunzip2</code>, y a leer el resumen de compresión con <code>gzip -l</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Prepara el terreno</h2>
+    <p class="mt-4">Vas a necesitar ficheros con los que trastear. Cópiate uno del sistema a tu home y renómbralo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cp /etc/passwd .
+$ mv passwd usuarios
+$ ls -l usuarios
+-rw-r--r-- 1 user001 user001 2841 ago  4 15:30 usuarios</code></pre>
+    <p class="mt-4">Recuerda que el <code>.</code> del <code>cp</code> es el directorio actual, como aprendiste en <a href="/Linux-course/lecciones/07-navegar-ficheros">rutas relativas</a>. También te servirá el <code>copia_ficheros.tar</code> de la lección anterior.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">gzip: comprime y se lleva el original</h2>
+    <p class="mt-4">El comando no puede ser más simple:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ gzip usuarios
+$ ls -ltr
+-rw-r--r-- 1 user001 user001 1180 ago  4 15:30 usuarios.gz</code></pre>
+    <p class="mt-4">Linux no dice nada —señal de que ha ido bien— y te deja un <code>usuarios.gz</code> más pequeño. Pero mira otra vez esa lista: <strong>el fichero <code>usuarios</code> original ha desaparecido</strong>. <code>gzip</code> lo elimina y lo sustituye por la versión comprimida. No es un fallo, es su comportamiento por defecto.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">gzip borra el original</p>
+      <p class="!mt-0">Si comprimes un fichero que no puedes permitirte perder, usa <code>gzip -k</code> (de <em>keep</em>, conservar). Sin esa opción el original desaparece y solo te queda el <code>.gz</code>. No hay papelera de la que recuperarlo.</p>
+    </div>
+
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ gzip -k copia_ficheros.tar
+$ ls -ltr
+-rw-r--r-- 1 user001 user001 194560 ago  4 15:20 copia_ficheros.tar
+-rw-r--r-- 1 user001 user001  38912 ago  4 15:32 copia_ficheros.tar.gz</code></pre>
+    <p class="mt-4">Ahora sí: tienes los dos. Y fíjate en la reducción de tamaño, esta vez real. Eso es lo que <a href="/Linux-course/lecciones/43-empaquetar-con-tar">tar</a> no hacía.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Comprime <code>usuarios</code> sin opciones y comprueba con <code>ls -ltr</code> que el original ya no está. Después descomprímelo (lo verás enseguida) y repite con <code>gzip -k</code>. <strong>Meta:</strong> que la diferencia entre las dos formas se te quede grabada.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Un fichero dentro, un fichero fuera</h2>
+    <p class="mt-4">Aquí está la diferencia grande con lo que conoces de Windows. Prepara una prueba:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ mkdir compresion
+$ cd compresion
+$ cp /etc/p* .
+cp: se omite el directorio '/etc/pam.d'
+cp: se omite el directorio '/etc/perl'
+
+$ ls
+pam.conf  passwd  profile  protocols</code></pre>
+    <p class="mt-4">Los avisos de «se omite el directorio» son normales: <code>cp</code> sin <code>-r</code> no copia directorios, como viste en <a href="/Linux-course/lecciones/09-crear-y-copiar">crear y copiar</a>. Ahora comprime todo de golpe:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ gzip *
+$ ls -l
+pam.conf.gz  passwd.gz  profile.gz  protocols.gz</code></pre>
+    <p class="mt-4">Cuatro ficheros dentro, <strong>cuatro ficheros comprimidos fuera</strong>. <code>gzip</code> no junta nada: comprime cada fichero por separado y genera un <code>.gz</code> por cada uno. Tampoco sabe comprimir directorios.</p>
+    <p class="mt-4">Y ahí tienes la razón de que <code>tar</code> y <code>gzip</code> vayan siempre juntos: primero <code>tar</code> mete todo en un único paquete, y después <code>gzip</code> comprime ese paquete. Cada uno hace una mitad del trabajo.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">No hagas esto en /etc</p>
+      <p class="!mt-0">Copia los ficheros a un directorio de pruebas <strong>antes</strong> de tocarlos, como hemos hecho aquí. Comprimir directamente dentro de <code>/etc</code> dejaría el sistema sin sus ficheros de configuración: tendrías errores de arranque y un problema serio de recuperar.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Descomprimir: gunzip</h2>
+    <p class="mt-4">Existe una opción de <code>gzip</code> para descomprimir, pero lo habitual es usar el comando dedicado:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ gunzip p*
+$ ls -l
+pam.conf  passwd  profile  protocols</code></pre>
+    <p class="mt-4">Los <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo">comodines</a> funcionan igual que en cualquier otro comando: <code>p*</code> descomprime todo lo que empiece por p.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cuánto has comprimido: gzip -l</h2>
+    <p class="mt-4">Con los ficheros ya comprimidos, <code>-l</code> te da el resumen:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ gzip p*
+$ gzip -l p*
+     compressed  uncompressed  ratio  uncompressed_name
+            565          2841  80.1%  passwd
+            300           148  -1.4%  protocols</code></pre>
+    <p class="mt-4">Cuatro columnas: tamaño comprimido, tamaño original, porcentaje ganado y nombre del fichero. ¿Y ese <strong>porcentaje negativo</strong>? No es un error: cuando el fichero es diminuto, las cabeceras que <code>gzip</code> necesita añadir pesan más de lo que ahorra la compresión, así que el resultado acaba siendo mayor que el original. Es raro que te encuentres con ello en la práctica.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">En tu directorio <code>compresion</code>, comprime con <code>gzip p*</code> y lanza <code>gzip -l p*</code>. <strong>Meta:</strong> identificar cuál de tus ficheros comprime mejor y comprobar si alguno te da ratio negativo.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">bzip2: lo mismo con otro algoritmo</h2>
+    <p class="mt-4"><code>bzip2</code> es más moderno y usa un algoritmo de compresión, en teoría, más efectivo para ficheros grandes. En la práctica se comporta exactamente igual que <code>gzip</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ bzip2 *
+$ ls -l
+pam.conf.bz2  passwd.bz2  profile.bz2  protocols.bz2
+
+$ bunzip2 *
+$ ls -l
+pam.conf  passwd  profile  protocols</code></pre>
+    <p class="mt-4">Misma mecánica, misma limitación (solo ficheros, nunca directorios) y solo cambia la extensión: <code>.bz2</code> en lugar de <code>.gz</code>. Consulta sus opciones con <code>bzip2 --help</code>: verás que también permite conservar el original y elegir entre comprimir más rápido o comprimir más.</p>
+    <p class="mt-4">¿Cuál usar? Para tu día a día, la diferencia real suele ser pequeña. Si ya estás acostumbrado a <code>gzip</code>, <code>bzip2</code> no te aporta gran cosa.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 180" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Un fichero entra, un fichero sale</text>
+
+        <rect x="40" y="50" width="70" height="26" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="75" y="67" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">passwd</text>
+        <rect x="40" y="86" width="70" height="26" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="75" y="103" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">profile</text>
+        <rect x="40" y="122" width="70" height="26" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="75" y="139" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">protocols</text>
+
+        <text x="215" y="86" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">gzip *</text>
+        <line x1="160" y1="99" x2="270" y2="99" stroke="#1A1A1A"/>
+        <path d="M270 99 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+
+        <rect x="330" y="50" width="80" height="26" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="370" y="67" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">passwd.gz</text>
+        <rect x="330" y="86" width="80" height="26" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="370" y="103" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">profile.gz</text>
+        <rect x="330" y="122" width="80" height="26" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="370" y="139" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">protocols.gz</text>
+
+        <text x="490" y="99" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">3 entran</text>
+        <text x="490" y="113" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">3 salen</text>
+        <line x1="440" y1="60" x2="440" y2="140" stroke="#E5E1D8"/>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">gzip no junta nada: comprime uno a uno. Para agrupar, primero tar.</figcaption>
+    </figure>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: comprimir sin perder nada</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Crea el directorio <code>compresion</code>, entra y copia dentro los ficheros del sistema que empiecen por p con <code>cp /etc/p* .</code>. Lista lo que ha llegado con <code>ls -l</code>.</li>
+        <li>Comprime todo con <code>gzip *</code> y cuenta los resultados: <code>ls *.gz | wc -l</code>. Confirma que hay tantos <code>.gz</code> como ficheros había.</li>
+        <li>Mira las estadísticas con <code>gzip -l *</code> y localiza el fichero que mejor comprime. Después descomprime todo con <code>gunzip *</code>.</li>
+        <li><strong>Reto:</strong> repite el ciclo completo con <code>bzip2 *</code> y <code>bunzip2 *</code>, y compara los tamaños de las dos versiones. Luego comprime tu <code>copia_ficheros.tar</code> con <code>gzip -k</code> y comprueba con <code>ls -l</code> que conservas el original y ganas espacio.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>gzip fichero</code> comprime y <strong>borra el original</strong>; <code>gzip -k</code> lo conserva. Se descomprime con <code>gunzip</code>, y <code>gzip -l</code> muestra tamaños y porcentaje de compresión (puede salir negativo en ficheros diminutos por el peso de las cabeceras).</p>
+      <p><code>gzip</code> trabaja con ficheros sueltos, nunca con directorios: si le pasas varios, genera un <code>.gz</code> por cada uno. Por eso se combina con <code>tar</code>, que es quien agrupa.</p>
+      <p><code>bzip2</code> y <code>bunzip2</code> funcionan igual, con un algoritmo distinto y extensión <code>.bz2</code>. En la práctica la diferencia de resultado suele ser pequeña.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Haces <code>gzip informe.txt</code> y después no encuentras <code>informe.txt</code>. ¿Qué ha pasado?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Nada raro: <code>gzip</code> borra el original y deja solo <code>informe.txt.gz</code>. Recupéralo con <code>gunzip informe.txt.gz</code>. Si quieres conservar ambos desde el principio, usa <code>gzip -k</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Tienes un directorio con 30 ficheros y quieres UN solo fichero comprimido. ¿Basta con <code>gzip *</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No. <code>gzip *</code> te dejaría 30 ficheros <code>.gz</code>, uno por cada original. Primero hay que agrupar con <code>tar</code> y después comprimir ese único paquete.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. <code>gzip -l</code> te devuelve un ratio negativo. ¿Es un fallo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No. Significa que el fichero comprimido ocupa más que el original, algo que pasa con ficheros muy pequeños: las cabeceras que necesita el formato pesan más de lo que se ahorra al comprimir.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/43-empaquetar-con-tar" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/45-zip-y-tar-comprimido" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

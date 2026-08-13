@@ -1,0 +1,145 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 77. Fuente: transcripciones/video_55.md (primera parte: case/in/;;/esac, wildcard *, refactorizar monitor.sh)
+---
+
+<Layout titulo="La cláusula case — Curso Linux" descripcion="Sustituye cadenas largas de if/elif por case/in/;;/esac: más limpio, más legible, y con * como opción por defecto.">
+  <article class="prose-editorial">
+
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 77</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">5 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">La cláusula case</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Cuando <code>if/elif</code> se alarga, <code>case</code> hace lo mismo más limpio.
+    </p>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Sintaxis: <code>case</code>, <code>in</code>, <code>;;</code> y <code>esac</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span><code>*</code> como opción «todo lo demás» (default).</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Refactorizar <a href="/Linux-course/lecciones/75-proyecto-menu-monitor">monitor.sh</a> de <code>if/elif</code> a <code>case</code>.</span></li>
+      </ul>
+    </section>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Sintaxis</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>case $variable in
+    patron1)
+        comandos
+        ;;
+    patron2)
+        comandos
+        ;;
+    *)
+        comandos por defecto
+        ;;
+esac</code></pre>
+    <p class="mt-4">Cada patrón termina en <code>)</code>. Cada bloque termina en <code>;;</code>. <code>esac</code> (<code>case</code> al revés) cierra. <code>*</code> = comodín que captura todo lo que no coincidió.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">monitor.sh con case</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>#!/bin/bash
+
+echo "----- Monitor del sistema -----"
+echo "1) Uso de disco"
+echo "2) Uso de RAM"
+echo "3) Uso de CPU"
+echo "0) Salir"
+
+read -p "Elige una opción: " opcion
+
+case $opcion in
+    1)
+        echo "--- Uso de disco ---"
+        df -h
+        ;;
+    2)
+        echo "--- Uso de RAM ---"
+        free -m
+        ;;
+    3)
+        echo "--- Uso de CPU ---"
+        top -bn1 | head -5
+        ;;
+    0)
+        echo "Hasta luego"
+        exit 0
+        ;;
+    *)
+        echo "Opción no válida"
+        exit 1
+        ;;
+esac</code></pre>
+    <p class="mt-4">Mismo resultado, menos ruido. Sin <code>[ ]</code>, sin <code>then</code>, sin <code>fi</code>.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 170" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">if/elif vs case</text>
+        <rect x="30" y="44" width="230" height="90" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="145" y="66" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">if / elif / else / fi</text>
+        <line x1="55" y1="76" x2="235" y2="76" stroke="#E5E1D8"/>
+        <text x="145" y="96" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">bueno para 2-3 condiciones</text>
+        <text x="145" y="114" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">necesita [ ], then, fi</text>
+        <text x="145" y="126" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">compara números y ficheros</text>
+        <rect x="300" y="44" width="230" height="90" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="415" y="66" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">case / in / ;; / esac</text>
+        <line x1="325" y1="76" x2="505" y2="76" stroke="#E5E1D8"/>
+        <text x="415" y="96" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">mejor para 4+ opciones</text>
+        <text x="415" y="114" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">más limpio y legible</text>
+        <text x="415" y="126" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">compara patrones de texto</text>
+        <text x="280" y="160" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">elige según cuántas ramas y qué comparas</text>
+      </svg>
+    </figure>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Reescribe <code>monitor.sh</code> con <code>case</code>. Prueba todas las opciones.</li>
+        <li>Comprueba que <code>*</code> captura entradas inesperadas (letras, números fuera de rango).</li>
+        <li><strong>Reto:</strong> escribe <code>saludo_hora.sh</code> que pida «m/t/n» (mañana/tarde/noche) y responda con <code>case</code>.</li>
+      </ol>
+    </section>
+
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>case $var in patrón) comandos ;; esac</code>. Cada rama termina en <code>;;</code>, <code>*)</code> captura el resto.</p>
+      <p>Mejor que <code>if/elif</code> cuando hay muchas opciones: sin corchetes, sin <code>then</code>, más legible.</p>
+      <p><code>esac</code> cierra (como <code>fi</code> cierra <code>if</code>). No olvides <code>;;</code> en cada rama.</p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué hace <code>*)</code> en un case?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Captura cualquier valor no cubierto por patrones anteriores. Es el «default».</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Olvidas <code>;;</code> en una rama. ¿Qué ocurre?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Error de sintaxis. Cada bloque debe cerrarse con <code>;;</code> antes del siguiente patrón.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. <code>esac</code> es <code>case</code> al revés. ¿Qué otra palabra sigue el mismo truco?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>fi</code> = <code>if</code> al revés.</p>
+        </details>
+      </div>
+    </section>
+
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/76-operadores-logicos" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/78-patrones-en-case" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

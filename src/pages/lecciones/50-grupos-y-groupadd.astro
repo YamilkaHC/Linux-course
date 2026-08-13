@@ -1,0 +1,201 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 50. Fuente: transcripciones/video_40.md (/etc/group y groupadd)
+---
+
+<Layout titulo="Grupos y groupadd — Curso Linux" descripcion="Lee los campos de /etc/group, consulta tus grupos con id y crea grupos nuevos con groupadd, asignando tú el GID en lugar de dejárselo al sistema.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 50</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+      <span class="etiqueta-arribita">Por arribita</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Grupos y groupadd</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      El tercer fichero de usuarios, y la razón por la que en Linux se crean los grupos antes que las personas.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A leer los cuatro campos de <code>/etc/group</code> y a cruzarlos con <code>/etc/passwd</code> usando <code>id</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Por qué la política habitual es <strong>crear primero el grupo</strong> y después los usuarios que van dentro.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A crear grupos con <code>groupadd</code> y a asignar tú el GID con <code>-g</code>, en vez de dejar que lo invente el sistema.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">El fichero que faltaba</h2>
+    <p class="mt-4">Cierras aquí los tres ficheros de usuarios que empezaste en <a href="/Linux-course/lecciones/49-shadow-y-caducidad-de-claves">la lección anterior</a>. Este es mucho más corto que los otros dos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat /etc/group
+root:x:0:
+sudo:x:27:user001
+cdrom:x:24:user001
+user001:x:1000:
+desarrollo:x:1002:</code></pre>
+    <p class="mt-4">Mismo formato que <code>passwd</code>: una línea por grupo y campos separados por <code>:</code>. Solo que aquí son cuatro:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Campo</th>
+            <th class="text-left p-3 border-b border-line font-bold">Qué es</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line">1.º</td><td class="p-3 border-b border-line"><strong>Nombre</strong> del grupo</td></tr>
+          <tr><td class="p-3 border-b border-line">2.º</td><td class="p-3 border-b border-line"><strong>Clave</strong> del grupo: sirve para que alguien de fuera pueda asociarse a él. No es lo habitual —normalmente se asignan los usuarios directamente—, pero está en todos los Linux</td></tr>
+          <tr><td class="p-3 border-b border-line">3.º</td><td class="p-3 border-b border-line"><strong>GID</strong>, el número del grupo. Es el mismo que aparece en el cuarto campo de <code>/etc/passwd</code></td></tr>
+          <tr><td class="p-3">4.º</td><td class="p-3"><strong>Usuarios</strong> que pertenecen al grupo, separados por comas. Es opcional, aunque conviene rellenarlo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">Cuidado con el último campo: que aparezca vacío <strong>no significa que el grupo no tenga usuarios</strong>. Significa que no están reflejados ahí. Un usuario cuyo grupo principal es <code>user001</code> pertenece a ese grupo aunque su nombre no salga en la lista.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cruzar los dos ficheros</h2>
+    <p class="mt-4">Saca tu línea de <code>passwd</code> con <a href="/Linux-course/lecciones/23-buscar-texto-grep">grep</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat /etc/passwd | grep user001
+user001:x:1000:1000:Tomas,,,:/home/user001:/bin/bash</code></pre>
+    <p class="mt-4">UID 1000, GID 1000. Ese 1000 del cuarto campo es el que tienes que buscar en <code>/etc/group</code>. Pero hay una forma mucho más cómoda de verlo todo junto, la de <a href="/Linux-course/lecciones/32-usuarios-y-grupos">usuarios y grupos</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ id
+uid=1000(user001) gid=1000(user001) grupos=1000(user001),24(cdrom),
+25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev),109(netdev),
+112(lpadmin),118(scanner)</code></pre>
+    <p class="mt-4">Ahí está la foto completa: tu UID, tu <strong>grupo principal</strong> y todos los <strong>grupos adicionales</strong> a los que perteneces. Y fíjate en uno concreto: <code>sudo</code>. Estar en ese grupo es justo lo que te permite ejecutar comandos como administrador.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lanza <code>id</code> y después busca dos de esos grupos en el fichero: <code>grep sudo /etc/group</code> y <code>grep cdrom /etc/group</code>. <strong>Meta:</strong> verte a ti mismo en el cuarto campo de esas líneas.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Por qué los grupos van primero</h2>
+    <p class="mt-4">Cuando se crea un usuario, Linux le crea automáticamente <strong>un grupo propio con su mismo nombre</strong>. Compruébalo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat /etc/passwd | grep user001      # GID 1000
+$ cat /etc/group  | grep user001      # grupo user001, GID 1000</code></pre>
+    <p class="mt-4">Para trastear en tu máquina eso vale. Para un entorno de trabajo real, no: allí lo que quieres son grupos que agrupen <em>de verdad</em> —<code>desarrollo</code>, <code>sistemas</code>, <code>calidad</code>— y usuarios asociados a ellos.</p>
+    <p class="mt-4">De ahí la política habitual: <strong>primero creas los grupos, después los usuarios</strong>, y a cada uno lo metes en el grupo que le toca. Por eso esta lección va antes que la de crear usuarios.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Crear un grupo: groupadd</h2>
+    <p class="mt-4">El comando estándar es <code>groupadd</code>. Prueba a pedirle ayuda tal cual:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ groupadd --help
+groupadd: orden no encontrada
+
+$ sudo groupadd --help
+Modo de empleo: groupadd [opciones] GRUPO
+  -f, --force          cancela si el grupo ya existe
+  -g, --gid GID        usa este GID para el grupo nuevo
+  ...</code></pre>
+    <p class="mt-4">No es que el comando no exista: es que <strong>vive en un directorio de administración que no está en tu PATH</strong> de usuario normal. Con <code>sudo</code> aparece. Es la misma idea del <a href="/Linux-course/lecciones/16-editar-y-localizar-comandos">PATH</a> que ya estudiaste.</p>
+    <p class="mt-4">Crear un grupo es tan simple como esto:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo groupadd desarrollo
+$ cat /etc/group | grep desarrollo
+desarrollo:x:1002:</code></pre>
+    <p class="mt-4">Ahí está, con un GID que ha elegido el sistema: 1002, el siguiente libre. Cómodo para una prueba rápida.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea el grupo con <code>sudo groupadd desarrollo</code> y compruébalo con <code>cat /etc/group | grep desarrollo</code>. <strong>Meta:</strong> anotar qué GID te ha asignado el sistema a ti.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Mejor elige tú el GID: -g</h2>
+    <p class="mt-4">Dejar que el sistema numere está bien para practicar, pero en producción trae confusión: acabas sin saber por qué un grupo tiene el número que tiene. La opción <code>-g</code> te deja decidirlo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo groupadd -g 3000 testing
+$ cat /etc/group | grep testing
+testing:x:3000:</code></pre>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 165" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">El territorio de los GID</text>
+
+        <rect x="40" y="48" width="150" height="46" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="115" y="68" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">0 – 999</text>
+        <text x="115" y="85" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">sistema · no tocar</text>
+
+        <rect x="205" y="48" width="150" height="46" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="280" y="68" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">1000 – 2999</text>
+        <text x="280" y="85" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">los asigna el sistema</text>
+
+        <rect x="370" y="48" width="150" height="46" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="445" y="68" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">3000 en adelante</text>
+        <text x="445" y="85" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">tus grupos, con -g</text>
+
+        <line x1="40" y1="118" x2="520" y2="118" stroke="#E5E1D8"/>
+        <text x="280" y="140" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">sudo groupadd -g 3000 testing</text>
+        <text x="280" y="157" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">tú decides el número, no el sistema</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Por debajo de 1000, terreno del sistema.</figcaption>
+    </figure>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">No bajes de 1000</p>
+      <p class="!mt-0">Los números por debajo de 1000 —en algunas distribuciones, de 500— están <strong>reservados para los grupos del sistema</strong>. Pisarlos es buscarse problemas. El consejo práctico: asigna tus grupos de trabajo <strong>del 3000 en adelante</strong>, así no chocas con nada.</p>
+    </div>
+
+    <p class="mt-4">Una nota sobre distribuciones: puede que veas por ahí un comando <code>addgroup</code>. Es un envoltorio que trae Ubuntu para hacer lo mismo de forma más guiada, pero <strong>no está en todas las distribuciones</strong>. <code>groupadd</code> sí lo vas a encontrar en prácticamente cualquier Linux, y por eso es el que conviene aprender.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>sudo groupadd -g 3000 testing</code> y compáralo con el grupo <code>desarrollo</code> de antes en <code>cat /etc/group</code>. <strong>Meta:</strong> ver los dos seguidos y decidir cuál de los dos GID te resultaría más claro dentro de seis meses.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: montar la estructura de grupos</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Lanza <code>id</code> y anota tu grupo principal y cuántos grupos adicionales tienes. Cuéntalos con <code>id | tr "," "\n" | wc -l</code>, usando el <a href="/Linux-course/lecciones/19-entrada-salida-y-redirecciones">tr</a> y el <a href="/Linux-course/lecciones/22-contar-y-tee">wc</a> que ya conoces.</li>
+        <li>Comprueba que tu usuario tiene un grupo propio homónimo: <code>grep $USER /etc/passwd</code> y <code>grep $USER /etc/group</code>. Verifica que el GID coincide.</li>
+        <li>Crea dos grupos con tu propio numerado: <code>sudo groupadd -g 3000 testing</code> y <code>sudo groupadd -g 3001 calidad</code>. Confírmalo con <code>cat /etc/group | tail -n 5</code>.</li>
+        <li><strong>Reto:</strong> lista solo los grupos con GID de 3000 en adelante extrayendo el tercer campo con <a href="/Linux-course/lecciones/25-cortar-campos-cut">cut</a>: <code>cut -d ":" -f1,3 /etc/group | sort -t ":" -k2 -n | tail -n 5</code>. Confirma que los tuyos son los últimos.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>/etc/group</code> tiene cuatro campos: nombre, clave del grupo, GID y lista opcional de usuarios. Que esa lista esté vacía no quiere decir que el grupo no tenga miembros. <code>id</code> te muestra de un vistazo tu grupo principal y todos los adicionales.</p>
+      <p>Al crear un usuario, Linux le hace un grupo propio con su mismo nombre. En un entorno real interesa lo contrario: crear primero los grupos de trabajo y luego asociarles los usuarios.</p>
+      <p><code>sudo groupadd nombre</code> crea un grupo dejando que el sistema elija el GID; <code>sudo groupadd -g 3000 nombre</code> te deja elegirlo a ti, que es lo recomendable. Por debajo de 1000 están los grupos del sistema: no los pises.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. El cuarto campo de un grupo está vacío. ¿Significa que nadie pertenece a ese grupo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No. Ese campo es opcional: solo lista usuarios que se han añadido explícitamente. Quien tenga ese grupo como principal (por el GID de <code>/etc/passwd</code>) pertenece a él aunque su nombre no aparezca. Compruébalo con <code>id</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Escribes <code>groupadd --help</code> y te dice «orden no encontrada». ¿Está el comando instalado?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Sí, lo está. Es un comando de administración y no aparece en el PATH de un usuario normal. Con <code>sudo groupadd --help</code> funciona.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Vas a crear el grupo <code>desarrollo</code> en un servidor de la empresa. ¿Cómo lo haces?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Con un GID elegido por ti y por encima de 3000: <code>sudo groupadd -g 3000 desarrollo</code>. Dejar que numere el sistema funciona, pero en producción genera confusión, y por debajo de 1000 se pisan los grupos del sistema.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/49-shadow-y-caducidad-de-claves" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/51-crear-usuarios-useradd" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

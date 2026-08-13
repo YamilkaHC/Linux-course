@@ -1,0 +1,185 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 62. Fuente: transcripciones/video_47.md (primera parte: modo ex, :s, /g, :%s y undo con u)
+---
+
+<Layout titulo="Buscar y reemplazar en vi — Curso Linux" descripcion="Sustituye texto en vi con :s, amplíalo a toda la línea con /g y a todo el fichero con :%s, y deshaz cualquier cambio con u.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 62</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+      <span class="etiqueta-saltar">Saltar</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Buscar y reemplazar en vi</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Cambiar una palabra en las mil líneas de un fichero de configuración. Una orden y listo.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>El <strong>tercer modo</strong> de <code>vi</code>, el que se abre con <code>:</code>, y la estructura fija de una sustitución.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Los dos interruptores que lo cambian todo: la <code>g</code> del final y el <code>%</code> del principio.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A deshacer con <code>u</code>. Imprescindible cuando una sustitución global sale mal.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">El tercer modo</h2>
+    <p class="mt-4">Ya conoces el modo comando y el <a href="/Linux-course/lecciones/58-insertar-texto-en-vi">modo edición</a>. Hay un tercero, llamado <strong>modo ex</strong>, que se abre pulsando <code>:</code> en modo comando.</p>
+    <p class="mt-4">Igual que con la búsqueda, el cursor <strong>baja a la esquina inferior izquierda</strong> y ahí escribes la orden completa. Es el modo donde viven las operaciones «de fichero»: sustituir, guardar, salir.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Una sustitución, pieza a pieza</h2>
+    <p class="mt-4">Colócate en una línea que contenga la letra <code>a</code> y escribe:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>:s/a/e/</code></pre>
+    <p class="mt-4">Al pulsar Enter, la <strong>primera</strong> <code>a</code> de esa línea se convierte en <code>e</code>. Desmontemos la orden:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Trozo</th>
+            <th class="text-left p-3 border-b border-line font-bold">Qué es</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>:</code></td><td class="p-3 border-b border-line">Abre el modo ex</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>s</code></td><td class="p-3 border-b border-line">Sustituir (de <em>substitute</em>)</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>/a/</code></td><td class="p-3 border-b border-line">Lo que se busca</td></tr>
+          <tr><td class="p-3"><code>e/</code></td><td class="p-3">Por lo que se cambia, con su <strong>barra de cierre</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">No olvides la barra final</p>
+      <p class="!mt-0">Las tres barras son obligatorias: <code>s/</code><em>busca</em><code>/</code><em>cambia</em><code>/</code>. Si te dejas la última, <code>vi</code> no reconoce el comando. Es el error más habitual al empezar.</p>
+    </div>
+
+    <p class="mt-4">Y una advertencia importante sobre el alcance: <strong>por defecto solo actúa en la línea donde está el cursor, y solo en la primera coincidencia</strong>. Si escribes <code>:s/a/e/</code> en un párrafo lleno de aes, cambiará exactamente una.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Sitúate en una línea con varias aes y ejecuta <code>:s/a/e/</code>. <strong>Meta:</strong> comprobar que solo ha cambiado una letra, y localizar cuál.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">La g: toda la línea</h2>
+    <p class="mt-4">Añade una <code>g</code> —de <em>global</em>— después de la última barra:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>:s/e/*/g</code></pre>
+    <p class="mt-4">Ahora <strong>todas</strong> las <code>e</code> de esa línea se convierten en asteriscos, no solo la primera.</p>
+    <p class="mt-4">Un detalle que confunde: puede parecer que ha cambiado varias líneas de la pantalla. No es así. Recuerda que <strong>una línea larga se dibuja partida en varios renglones</strong> según el ancho de la ventana; para <code>vi</code> sigue siendo una sola línea.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El %: todo el fichero</h2>
+    <p class="mt-4">Para salir de la línea actual, se antepone <code>%</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>:%s/tierra/marte/       → la PRIMERA "tierra" de CADA línea del fichero
+:%s/tierra/marte/g      → TODAS las "tierra" de TODO el fichero</code></pre>
+    <p class="mt-4">Ahí están las cuatro combinaciones posibles, y conviene tenerlas claras porque la diferencia entre una y otra puede ser un desastre en un fichero de configuración:</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 205" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Los dos interruptores</text>
+
+        <text x="150" y="48" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">sin g</text>
+        <text x="400" y="48" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">con g</text>
+
+        <text x="40" y="90" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">sin %</text>
+        <rect x="80" y="60" width="140" height="52" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="150" y="82" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">:s/a/e/</text>
+        <text x="150" y="100" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">1 vez, 1 línea</text>
+
+        <rect x="330" y="60" width="140" height="52" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="400" y="82" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">:s/a/e/g</text>
+        <text x="400" y="100" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">toda la línea</text>
+
+        <text x="40" y="152" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">con %</text>
+        <rect x="80" y="122" width="140" height="52" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="150" y="144" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">:%s/a/e/</text>
+        <text x="150" y="162" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">1 vez por línea</text>
+
+        <rect x="330" y="122" width="140" height="52" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="400" y="144" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">:%s/a/e/g</text>
+        <text x="400" y="162" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">todo el fichero</text>
+
+        <text x="280" y="196" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">% amplía a todas las líneas · g amplía a todas las coincidencias</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Dos letras y cuatro alcances distintos.</figcaption>
+    </figure>
+
+    <p class="mt-4">La forma completa, <code>:%s/viejo/nuevo/g</code>, es la que usarás casi siempre: <strong>cambia todo en todo el fichero</strong>. Es también la más peligrosa, así que conviene tener a mano lo siguiente.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Prueba las cuatro variantes seguidas sobre una misma palabra, deshaciendo entre una y otra: <code>:s/e/*/</code>, <code>:s/e/*/g</code>, <code>:%s/e/*/</code> y <code>:%s/e/*/g</code>. <strong>Meta:</strong> ver con tus ojos qué añade cada letra.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Deshacer: u</h2>
+    <p class="mt-4">Acabas de convertir todas las letras de tu documento en asteriscos. Tranquilo: en modo comando, pulsa <code>u</code>.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>u     → deshace el último cambio
+1 cambio; antes de #39  hace 57 segundos</code></pre>
+    <p class="mt-4"><code>u</code> viene de <em>undo</em> y es tu red de seguridad. Además, el editor te informa abajo de qué ha deshecho y cuándo se hizo. Puedes pulsarla varias veces para ir retrocediendo cambios.</p>
+    <p class="mt-4">Con esto ya puedes experimentar sin miedo: si una sustitución global destroza el texto, <code>u</code> lo devuelve. Y como aún no has guardado —eso viene en la siguiente lección—, el fichero del disco sigue intacto de todos modos.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>:%s/a/#/g</code> para destrozar el texto a propósito y deshazlo con <code>u</code>. <strong>Meta:</strong> comprobar que una sola tecla revierte una sustitución que ha tocado cientos de sitios.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: sustituciones con puntería</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>En una línea concreta, cambia una sola letra con <code>:s/a/e/</code> y después todas las de esa línea con <code>:s/a/e/g</code>. Deshaz con <code>u</code> entre las dos pruebas.</li>
+        <li>Sustituye una palabra en todo el documento con <code>:%s/tierra/marte/g</code> y localiza los cambios con la búsqueda <code>/marte</code> y <code>n</code>, como en <a href="/Linux-course/lecciones/61-buscar-en-vi">la lección anterior</a>.</li>
+        <li>Comprueba la diferencia entre <code>:%s/a/#/</code> y <code>:%s/a/#/g</code> sobre el mismo texto, deshaciendo en medio. Explica en una línea qué hace exactamente cada uno.</li>
+        <li><strong>Reto:</strong> caso real. Genera un fichero de configuración de prueba con <code>cp /etc/profile perfil.txt</code>, ábrelo con <code>vi perfil.txt</code> y sustituye todas las apariciones de <code>PATH</code> por <code>RUTA</code>. Cuenta cuántas eran buscando antes con <code>/PATH</code> y <code>n</code>. Sal <strong>sin guardar</strong> con <code>:q!</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Los dos puntos abren el <strong>modo ex</strong>, donde se escriben las órdenes en la última línea de la pantalla. La sustitución tiene forma fija: <code>:s/busca/cambia/</code>, con las tres barras obligatorias.</p>
+      <p>Sin más, actúa solo sobre la primera coincidencia de la línea actual. La <code>g</code> final la extiende a <strong>toda la línea</strong> y el <code>%</code> inicial a <strong>todas las líneas</strong>. La forma completa es <code>:%s/viejo/nuevo/g</code>.</p>
+      <p><code>u</code> deshace el último cambio en modo comando, y el editor informa de qué ha revertido. Es la red de seguridad para experimentar con sustituciones globales.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Ejecutas <code>:s/error/aviso/</code> en un fichero con cincuenta «error». ¿Cuántos cambian?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Uno: la primera aparición de la línea donde está el cursor. Para toda la línea haría falta <code>:s/error/aviso/g</code>, y para todo el fichero <code>:%s/error/aviso/g</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué diferencia hay entre <code>:%s/a/e/</code> y <code>:%s/a/e/g</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">El <code>%</code> hace que las dos recorran todo el fichero, pero la primera solo cambia <strong>una</strong> coincidencia por línea. Con la <code>g</code> cambia <strong>todas</strong> las coincidencias de cada línea.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Una sustitución global te ha destrozado el documento. ¿Qué haces?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Pulsar <code>u</code> en modo comando para deshacerla. Y si aún no has guardado, siempre puedes salir sin guardar y volver a abrir el fichero tal como estaba.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/61-buscar-en-vi" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/63-guardar-y-salir-de-vi" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

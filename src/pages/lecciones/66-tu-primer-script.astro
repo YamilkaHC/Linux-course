@@ -1,0 +1,223 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 66. Fuente: transcripciones/video_49.md (introducción a shell scripting)
+---
+
+<Layout titulo="Tu primer script en bash — Curso Linux" descripcion="Qué es un shell script, cómo se escribe con shebang y comentarios, cómo darle permisos de ejecución y cómo lanzarlo desde cualquier directorio con el PATH.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 66</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Tu primer script en bash</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Todo lo que has escrito en la terminal durante el curso, guardado en un fichero y ejecutable las veces que quieras.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Qué es realmente un script: <strong>comandos de la shell puestos en fila</strong>, nada más exótico que eso.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Los tres pasos obligatorios —<strong>crear, dar permisos, ejecutar</strong>— que valen igual para un script de tres líneas que para uno de trescientas.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Qué es esa primera línea rara con <code>#!</code> y por qué conviene ponerla siempre.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Empieza la programación</h2>
+    <p class="mt-4">Un <strong>shell script</strong> es un programa hecho con comandos de la shell. Los mismos que llevas usando todo el curso —<code>ls</code>, <code>grep</code>, <code>date</code>, <code>tar</code>— más una serie de estructuras propias: <strong>variables, condiciones y bucles</strong>, como en cualquier lenguaje de programación.</p>
+    <p class="mt-4">La idea de fondo es simple: en vez de teclear los comandos uno a uno cada vez, los metes en un fichero y ejecutas el fichero. Se hacen todos seguidos, y lo puedes reutilizar siempre que quieras.</p>
+    <p class="mt-4">No hace falta saber programar para empezar. Y si vienes de otros lenguajes, verás que la lógica es la de siempre.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 1: crear el script</h2>
+    <p class="mt-4">Abre tu editor —<code>edit</code> si tienes entorno gráfico, o <a href="/Linux-course/lecciones/57-editor-vi-primeros-pasos">vi</a> si estás en un servidor— y escribe esto:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>#!/bin/bash
+
+# mi primer programa
+echo "Este es mi primer script de Linux"</code></pre>
+    <p class="mt-4">Guárdalo como <strong><code>s1.sh</code></strong>. Si tu editor colorea el texto al guardarlo, es que ya ha reconocido que es un script.</p>
+    <p class="mt-4">Compruébalo desde la terminal con lo que ya sabes:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat s1.sh
+$ vi s1.sh          # abajo verás las líneas y el tamaño</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Qué hay dentro</h2>
+    <p class="mt-4">Tres elementos, y solo uno es nuevo.</p>
+    <p class="mt-4"><strong>La almohadilla es un comentario.</strong> Todo lo que va detrás de <code>#</code> lo ignora la shell; sirve para explicarle a un humano qué hace el programa.</p>
+    <p class="mt-4"><strong><code>echo</code> escribe en pantalla</strong> lo que le pases. Es el mismo comando que ya usabas suelto en la terminal:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo hola
+hola</code></pre>
+    <p class="mt-4">Y lo nuevo: <strong>la primera línea, <code>#!/bin/bash</code></strong>. Parece un comentario porque empieza por almohadilla, pero no lo es. Esa pareja <code>#!</code> —el <em>shebang</em>— le dice a Linux <strong>con qué shell debe ejecutar el programa</strong>.</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Primera línea</th>
+            <th class="text-left p-3 border-b border-line font-bold">Ejecuta con</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>#!/bin/bash</code></td><td class="p-3 border-b border-line">bash, la shell habitual en Linux</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>#!/bin/sh</code></td><td class="p-3 border-b border-line">sh</td></tr>
+          <tr><td class="p-3"><code>#!/bin/ksh</code></td><td class="p-3">korn shell</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-4">No es obligatorio, pero <strong>ponlo siempre</strong>: evita que el sistema se equivoque de intérprete. Recuerda que puedes ver cuál usas tú con la variable <code>$SHELL</code> de <a href="/Linux-course/lecciones/37-variables-de-entorno">variables de entorno</a>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Comandos en fila</h2>
+    <p class="mt-4">Amplía el script para ver la idea clara:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>#!/bin/bash
+
+# mi primer programa
+echo "Este es mi primer script de Linux"
+echo "Esta es la segunda línea"
+date
+
+# fin de programa</code></pre>
+    <p class="mt-4">Eso es todo lo que hay: <strong>una serie de comandos que se ejecutan uno detrás de otro</strong>. El <a href="/Linux-course/lecciones/18-fecha-y-tiempo-activo">date</a> del final es exactamente el mismo que usarías suelto.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>s1.sh</code> con esas siete líneas y míralo con <code>cat s1.sh</code>. <strong>Meta:</strong> distinguir a simple vista cuáles son comentarios, cuál es el shebang y cuáles son comandos de verdad.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 2: hacerlo ejecutable</h2>
+    <p class="mt-4">Míralo con <code>ls -l</code> y verás el problema:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -l s1.sh
+-rw-r--r-- 1 user001 user001 75 ago  4 16:40 s1.sh</code></pre>
+    <p class="mt-4">Hay <code>r</code> y <code>w</code>, pero <strong>no hay <code>x</code></strong>. Sin permiso de ejecución, ese fichero no es un programa, es solo texto. Como aprendiste en <a href="/Linux-course/lecciones/34-cambiar-permisos-chmod">chmod</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ chmod +x s1.sh
+$ ls -l s1.sh
+-rwxr-xr-x 1 user001 user001 75 ago  4 16:40 s1.sh</code></pre>
+    <p class="mt-4">En las distribuciones modernas, además, el nombre cambia de color en el <code>ls</code>.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">La extensión .sh no hace nada</p>
+      <p class="!mt-0">En Windows, un <code>.bat</code> o un <code>.exe</code> es ejecutable por su extensión. <strong>En Linux las extensiones son irrelevantes</strong>: poner <code>.sh</code> no le da permisos de ejecución a nadie. Se usa por pura <strong>buena práctica</strong>, para que cualquiera reconozca de un vistazo que ese fichero es un script. El permiso hay que darlo siempre a mano.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 3: ejecutarlo</h2>
+    <p class="mt-4">Escribe su nombre y verás otro tropiezo clásico:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ s1.sh
+s1.sh: orden no encontrada</code></pre>
+    <p class="mt-4">Pero si el fichero está justo ahí. La razón es la diferencia de fondo que ya viste en <a href="/Linux-course/lecciones/38-crear-variables-y-modificar-path">modificar el PATH</a>: <strong>Windows busca primero en el directorio actual y luego en el PATH; Linux busca solo en el PATH</strong>. Y tu home no está en él.</p>
+    <p class="mt-4">Dos formas de arreglarlo ahora mismo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ /home/user001/s1.sh      # ruta completa
+$ ./s1.sh                  # el punto es "el directorio actual"
+
+Este es mi primer script de Linux
+Esta es la segunda línea
+vie 04 ago 2026 16:42:11 CEST</code></pre>
+    <p class="mt-4">Funciona. Ahí tienes tus tres comandos ejecutados en orden.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 170" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Los tres pasos, siempre</text>
+
+        <rect x="24" y="46" width="150" height="62" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="99" y="70" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">1. crear</text>
+        <text x="99" y="90" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">vi s1.sh</text>
+
+        <line x1="180" y1="77" x2="200" y2="77" stroke="#1A1A1A"/>
+        <path d="M200 77 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+
+        <rect x="206" y="46" width="150" height="62" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="281" y="70" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">2. permisos</text>
+        <text x="281" y="90" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">chmod +x s1.sh</text>
+
+        <line x1="362" y1="77" x2="382" y2="77" stroke="#1A1A1A"/>
+        <path d="M382 77 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+
+        <rect x="388" y="46" width="150" height="62" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="463" y="70" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">3. ejecutar</text>
+        <text x="463" y="90" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">./s1.sh</text>
+
+        <line x1="24" y1="130" x2="538" y2="130" stroke="#E5E1D8"/>
+        <text x="280" y="152" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">da igual que el script tenga 3 líneas o 300: el orden no cambia</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Saltarte el paso 2 es el error más común al empezar.</figcaption>
+    </figure>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Intenta ejecutar <code>s1.sh</code> <strong>antes</strong> de darle permisos y después de dárselos, en ambos casos con <code>./</code> delante. <strong>Meta:</strong> distinguir el error de «orden no encontrada» del de «permiso denegado».</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Ejecutarlo desde cualquier sitio</h2>
+    <p class="mt-4">Escribir <code>./</code> o la ruta completa cansa. La solución es la de siempre: <strong>meter tus scripts en el PATH</strong>. Organízalos primero en su propio directorio:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ mkdir scripts
+$ cp s1.sh scripts
+$ echo $PATH
+/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games</code></pre>
+    <p class="mt-4">Tu directorio no está ahí. Añádelo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ PATH=$PATH:/home/user001/scripts
+$ echo $PATH
+/usr/local/bin:/usr/bin:/bin:...:/home/user001/scripts</code></pre>
+    <p class="mt-4">Recuerda el porqué de cada parte: los directorios van separados por <code>:</code>, y <strong>el <code>$PATH</code> del principio es imprescindible</strong> para conservar lo que ya había. Sin él perderías el acceso a todos los comandos del sistema.</p>
+    <p class="mt-4">Ahora prueba desde donde quieras:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd Documentos
+$ ls                    # el script no está aquí
+$ s1.sh                 # y aun así se ejecuta</code></pre>
+    <p class="mt-4">Linux no lo encuentra en el directorio actual, se va al PATH, lo localiza en <code>scripts</code> y lo ejecuta. Sin <code>./</code> y sin rutas.</p>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: del fichero al comando</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Crea <code>s1.sh</code> con shebang, un comentario, dos <code>echo</code> y un <code>date</code>. Compruébalo con <code>cat</code>.</li>
+        <li>Mira sus permisos con <code>ls -l</code>, intenta ejecutarlo con <code>./s1.sh</code>, dale permisos con <code>chmod +x</code> y vuelve a intentarlo. Anota los dos mensajes distintos.</li>
+        <li>Crea <code>~/scripts</code>, copia el script dentro, añade ese directorio al PATH y ejecútalo desde <code>/tmp</code> sin rutas ni <code>./</code>.</li>
+        <li><strong>Reto:</strong> escribe un script útil de verdad. Llámalo <code>backup.sh</code> y que haga tres cosas: un <code>echo</code> anunciando el backup, un <code>tar czvf /tmp/backup.tar.gz</code> de tu directorio de documentos —de <a href="/Linux-course/lecciones/45-zip-y-tar-comprimido">tar comprimido</a>— y un <code>date</code> final. Dale permisos y ejecútalo.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Un script es un fichero con comandos de la shell que se ejecutan uno detrás de otro, y admite además variables, condiciones y bucles. La primera línea <code>#!/bin/bash</code> —el shebang— indica con qué shell ejecutarlo: no es obligatoria, pero conviene ponerla siempre. Todo lo que va tras <code>#</code> es comentario.</p>
+      <p>Hay tres pasos invariables: <strong>crear</strong> el fichero, <strong>darle permisos</strong> con <code>chmod +x</code> y <strong>ejecutarlo</strong>. La extensión <code>.sh</code> es solo una buena práctica: en Linux no otorga ningún permiso.</p>
+      <p>Linux busca los ejecutables <strong>solo en el PATH</strong>, no en el directorio actual; por eso hace falta <code>./s1.sh</code> o la ruta completa. Añadiendo tu carpeta con <code>PATH=$PATH:/home/usuario/scripts</code> puedes llamarlo por su nombre desde cualquier sitio.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Guardas un fichero como <code>programa.sh</code>. ¿Ya es ejecutable?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No. En Linux la extensión no otorga permisos: es solo una convención para que se reconozca a simple vista. Hay que dárselos con <code>chmod +x programa.sh</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. El script está en tu directorio actual, tiene permisos, y aun así <code>s1.sh</code> devuelve «orden no encontrada». ¿Por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque Linux busca los ejecutables solo en el PATH, y el directorio actual no está en él. Ejecútalo con <code>./s1.sh</code>, con su ruta completa, o añade su carpeta al PATH.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué hace exactamente la línea <code>#!/bin/bash</code> si la almohadilla es un comentario?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">La pareja <code>#!</code> es un caso especial: indica al sistema <strong>con qué intérprete</strong> ejecutar el script. Con <code>/bin/bash</code> lo ejecuta bash; podría ser <code>/bin/sh</code> o <code>/bin/ksh</code>. Solo funciona en la primera línea del fichero.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/65-trucos-de-vi" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/67-path-permanente-y-source" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

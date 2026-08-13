@@ -1,0 +1,171 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 63. Fuente: transcripciones/video_47.md (segunda parte: :w, :q, :q!, :wq, :x, :w nombre)
+---
+
+<Layout titulo="Guardar y salir de vi — Curso Linux" descripcion="Guarda con :w, sal con :q, descarta cambios con :q! y combina ambas con :wq o :x; además, guarda con otro nombre usando :w nombre.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 63</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">6 min de lectura</span>
+      <span class="etiqueta-arribita">Por arribita</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Guardar y salir de vi</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      La pregunta que todo el mundo busca en internet la primera vez. Aquí están las cinco órdenes que la responden.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Que mientras editas <strong>no estás tocando el fichero real</strong>: todo vive en memoria hasta que guardas.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Las órdenes que necesitas: <code>:w</code> guardar, <code>:q</code> salir, <code>:q!</code> salir descartando, <code>:wq</code> y <code>:x</code> hacer las dos cosas.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A guardar con otro nombre desde dentro del editor con <code>:w nombre</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Nada es real hasta que guardas</h2>
+    <p class="mt-4">Llevas cuatro lecciones borrando, pegando y sustituyendo, y el fichero del disco sigue como estaba. Eso es porque <code>vi</code> trabaja sobre <strong>una copia en memoria</strong>.</p>
+    <p class="mt-4">Es lo mismo que ocurre en cualquier editor de Windows: escribes, cambias, revuelves… y hasta que no pulsas «guardar» el fichero original no se modifica. Aquí el «guardar» son dos caracteres.</p>
+    <p class="mt-4">Todas estas órdenes se escriben en el <a href="/Linux-course/lecciones/62-buscar-y-reemplazar-en-vi">modo ex</a>, el que se abre con <code>:</code> desde modo comando. Si vienes de escribir, pulsa <code>Esc</code> primero.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Guardar: :w</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>:w
+"planeta" 24L, 1180B escritos</code></pre>
+    <p class="mt-4">La <code>w</code> es de <em>write</em>. Al pulsar Enter, el editor confirma abajo el <strong>nombre del fichero, las líneas y el tamaño</strong> que ha escrito. Ya está en disco, y puedes seguir editando.</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Los dos puntos son imprescindibles</p>
+      <p class="!mt-0">Si pulsas <code>w</code> a secas, sin los dos puntos, no guardas nada: estarás <a href="/Linux-course/lecciones/57-editor-vi-primeros-pasos">saltando de palabra en palabra</a>, que es lo que hace esa tecla en modo comando. Guardar es <code>:w</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Salir: :q</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>:q       → cierra el editor y vuelves a la terminal</code></pre>
+    <p class="mt-4">Funciona <strong>siempre que no haya cambios pendientes</strong>. Si acabas de hacer <code>:w</code>, sales sin más. Pero si has tocado algo y no lo has guardado:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>:q
+E37: No se ha guardado desde el último cambio</code></pre>
+    <p class="mt-4">No es un fallo: el editor te está protegiendo de perder trabajo sin darte cuenta.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Salir tirando los cambios: :q!</h2>
+    <p class="mt-4">Cuando el aviso anterior aparece pero tú <em>sí</em> quieres descartar lo hecho, añade la admiración:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>:q!      → sale sin guardar nada</code></pre>
+    <p class="mt-4">Es la orden que llevas usando toda la sección para practicar sin consecuencias. La admiración significa «sé lo que hago, hazlo igualmente», y ese matiz aparece en más sitios de Linux.</p>
+    <p class="mt-4">Compruébalo: abre el fichero, escribe una línea con <code>i</code>, sal con <code>:q!</code> y vuelve a abrirlo. La línea no está.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Añade una línea cualquiera al fichero e intenta salir con <code>:q</code>: verás el aviso. Sal entonces con <code>:q!</code> y vuelve a abrirlo para confirmar que no se guardó. <strong>Meta:</strong> distinguir el aviso de un error real.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Las dos cosas a la vez: :wq y :x</h2>
+    <p class="mt-4">Guardar y salir es tan frecuente que existe la orden combinada:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>:wq      → guarda y sale
+:x       → guarda y sale (exactamente lo mismo)</code></pre>
+    <p class="mt-4">Las dos hacen lo mismo. <code>:x</code> es más corta y es <strong>la que más usan los administradores de Linux</strong> en el día a día. Elige la que prefieras, pero reconoce las dos porque las verás en cualquier manual.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 195" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Cinco salidas</text>
+
+        <rect x="30" y="44" width="150" height="56" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="105" y="68" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">:w</text>
+        <text x="105" y="88" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">guarda y sigues dentro</text>
+
+        <rect x="205" y="44" width="150" height="56" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="280" y="68" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">:q</text>
+        <text x="280" y="88" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">sale si no hay cambios</text>
+
+        <rect x="380" y="44" width="150" height="56" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="455" y="68" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">:q!</text>
+        <text x="455" y="88" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">sale y descarta todo</text>
+
+        <rect x="120" y="116" width="150" height="56" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="195" y="140" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">:wq</text>
+        <text x="195" y="160" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">guarda y sale</text>
+
+        <rect x="290" y="116" width="150" height="56" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="365" y="140" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">:x</text>
+        <text x="365" y="160" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">lo mismo, más corto</text>
+
+        <text x="280" y="188" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">la admiración siempre significa «hazlo igualmente»</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Guardar, salir, o las dos cosas.</figcaption>
+    </figure>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Escribe una línea nueva y sal con <code>:wq</code>. Vuelve a entrar, escribe otra y sal con <code>:x</code>. <strong>Meta:</strong> confirmar con <code>cat</code> desde la terminal que las dos líneas están guardadas.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Guardar con otro nombre: :w nombre</h2>
+    <p class="mt-4">Estás editando <code>planeta</code> y quieres conservar el resultado en un fichero distinto sin salir del editor:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>:w la_tierra
+"la_tierra" 24L, 1180B escritos</code></pre>
+    <p class="mt-4">Sal y compruébalo desde la terminal:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls
+planeta  la_tierra
+
+$ vi la_tierra      → contiene lo mismo que planeta</code></pre>
+    <p class="mt-4">Es el equivalente al «guardar como» de toda la vida: te llevas una copia con el contenido actual, muy útil antes de tocar un fichero de configuración importante.</p>
+    <p class="mt-4">Hay más opciones para guardar y salir, pero con estas cinco cubres prácticamente todo lo que harás en un entorno real.</p>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: el ciclo completo</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Abre un fichero, añade una línea con <code>i</code>, guarda con <code>:w</code> y observa el mensaje de confirmación. Sigue editando y guarda otra vez.</li>
+        <li>Provoca el aviso: haz un cambio e intenta <code>:q</code>. Lee el mensaje y sal después con <code>:q!</code>. Verifica desde la terminal con <code>cat</code> que ese cambio no está.</li>
+        <li>Haz una copia de seguridad sin salir del editor: ábrelo, ejecuta <code>:w copia_seguridad.txt</code> y confirma con <code>ls</code> que existe.</li>
+        <li><strong>Reto:</strong> flujo real de administrador. Copia un fichero de configuración con <code>cp /etc/profile perfil.txt</code>, ábrelo, guarda una copia intacta con <code>:w perfil.bak</code>, sustituye algo con <code>:%s/PATH/RUTA/g</code>, guarda y sal con <code>:x</code>, y compara los dos ficheros con <code>diff perfil.txt perfil.bak</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Mientras editas, <code>vi</code> trabaja sobre una copia en memoria: el fichero del disco no cambia hasta que guardas. Todas las órdenes de guardado se escriben en modo ex, con <code>:</code> delante.</p>
+      <p><code>:w</code> guarda y confirma nombre, líneas y tamaño. <code>:q</code> sale, pero avisa si hay cambios sin guardar; <code>:q!</code> sale descartándolos. <code>:wq</code> y <code>:x</code> guardan y salen —<code>:x</code> es la forma corta que más se usa—.</p>
+      <p><code>:w nombre</code> guarda el contenido actual con otro nombre, como un «guardar como». Muy útil para dejar una copia antes de modificar un fichero importante.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Intentas salir con <code>:q</code> y te dice que no se ha guardado desde el último cambio. ¿Qué opciones tienes?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Dos: guardar y salir con <code>:wq</code> (o <code>:x</code>), o descartar los cambios con <code>:q!</code>. El aviso no es un error, es el editor evitando que pierdas trabajo por descuido.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Pulsas <code>w</code> para guardar y el cursor empieza a saltar por el texto. ¿Qué ha pasado?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Faltan los dos puntos. En modo comando, <code>w</code> a secas mueve el cursor a la siguiente palabra. Guardar es <code>:w</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Vas a modificar un fichero de configuración importante. ¿Cómo te haces una copia sin salir de vi?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Con <code>:w copia.bak</code> nada más abrirlo: guarda el contenido actual con ese otro nombre y te deja seguir editando el original. Después ya puedes trabajar con red.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/62-buscar-y-reemplazar-en-vi" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/64-recuperar-un-fichero-en-vi" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

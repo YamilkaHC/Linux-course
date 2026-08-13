@@ -1,0 +1,162 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 15. Fuente: transcripciones/video_12.md (autocompletado con TAB, history, sesiones virtuales, who)
+---
+
+<Layout titulo="Autocompletado, historial y sesiones — Curso Linux" descripcion="Escribe más rápido con la tecla TAB, reutiliza comandos con history, !! y !número, y abre varias sesiones a la vez con Ctrl+Alt+F2/F3/F4.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 15</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">5 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Escribir menos: autocompletado, historial y sesiones</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Tras aprender a <a href="/Linux-course/lecciones/07-navegar-ficheros">moverte por el sistema</a>, toca hacerlo rápido: la tecla <kbd>TAB</kbd> completa nombres por ti, <code>history</code> te devuelve comandos que ya escribiste, y con <kbd>Ctrl+Alt+Fn</kbd> abres varias sesiones al mismo tiempo.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A <strong>autocompletar</strong> nombres de directorios y comandos con la tecla <kbd>TAB</kbd>, y a ver todas las opciones con doble <kbd>TAB</kbd>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A reutilizar comandos con <strong><code>history</code></strong>: repetir el último con <code>!!</code>, ejecutar uno por su número con <code>!N</code> y borrar entradas con <code>history -d</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A abrir <strong>varias sesiones</strong> a la vez con <kbd>Ctrl+Alt+F3</kbd> y volver al escritorio con <kbd>Ctrl+Alt+F2</kbd>, y a verlas todas con <a href="/Linux-course/lecciones/12-ver-mas-y-explorar"><code>who</code></a>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">TAB: que Linux escriba por ti</h2>
+    <p class="mt-4">Estás en tu carpeta y quieres entrar en <code>Vídeos</code>. Escribe la primera letra y pulsa <kbd>TAB</kbd>: si solo hay <strong>un</strong> directorio que empiece así, Linux lo completa solo.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd V<kbd>TAB</kbd>          # si solo "Vídeos" empieza por V, se completa: cd Vídeos/</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Escribe <code>cd</code>, la primera letra de una de tus carpetas y pulsa <kbd>TAB</kbd>. <strong>Meta:</strong> ver cómo el nombre se completa solo sin teclearlo entero.</p>
+    </div>
+
+    <p class="mt-4">¿Y si hay <strong>dos</strong> que empiezan igual, como <code>Descargas</code> y <code>Documentos</code>? Al pulsar <kbd>TAB</kbd> solo oirás un <em>bip</em>: el sistema no sabe cuál quieres. Añade otra letra para desambiguar (<code>Do</code> apunta a <code>Documentos</code>) y vuelve a pulsar <kbd>TAB</kbd>.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 170" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Qué hace TAB según lo que coincide</text>
+        <rect x="20" y="45" width="150" height="100" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="95" y="72" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">1 coincidencia</text>
+        <text x="95" y="100" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">TAB completa</text>
+        <text x="95" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">el nombre</text>
+        <rect x="185" y="45" width="150" height="100" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="72" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">Varias</text>
+        <text x="260" y="100" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">1 TAB = bip</text>
+        <text x="260" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">2 TAB = lista</text>
+        <rect x="350" y="45" width="150" height="100" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="425" y="72" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">Ninguna</text>
+        <text x="425" y="100" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">bip de alerta,</text>
+        <text x="425" y="118" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">no completa</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Una coincidencia completa; varias, doble TAB las lista; ninguna, solo suena.</figcaption>
+    </figure>
+
+    <p class="mt-4">El <strong>doble <kbd>TAB</kbd></strong> muestra <strong>todas</strong> las opciones que empiezan por lo que llevas escrito, y funciona igual con <strong>comandos</strong>: escribe <code>mk</code>, pulsa <kbd>TAB</kbd> dos veces y verás todos los que empiezan por <code>mk</code> (como <a href="/Linux-course/lecciones/09-crear-y-copiar"><code>mkdir</code></a>).</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ mk<kbd>TAB</kbd><kbd>TAB</kbd>       # lista todos los comandos que empiezan por "mk"
+$ ls /tmp/s<kbd>TAB</kbd>      # completa un fichero de /tmp que empiece por "s"</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Escribe la letra <code>b</code> y pulsa <kbd>TAB</kbd> dos veces. <strong>Meta:</strong> ver la lista de todos los comandos del sistema que empiezan por <code>b</code>. Repítelo con <code>mk</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">history: todo lo que ya escribiste</h2>
+    <p class="mt-4"><code>history</code> lista <strong>todos</strong> los comandos que has lanzado, cada uno con un número; con una cifra ves solo los últimos: <code>history 5</code> muestra los cinco más recientes.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ history               # lista completa, numerada
+$ history 5             # solo los últimos 5 comandos</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>history 5</code>. <strong>Meta:</strong> reconocer tus últimos comandos y fijarte en el número que lleva cada uno a la izquierda.</p>
+    </div>
+
+    <p class="mt-4">Esos números reejecutan sin volver a teclear. Con <code>!!</code> repites el <strong>último</strong> comando; con <code>!N</code> ejecutas el que tenga ese número. Si <code>clear</code> era el 299, <code>!299</code> lo vuelve a lanzar.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -l /tmp
+$ !!                    # repite el último comando: ls -l /tmp
+$ !299                  # ejecuta el comando número 299 del historial (p. ej. clear)</code></pre>
+
+    <p class="mt-4">Con <code>history -d</code> seguido de un número <strong>borras</strong> esa entrada del historial.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ history -d 481        # borra del historial el comando número 481</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lanza cualquier comando, luego escribe <code>!!</code> y pulsa <kbd>Enter</kbd>. <strong>Meta:</strong> comprobar que se vuelve a ejecutar el mismo comando sin reescribirlo.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Varias sesiones a la vez: Ctrl+Alt+Fn</h2>
+    <p class="mt-4">A veces quieres trabajar como tu <a href="/Linux-course/lecciones/06-usuarios-y-ficheros">usuario normal</a> en un sitio y probar como otro usuario en paralelo. Linux tiene <strong>consolas virtuales</strong>: <kbd>Ctrl+Alt+F3</kbd> sale del modo gráfico a una terminal de texto donde inicias sesión con otro usuario; <kbd>Ctrl+Alt+F4</kbd> abre una tercera, y así.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>Ctrl+Alt+F3    # abre una consola de texto (login con otro usuario)
+Ctrl+Alt+F4    # abre otra consola distinta
+Ctrl+Alt+F2    # vuelve a tu sesión gráfica (el escritorio)</code></pre>
+    <p class="mt-4">La vuelta al escritorio suele ser <kbd>Ctrl+Alt+F2</kbd>. No cierras nada al cambiar: las sesiones siguen abiertas en segundo plano; solo saltas entre ellas.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Ojo con la resolución</p>
+      <p class="!mt-2">Si al volver al escritorio la pantalla se ve mal, es un detalle de la máquina virtual, no un fallo: clic derecho → <em>Configuración de pantalla</em> y vuelve a elegir tu resolución.</p>
+    </div>
+
+    <p class="mt-4">¿Cuántas sesiones tienes abiertas y con qué usuario? El comando <a href="/Linux-course/lecciones/12-ver-mas-y-explorar"><code>who</code></a> lista cada sesión conectada, su usuario y desde qué terminal, con fecha y hora.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ who                   # todas las sesiones abiertas: usuario, terminal, fecha/hora</code></pre>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: velocidad en la terminal</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Entra en una de tus carpetas usando solo la primera letra y <kbd>TAB</kbd>. Luego escribe <code>D</code> y pulsa <kbd>TAB</kbd> dos veces: si tienes <code>Descargas</code> y <code>Documentos</code>, verás las dos listadas.</li>
+        <li>Escribe <code>mk</code> y pulsa <kbd>TAB</kbd> dos veces para listar los comandos que empiezan por <code>mk</code>. Repite con la letra <code>b</code>.</li>
+        <li>Lanza <code>history 5</code>, fíjate en el número del penúltimo comando y reejecútalo con <code>!N</code> (sustituye N por ese número). Prueba también <code>!!</code>.</li>
+        <li>Localiza en <code>history 5</code> un comando que no quieras conservar y bórralo con <code>history -d N</code>. <strong>Reto:</strong> abre una consola con <kbd>Ctrl+Alt+F3</kbd>, inicia sesión, vuelve con <kbd>Ctrl+Alt+F2</kbd> y ejecuta <code>who</code> para ver las dos sesiones.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>La tecla <kbd>TAB</kbd> autocompleta nombres de directorios y comandos: una coincidencia se completa sola, varias suenan con un <em>bip</em> y con doble <kbd>TAB</kbd> se listan todas. Es la forma más rápida de escribir sin equivocarte.</p>
+      <p><code>history</code> guarda todos tus comandos numerados; <code>history N</code> muestra los últimos N. Reejecutas el último con <code>!!</code>, uno concreto con <code>!N</code>, y borras una entrada con <code>history -d N</code>.</p>
+      <p>Con <kbd>Ctrl+Alt+F3</kbd> y <kbd>F4</kbd> abres consolas de texto para trabajar con varios usuarios a la vez, y con <kbd>Ctrl+Alt+F2</kbd> vuelves al escritorio. El comando <code>who</code> te muestra todas las sesiones abiertas.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Tienes <code>Descargas</code> y <code>Documentos</code>. Escribes <code>cd D</code> y pulsas <kbd>TAB</kbd> una vez. ¿Qué pasa?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Solo suena un <em>bip</em>: hay dos directorios que empiezan por <code>D</code> y el sistema no sabe cuál quieres. Añades otra letra (<code>cd Do</code>) para desambiguar, o pulsas <kbd>TAB</kbd> otra vez para ver las dos opciones listadas.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué diferencia hay entre <code>!!</code> y <code>!299</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>!!</code> reejecuta el <strong>último</strong> comando que lanzaste. <code>!299</code> ejecuta el comando que tiene el número 299 en el listado de <code>history</code>. Uno es «el anterior», el otro es «uno concreto por su número».</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Para qué sirve <kbd>Ctrl+Alt+F3</kbd> y cómo vuelves al escritorio?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><kbd>Ctrl+Alt+F3</kbd> abre una consola de texto donde puedes iniciar sesión con otro usuario, en paralelo a tu sesión gráfica. Para volver al escritorio pulsas <kbd>Ctrl+Alt+F2</kbd>. Ninguna sesión se cierra al cambiar; solo saltas entre ellas.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/14-espacio-en-disco" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/16-editar-y-localizar-comandos" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

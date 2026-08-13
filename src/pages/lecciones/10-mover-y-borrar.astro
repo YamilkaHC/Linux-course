@@ -1,0 +1,159 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 10. Fuente: transcripciones/video 8.md (mv, rm, rm -i, rmdir, rm -r)
+---
+
+<Layout titulo="Mover, renombrar y borrar — Curso Linux" descripcion="Mueve y renombra archivos con mv, bórralos con rm (-i) y elimina directorios con rmdir y el peligroso rm -r.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 10</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Mover, renombrar y borrar</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Ya sabes crear y copiar. Ahora aprende a reorganizar tu sistema: mover, renombrar y —con mucho cuidado— borrar.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A usar <code>mv</code> para dos cosas con un mismo comando: <strong>mover</strong> un archivo a otra carpeta y <strong>renombrarlo</strong> en su sitio.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A borrar archivos con <code>rm</code> y protegerte con <code>-i</code>. Un borrado en terminal <strong>no va a la papelera</strong>: es definitivo.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A eliminar directorios con <code>rmdir</code> y a conocer el comando más peligroso del curso: <code>rm -r</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <p class="mt-8 text-ink/70">Si vienes de <a href="/Linux-course/lecciones/09-crear-y-copiar"><code>cp</code></a>, notarás que <code>mv</code> se comporta casi igual y acepta las mismas <a href="/Linux-course/lecciones/07-navegar-ficheros">rutas relativas/absolutas</a> y <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo">comodines</a>. La diferencia clave: <strong><code>cp</code> conserva el origen; <code>mv</code> lo quita</strong>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">mv: mover un archivo a otra carpeta</h2>
+    <p class="mt-4"><code>mv</code> (de <em>move</em>) usa la forma <code>mv origen destino</code>. Al contrario que <code>cp</code>, el archivo <strong>desaparece del origen</strong> y aparece en el destino:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ touch f2          # creamos un archivo de prueba
+$ mv f2 /tmp        # lo movemos a /tmp
+$ ls -l             # f2 ya NO está aquí
+$ ls /tmp           # ...está en /tmp</code></pre>
+    <p>Piensa en <code>mv</code> como «cortar y pegar», mientras que <code>cp</code> es «copiar y pegar».</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>touch f2</code>, muévelo con <code>mv f2 /tmp</code> y confirma con <code>ls</code> aquí y <code>ls /tmp</code>. <strong>Meta:</strong> ver que el archivo ya no está en el origen.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">mv: renombrar (mover en el mismo directorio)</h2>
+    <p class="mt-4">Aquí está el truco: si el destino es <strong>el mismo directorio</strong>, mover equivale a <strong>renombrar</strong>. Por eso no existe un comando <code>rename</code> básico: se usa <code>mv</code>.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ touch f2.txt
+$ mv f2.txt f2.dat      # mismo sitio, nuevo nombre = renombrar
+$ ls -l                 # ya no hay f2.txt, ahora es f2.dat</code></pre>
+    <p>También puedes mover y renombrar <strong>a la vez</strong>, indicando la carpeta destino más el nuevo nombre:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ touch f3
+$ mv f3 /tmp/f3.dat     # lo mueve a /tmp Y lo llama f3.dat
+$ ls /tmp/f3*           # aparece f3.dat</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>touch f2.txt</code> y renómbralo con <code>mv f2.txt f2.dat</code>. Comprueba con <code>ls -l</code>. <strong>Meta:</strong> entender que renombrar es solo mover al mismo sitio.</p>
+    </div>
+
+    <p class="mt-6">Y como <code>cp</code>, <code>mv</code> admite comodines para mover varios de golpe:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ mv f*.txt /home/user01/dir3   # mueve TODOS los .txt que empiecen por f</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">rm: borrar archivos</h2>
+    <p class="mt-4"><code>rm</code> (de <em>remove</em>) borra archivos. Aviso importante: en la terminal <strong>no hay papelera</strong>; lo que borras se va para siempre (y necesitas <a href="/Linux-course/lecciones/06-usuarios-y-ficheros">permisos</a> sobre el archivo).</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ rm f1             # borra f1, sin confirmación, sin vuelta atrás
+$ ls -l             # f1 ya no existe</code></pre>
+    <p>Los comodines funcionan igual que con el resto de comandos de ficheros:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ rm /tmp/f*        # borra todo lo que en /tmp empiece por f (ruta absoluta)</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">rm -i: que te pregunte antes de borrar</h2>
+    <p class="mt-4">Igual que <code>cp -i</code>, la opción <code>-i</code> (interactivo) pide confirmación por cada archivo antes de eliminarlo. Es tu red de seguridad, sobre todo al usar comodines:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ rm -i *.txt
+rm: ¿borrar el fichero regular 'f1.txt'? n   # respondes n: se salva
+rm: ¿borrar el fichero regular 'f3.txt'? s   # respondes s: se borra</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>touch f1.txt f3.txt</code>, lanza <code>rm -i *.txt</code> y responde <code>n</code> al primero y <code>s</code> al segundo. Verifica con <code>ls</code>. <strong>Meta:</strong> comprobar que <code>-i</code> te deja decidir archivo por archivo.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">rmdir: borrar directorios vacíos</h2>
+    <p class="mt-4"><code>rm</code> por sí solo no borra carpetas. Para eso está <code>rmdir</code> (de <em>remove directory</em>), pero con una condición estricta: <strong>el directorio debe estar vacío</strong>.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ rmdir dir2
+rmdir: fallo al borrar 'dir2': El directorio no está vacío
+$ rm dir3/*         # primero vaciamos el directorio
+$ rmdir dir3        # ahora sí: se borra
+$ ls -l             # dir3 ya no aparece</code></pre>
+    <p>Esa exigencia de «vacío primero» es, en realidad, una protección: te obliga a ser consciente de lo que hay dentro antes de eliminar la carpeta.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>mkdir dir3</code> y <code>touch dir3/a</code>. Intenta <code>rmdir dir3</code> (fallará), vacíalo con <code>rm dir3/*</code> y repite <code>rmdir dir3</code>. <strong>Meta:</strong> ver por qué <code>rmdir</code> exige carpeta vacía.</p>
+    </div>
+
+    <!-- ================= AVISO DE PELIGRO (no caveman: claridad total) ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">rm -r: el comando más peligroso del curso</h2>
+    <p class="mt-4">La opción <code>-r</code> (recursivo) hace que <code>rm</code> borre un directorio <strong>con todo su contenido de golpe</strong>, sin vaciarlo antes y <strong>sin ninguna advertencia</strong>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ rm -r dir6        # borra dir6 y TODO lo que contenga, sin preguntar</code></pre>
+    <div class="bg-white border-2 border-ink p-6 my-6">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">⚠ Advertencia</p>
+      <p class="!mt-3">Combinado con comodines o rutas equivocadas, <code>rm -r</code> puede borrar datos irrecuperables en segundos. No existe papelera ni deshacer. Antes de ejecutarlo, <strong>lee la ruta dos veces</strong> y, si dudas, añade <code>-i</code> para que pregunte: <code>rm -ri dir6</code>.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: reorganiza y limpia</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>En tu home crea una zona de trabajo: <code>mkdir -p orden/viejo</code> y entra con <code>cd orden</code>.</li>
+        <li>Crea tres archivos con <code>touch a.txt b.txt c.log</code>. Renombra uno: <code>mv a.txt informe.txt</code> y verifica con <code>ls</code>.</li>
+        <li>Mueve los <code>.txt</code> a la subcarpeta: <code>mv *.txt viejo/</code> y comprueba con <code>ls viejo</code>.</li>
+        <li>Borra con confirmación: <code>rm -i c.log</code> (responde <code>s</code>). <strong>Reto extra:</strong> intenta <code>rmdir viejo</code> (fallará por no estar vacío) y luego elimínalo entero con <code>rm -r viejo</code>. Piensa por qué el segundo sí funciona.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>mv origen destino</code> mueve un archivo (lo quita del origen); si el destino es el mismo directorio, lo que hace es <strong>renombrar</strong>. Acepta rutas y comodines igual que <code>cp</code>.</p>
+      <p><code>rm</code> borra archivos sin papelera ni deshacer; <code>-i</code> pregunta antes de cada borrado y es tu red de seguridad con comodines.</p>
+      <p><code>rmdir</code> solo borra directorios vacíos; <code>rm -r</code> borra un directorio con todo su contenido sin avisar: úsalo con máximo cuidado.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Cómo renombras un archivo si no hay comando <code>rename</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Con <code>mv</code>: si mueves un archivo al <strong>mismo directorio</strong> con otro nombre, p. ej. <code>mv f2.txt f2.dat</code>, lo estás renombrando. Mover y renombrar son la misma operación.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué diferencia hay entre <code>cp</code> y <code>mv</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>cp</code> <strong>conserva</strong> el archivo de origen (copiar y pegar); <code>mv</code> lo <strong>elimina</strong> del origen (cortar y pegar). Tras un <code>mv</code>, el original ya no está.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Por qué <code>rmdir dir2</code> falla y <code>rm -r dir2</code> no?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>rmdir</code> solo borra directorios <strong>vacíos</strong>: si <code>dir2</code> tiene contenido, falla. <code>rm -r</code> borra el directorio y todo lo que hay dentro de forma recursiva, sin avisar; por eso es tan potente como peligroso.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/09-crear-y-copiar" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/11-ver-contenido-cat" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

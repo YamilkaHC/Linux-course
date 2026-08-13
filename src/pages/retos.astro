@@ -1,0 +1,527 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Pagina de autoevaluacion. Mismo contexto que /practicas (soporte de un servidor
+// remoto de produccion por SSH), pero aqui NO se ensena: se pregunta. Cada reto
+// muestra solo el enunciado; pista y solucion van ocultas en <details>.
+---
+
+<Layout
+  titulo="Ponte a prueba — Retos de Linux para soporte de producción"
+  descripcion="Situaciones reales de un servidor de producción que debes resolver tú. Pistas y soluciones ocultas para comprobar si de verdad te acuerdas."
+>
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4 flex-wrap">
+      <span class="etiqueta">Autoevaluación</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">6 rondas · 45 retos</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Ponte a prueba</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Aquí no se explica nada. Se pregunta. Cada reto es una situación que podrías tener hoy en el
+      servidor: tú escribes el comando, y solo después abres la pista o la solución.
+    </p>
+
+    <!-- ================= CÓMO FUNCIONA ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Cómo funciona</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span><strong>Escribe la respuesta antes de abrir nada.</strong> En papel o en la terminal. Si abres la solución de entrada, esta página no mide nada.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Cada reto trae <strong>Pista</strong> (un empujón, no la respuesta) y <strong>Solución</strong>. Usar la pista cuenta como acierto a medias.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Ejecuta lo que respondas en el laboratorio <code>~/lab</code> de las <a href="/Linux-course/practicas">Prácticas de campo</a>. Un comando que no probaste no lo sabes.</span></li>
+      </ul>
+    </section>
+
+    <div class="border border-line bg-white p-6 md:p-8 mt-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Antes de empezar</p>
+      <p class="!mt-0">Si aún no montaste el laboratorio, hazlo: <a href="/Linux-course/practicas#m0">Misión 0 de Prácticas de campo</a>. Crea <code>~/lab</code> con las cinco aplicaciones (PAGOS, CATALOGO, INVENTARIO, ENVIOS, NOTIFICA), sus logs y sus configs. Todos los retos de esta página se resuelven ahí.</p>
+    </div>
+
+    <!-- ================= ÍNDICE ================= -->
+    <nav class="border border-line bg-white p-6 md:p-8 mt-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4">Las 6 rondas</p>
+      <ol class="grid md:grid-cols-2 gap-y-2 gap-x-8 text-sm !mt-0">
+        <li><a href="#r1">1 · Reflejo rápido (12)</a></li>
+        <li><a href="#r2">2 · Situaciones de guardia (10)</a></li>
+        <li><a href="#r3">3 · Lee la salida (5)</a></li>
+        <li><a href="#r4">4 · ¿Qué hace este comando? (6)</a></li>
+        <li><a href="#r5">5 · Encuentra el error (6)</a></li>
+        <li><a href="#r6">6 · Simulacro de incidente (6)</a></li>
+      </ol>
+    </nav>
+
+    <!-- ================= RONDA 1 ================= -->
+    <h2 id="r1" class="font-display text-2xl font-bold mt-14">Ronda 1 — Reflejo rápido</h2>
+    <p class="mt-4">Doce preguntas de un solo comando. No hay pista: o sale sin pensar, o no sale. Di el comando en voz alta antes de abrir.</p>
+
+    <div class="space-y-3 mt-6">
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">1. Acabas de conectarte. ¿Qué comando te dice tu usuario y todos tus grupos?</summary>
+        <p class="mt-3"><code>id</code> — devuelve UID, GID y la lista completa de grupos. La mitad de los «no me deja leer el log» se explican con esta línea.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">2. ¿Cómo ves la hora real del servidor, no la de tu laptop?</summary>
+        <p class="mt-3"><code>date</code>. Imprescindible antes de reportar «falló a las 10:42».</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">3. ¿Cuánto lleva encendido el servidor?</summary>
+        <p class="mt-3"><code>uptime -p</code> (legible) o <code>uptime -s</code> (fecha exacta de arranque). Un uptime bajo delata un reinicio reciente.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">4. ¿Espacio libre de las particiones, en formato legible?</summary>
+        <p class="mt-3"><code>df -h</code>. Mira la columna <em>Use%</em>.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">5. Ver las últimas 100 líneas del log de ENVIOS.</summary>
+        <p class="mt-3"><code>tail -100 envios.log</code>.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">6. Ver el log mientras se escribe, en tiempo real.</summary>
+        <p class="mt-3"><code>tail -f envios.log</code>. Se sale con <kbd>Ctrl</kbd>+<kbd>C</kbd>.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">7. Contar cuántas veces aparece <code>COD=91</code> en un log.</summary>
+        <p class="mt-3"><code>grep -c "COD=91" pagos.log</code>. La opción <code>-c</code> cuenta en vez de mostrar.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">8. Buscar «timeout» sin importar si está en mayúsculas o minúsculas.</summary>
+        <p class="mt-3"><code>grep -i timeout pagos.log</code>.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">9. Comprobar si el proceso de CATALOGO está corriendo.</summary>
+        <p class="mt-3"><code>ps -ef | grep catalogo</code>. Fíjate en PID, PPID y STIME (hora de arranque).</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">10. Pedirle a un proceso que termine de forma ordenada.</summary>
+        <p class="mt-3"><code>kill -15 PID</code> (SIGTERM). <code>kill -9</code> solo si el <code>-15</code> no funcionó.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">11. Hacer ejecutable tu script de chequeo.</summary>
+        <p class="mt-3"><code>chmod +x chequeo.sh</code>.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">12. Salir de <code>vi</code> sin guardar nada de lo que tocaste.</summary>
+        <p class="mt-3"><code>:q!</code> — el botón de pánico. Si estabas en modo inserción, primero <kbd>Esc</kbd>.</p>
+      </details>
+    </div>
+
+    <!-- ================= RONDA 2 ================= -->
+    <h2 id="r2" class="font-display text-2xl font-bold mt-14">Ronda 2 — Situaciones de guardia</h2>
+    <p class="mt-4">Diez llamadas reales. Lee la situación, escribe la secuencia completa de comandos y solo entonces compara.</p>
+
+    <!-- Caso 1 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Caso 01 · Ubicación</p>
+      <p class="!mt-3"><strong>«Revisa el log de INVENTARIO.»</strong> Nadie te dio la ruta y no la recuerdas. Estás en tu <code>home</code>. Encuéntralo, y de paso quédate solo con los logs que se han modificado hoy.</p>
+      <div class="space-y-3 mt-5">
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Pista</summary>
+          <p class="!mt-3 text-sm">Un comando busca por nombre en todo un árbol de directorios. Y tiene una opción de fecha que filtra por «modificado hace menos de N días».</p>
+        </details>
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+          <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-3"><code>$ find ~/lab -name "inventario*"
+$ find ~/lab -name "*.log" -mtime -1       # solo los tocados en las últimas 24 h
+$ find / -name "inventario*" 2&gt;/dev/null   # búsqueda global sin ruido de permisos</code></pre>
+          <p class="!mt-3 text-sm"><code>-mtime -1</code> separa los logs vivos de los archivados hace meses. <code>2&gt;/dev/null</code> tira a la basura los «permiso denegado».</p>
+        </details>
+      </div>
+    </div>
+
+    <!-- Caso 2 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Caso 02 · Pedido perdido</p>
+      <p class="!mt-3"><strong>«El pedido 90009 no aparece en el panel de la tienda.»</strong> No sabes cuál de los cinco binarios lo procesó. Encuéntralo en todos los logs de una sola pasada, sin que la terminal se llene de avisos.</p>
+      <div class="space-y-3 mt-5">
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Pista</summary>
+          <p class="!mt-3 text-sm">Puedes pasarle a <code>grep</code> varios ficheros usando comodines en la ruta. Y tiene una opción que silencia los mensajes de error.</p>
+        </details>
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+          <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-3"><code>$ cd ~/lab
+$ grep -s PED=90009 */log/*.log</code></pre>
+          <p class="!mt-3 text-sm">Al buscar en varios ficheros, <code>grep</code> antepone el nombre del fichero a cada coincidencia: así sabes en qué aplicación se procesó. <code>-s</code> calla los avisos.</p>
+        </details>
+      </div>
+    </div>
+
+    <!-- Caso 3 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Caso 03 · Diagnóstico en vivo</p>
+      <p class="!mt-3"><strong>«Voy a reintentar el cobro ahora, dime qué ves.»</strong> Necesitas observar el log de PAGOS en el momento exacto en que llegue el pedido. ¿Qué dejas corriendo y cómo lo cortas después?</p>
+      <div class="space-y-3 mt-5">
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Pista</summary>
+          <p class="!mt-3 text-sm">Hay una opción de <code>tail</code> que en vez de terminar se queda pegada al fichero esperando líneas nuevas.</p>
+        </details>
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+          <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-3"><code>$ tail -f ~/lab/pagos/log/pagos.log             # Ctrl+C para salir
+$ tail -f ~/lab/pagos/log/pagos.log | grep T0034   # solo esa tienda, también en vivo</code></pre>
+          <p class="!mt-3 text-sm">La segunda variante filtra el flujo en vivo: ves aparecer únicamente las líneas de la tienda que te reportaron.</p>
+        </details>
+      </div>
+    </div>
+
+    <!-- Caso 4 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Caso 04 · Reporte de incidente</p>
+      <p class="!mt-3"><strong>Te piden un reporte de la tienda T0034 del último turno.</strong> Necesitas: (a) ver las líneas en pantalla, (b) que queden guardadas en <code>~/incidente.txt</code> en la misma pasada, y (c) decir cuántas fueron.</p>
+      <div class="space-y-3 mt-5">
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Pista</summary>
+          <p class="!mt-3 text-sm">Con <code>&gt;</code> guardas pero no ves nada. Hay un comando que hace de «T» en la tubería: manda la salida a pantalla y a un fichero a la vez.</p>
+        </details>
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+          <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-3"><code>$ grep T0034 ~/lab/pagos/log/pagos.log | tee ~/incidente.txt
+$ wc -l ~/incidente.txt
+
+# variante: contar sin guardar
+$ grep -c T0034 ~/lab/pagos/log/pagos.log</code></pre>
+        </details>
+      </div>
+    </div>
+
+    <!-- Caso 5 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Caso 05 · Ranking</p>
+      <p class="!mt-3"><strong>«¿Qué tienda está generando más movimientos?»</strong> El campo de la tienda es la quinta columna del log, separada por espacios. Saca un ranking de mayor a menor.</p>
+      <div class="space-y-3 mt-5">
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Pista</summary>
+          <p class="!mt-3 text-sm">Cuatro comandos encadenados: uno recorta la columna, otro ordena, otro cuenta repetidos y el último vuelve a ordenar (por número, al revés).</p>
+        </details>
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+          <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-3"><code>$ cut -d' ' -f5 ~/lab/pagos/log/pagos.log | sort | uniq -c | sort -nr</code></pre>
+          <p class="!mt-3 text-sm"><code>uniq -c</code> exige la entrada <strong>ya ordenada</strong>: por eso va el primer <code>sort</code>. El <code>sort -nr</code> final ordena numéricamente en orden inverso, dejando arriba el que más se repite.</p>
+        </details>
+      </div>
+    </div>
+
+    <!-- Caso 6 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Caso 06 · Servicio caído</p>
+      <p class="!mt-3"><strong>«CATALOGO no responde, hay que bajarlo y volver a levantarlo.»</strong> Escribe la secuencia completa <em>y segura</em> para pararlo. ¿Cuántos pasos son y en qué orden?</p>
+      <div class="space-y-3 mt-5">
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Pista</summary>
+          <p class="!mt-3 text-sm">Son cuatro pasos y dos de ellos son verificaciones. La señal brusca nunca va primero.</p>
+        </details>
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+          <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-3"><code>$ ps -ef | grep catalogo   # 1. confirmar el PID exacto
+$ kill -15 1234            # 2. SIGTERM: cierre ordenado
+$ ps -ef | grep catalogo   # 3. verificar si murió
+$ kill -9 1234             # 4. SOLO si sigue vivo</code></pre>
+          <p class="!mt-3 text-sm">Nunca mates un PID que no verificaste en el paso 1: los PID se reciclan y podrías tumbar otro proceso. <code>kill -9</code> sobre un binario que procesa pedidos puede dejar operaciones a medias.</p>
+        </details>
+      </div>
+    </div>
+
+    <!-- Caso 7 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Caso 07 · Disco al 97 %</p>
+      <p class="!mt-3"><strong>Alerta de disco.</strong> Di los tres comandos del diagnóstico, en orden, y qué responde cada uno. Luego, cómo liberas espacio <em>sin</em> perder los logs.</p>
+      <div class="space-y-3 mt-5">
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Pista</summary>
+          <p class="!mt-3 text-sm">Uno mira el disco desde arriba (particiones), otro desde abajo (directorios) y el tercero señala el fichero concreto por su tamaño. Para no perder nada: empaquetar y comprimir antes de borrar.</p>
+        </details>
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+          <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-3"><code>$ df -h                       # 1. ¿QUÉ partición está llena?
+$ du -h ~/lab                 # 2. ¿QUÉ directorio pesa?
+$ find ~/lab -size +50M       # 3. ¿QUÉ fichero concreto?
+
+$ tar czvf logs-respaldo.tar.gz pagos/log   # empaqueta y comprime
+$ tar tzvf logs-respaldo.tar.gz             # VERIFICA el contenido antes de borrar</code></pre>
+          <p class="!mt-3 text-sm">El orden importa: <code>df</code> dice dónde está el problema, <code>du</code> dice quién lo causa. Y nunca borras sin haber listado el respaldo con <code>tar tzvf</code>.</p>
+        </details>
+      </div>
+    </div>
+
+    <!-- Caso 8 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Caso 08 · Acceso denegado</p>
+      <p class="!mt-3"><strong>Haces <code>cat</code> al log de PAGOS y responde «Permission denied».</strong> ¿Qué dos comandos ejecutas para entender por qué, y cuál es la solución correcta en un servidor de producción?</p>
+      <div class="space-y-3 mt-5">
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Pista</summary>
+          <p class="!mt-3 text-sm">Uno te muestra a quién pertenece el fichero y qué permite; el otro te dice a qué grupos perteneces tú. La respuesta correcta no es cambiar el permiso.</p>
+        </details>
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+          <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-3"><code>$ ls -l pagos.log
+-rw-r-----  1 appuser appgrp  1420 abr 28 10:42 pagos.log
+$ id                    # ¿estoy en appgrp?</code></pre>
+          <p class="!mt-3 text-sm">Lee los tres bloques: dueño <code>rw-</code>, grupo <code>r--</code>, otros <code>---</code>. Si no eres <code>appuser</code> ni estás en <code>appgrp</code>, caes en «otros» y no tienes ni lectura. <strong>La solución correcta es pedir que te agreguen al grupo</strong>, no cambiarle los permisos a un fichero de producción.</p>
+        </details>
+      </div>
+    </div>
+
+    <!-- Caso 9 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Caso 09 · Cambio de configuración</p>
+      <p class="!mt-3"><strong>Hay que subir el <code>TIMEOUT</code> de CATALOGO de 30 a 60 segundos.</strong> Solo tienes <code>vi</code>. Escribe todos los pasos, desde antes de abrir el fichero hasta comprobar el cambio.</p>
+      <div class="space-y-3 mt-5">
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Pista</summary>
+          <p class="!mt-3 text-sm">El primer paso no es abrir <code>vi</code>. Y dentro de <code>vi</code> no hace falta editar a mano: existe una sustitución que aplica a todo el fichero.</p>
+        </details>
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+          <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-3"><code>$ cp catalogo.cfg catalogo.cfg.bak  # 0. respaldo SIEMPRE
+$ vi catalogo.cfg
+  :set nu                           # numera, para reportar qué línea cambiaste
+  :%s/TIMEOUT=30/TIMEOUT=60/g       # sustituye en todo el fichero
+  :wq                               # guardar y salir
+$ cat catalogo.cfg                  # 3. comprobar</code></pre>
+          <p class="!mt-3 text-sm">Si te equivocas dentro de <code>vi</code>: <code>u</code> deshace el último cambio, y <code>:q!</code> sale sin guardar nada.</p>
+        </details>
+      </div>
+    </div>
+
+    <!-- Caso 10 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Caso 10 · Vigilancia</p>
+      <p class="!mt-3"><strong>Reiniciaron NOTIFICA y hay que avisar en cuanto vuelva a levantar.</strong> No quieres escribir <code>ps -ef | grep</code> cincuenta veces. ¿Qué usas?</p>
+      <div class="space-y-3 mt-5">
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Pista</summary>
+          <p class="!mt-3 text-sm">Hay un comando cuyo único trabajo es repetir otro comando cada N segundos. Ojo con las comillas cuando lo que repites lleva una tubería.</p>
+        </details>
+        <details class="bg-sand border border-line p-4">
+          <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+          <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-3"><code>$ watch -n 5 'ps -ef | grep notifica'</code></pre>
+          <p class="!mt-3 text-sm">Sin comillas, la tubería se aplicaría a la salida de <code>watch</code> y no al comando repetido. <code>-n 5</code> = cada 5 segundos.</p>
+        </details>
+      </div>
+    </div>
+
+    <!-- ================= RONDA 3 ================= -->
+    <h2 id="r3" class="font-display text-2xl font-bold mt-14">Ronda 3 — Lee la salida</h2>
+    <p class="mt-4">Media guardia se va en interpretar lo que el servidor te devuelve. Aquí la salida ya está: responde la pregunta.</p>
+
+    <!-- Lectura 1 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Lectura 01</p>
+      <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -l
+-rwxr-x---  1 appuser  appgrp   2140 abr 28 09:12 arranque.sh
+-rw-r--r--  1 root     root      512 abr 27 22:03 catalogo.cfg
+drwxr-xr-x  2 appuser  appgrp   4096 abr 28 10:42 log</code></pre>
+      <p class="!mt-0"><strong>Preguntas:</strong> (a) ¿quién puede ejecutar <code>arranque.sh</code>? (b) ¿puedes tú, que no eres root, modificar <code>catalogo.cfg</code>? (c) ¿qué te dice la primera letra de la tercera línea?</p>
+      <details class="bg-sand border border-line p-4 mt-5">
+        <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+        <p class="!mt-3 text-sm"><strong>(a)</strong> El dueño <code>appuser</code> (tiene <code>rwx</code>) y los miembros del grupo <code>appgrp</code> (<code>r-x</code>). «Otros» no tiene nada: <code>---</code>.</p>
+        <p class="!mt-2 text-sm"><strong>(b)</strong> No. <code>catalogo.cfg</code> es de root con permisos <code>rw-r--r--</code>: tú caes en «otros» y solo puedes leerlo. Modificarlo requiere <code>sudo</code>.</p>
+        <p class="!mt-2 text-sm"><strong>(c)</strong> La <code>d</code> indica que <code>log</code> es un <strong>directorio</strong>, no un fichero. Un guion <code>-</code> sería fichero normal y una <code>l</code> un enlace simbólico.</p>
+      </details>
+    </div>
+
+    <!-- Lectura 2 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Lectura 02</p>
+      <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ df -h
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/sda1          20G    18G  1,1G  95% /
+/dev/sdb1         100G    12G   83G  13% /opt
+tmpfs             2,0G      0  2,0G   0% /dev/shm</code></pre>
+      <p class="!mt-0"><strong>Preguntas:</strong> (a) ¿dónde está el problema? (b) si los logs de las aplicaciones viven en <code>/opt/apps/pagos/log</code>, ¿son ellos los culpables? (c) ¿cuál es tu siguiente comando?</p>
+      <details class="bg-sand border border-line p-4 mt-5">
+        <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+        <p class="!mt-3 text-sm"><strong>(a)</strong> En la raíz <code>/</code>: al 95 %, con solo 1,1 GB libres.</p>
+        <p class="!mt-2 text-sm"><strong>(b)</strong> No. <code>/opt</code> es otra partición y está al 13 %. Lo que llena <code>/</code> es otra cosa, no esos logs. Este es el error clásico: correr a borrar logs que no tienen la culpa.</p>
+        <p class="!mt-2 text-sm"><strong>(c)</strong> <code>du -h</code> dentro de <code>/</code> para localizar qué directorio pesa, y luego <code>find / -size +50M 2&gt;/dev/null</code> para el fichero concreto.</p>
+      </details>
+    </div>
+
+    <!-- Lectura 3 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Lectura 03</p>
+      <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps -ef | grep catalogo
+appuser   4812     1  0 09:12 ?        00:00:41 /opt/apps/catalogo/bin/catalogod
+appuser   9033  4812  0 14:55 ?        00:00:02 /opt/apps/catalogo/bin/catalogod
+yamilka  12470 12001  0 15:02 pts/0    00:00:00 grep catalogo</code></pre>
+      <p class="!mt-0"><strong>Preguntas:</strong> (a) ¿está arriba CATALOGO? (b) ¿qué relación hay entre 4812 y 9033? (c) ¿por qué aparece una tercera línea y qué pasaría si la matas?</p>
+      <details class="bg-sand border border-line p-4 mt-5">
+        <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+        <p class="!mt-3 text-sm"><strong>(a)</strong> Sí. El proceso principal (PID 4812) arrancó a las 09:12 y lleva corriendo desde entonces.</p>
+        <p class="!mt-2 text-sm"><strong>(b)</strong> 4812 es el <strong>padre</strong> de 9033: mira la columna PPID de la segunda línea. El hijo arrancó a las 14:55, mucho después — dato relevante si hubo un incidente a esa hora.</p>
+        <p class="!mt-2 text-sm"><strong>(c)</strong> Es tu propio <code>grep catalogo</code>, que también contiene la palabra buscada. Es inofensiva y desaparece sola. Pero enseña la trampa: <strong>si cuentas procesos con <code>| wc -l</code>, esa línea infla el conteo en 1</strong>.</p>
+      </details>
+    </div>
+
+    <!-- Lectura 4 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Lectura 04</p>
+      <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ tail -4 pagos.log
+28/04/2026 10:41:58 PAGOS PED=90008 TIENDA=T0034 COD=00 APROBADO COBRO
+28/04/2026 10:42:03 PAGOS PED=90009 TIENDA=T0034 COD=91 TIMEOUT DE PASARELA
+28/04/2026 10:42:04 PAGOS ERROR conexion con ENVIOS rechazada
+28/04/2026 10:42:31 PAGOS PED=90010 TIENDA=T0077 COD=51 STOCK INSUFICIENTE</code></pre>
+      <p class="!mt-0"><strong>Preguntas:</strong> (a) ¿cuál de los tres pedidos es un problema <em>del sistema</em> y cuál es del cliente? (b) ¿qué línea te apunta al siguiente binario que hay que revisar? (c) ¿qué comando te da solo las líneas de <code>T0034</code>?</p>
+      <details class="bg-sand border border-line p-4 mt-5">
+        <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+        <p class="!mt-3 text-sm"><strong>(a)</strong> <code>COD=91</code> (timeout de pasarela) es un problema técnico: la respuesta no llegó a tiempo. <code>COD=51</code> (stock insuficiente) es una respuesta <strong>legítima</strong> del negocio, no un fallo — no se escala.</p>
+        <p class="!mt-2 text-sm"><strong>(b)</strong> La tercera: «conexion con ENVIOS rechazada», un segundo después del timeout. El siguiente log a revisar es el de ENVIOS.</p>
+        <p class="!mt-2 text-sm"><strong>(c)</strong> <code>grep T0034 pagos.log</code>.</p>
+      </details>
+    </div>
+
+    <!-- Lectura 5 -->
+    <div class="border border-line bg-white p-6 md:p-8 my-6">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50">Lectura 05</p>
+      <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ uptime -p
+up 12 minutes
+$ who
+yamilka  pts/0        2026-04-28 15:02
+soporte2 pts/1        2026-04-28 15:00</code></pre>
+      <p class="!mt-0"><strong>Preguntas:</strong> (a) ¿qué te dice ese uptime sobre el incidente que estás investigando? (b) ¿qué precaución tomas antes de tocar un config?</p>
+      <details class="bg-sand border border-line p-4 mt-5">
+        <summary class="font-bold cursor-pointer text-sm">Solución</summary>
+        <p class="!mt-3 text-sm"><strong>(a)</strong> El servidor se reinició hace 12 minutos. Eso explica por sí solo que los binarios se cayeran, y cambia el diagnóstico entero: no buscas un fallo de aplicación, buscas por qué se reinició la máquina.</p>
+        <p class="!mt-2 text-sm"><strong>(b)</strong> Hay <strong>otra persona conectada</strong> (<code>soporte2</code>, entró dos minutos antes). Si ambas editan el mismo fichero con <code>vi</code>, el último en guardar pisa al otro — y aparecerá el aviso de fichero <code>.swp</code>. Coordínate antes de editar.</p>
+      </details>
+    </div>
+
+    <!-- ================= RONDA 4 ================= -->
+    <h2 id="r4" class="font-display text-2xl font-bold mt-14">Ronda 4 — ¿Qué hace este comando?</h2>
+    <p class="mt-4">Al revés que las rondas anteriores: aquí tienes el comando y tienes que decir, en una frase, qué devuelve exactamente.</p>
+
+    <div class="space-y-3 mt-6">
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer"><code>tail -200 pagos.log | grep COD=91 | wc -l</code></summary>
+        <p class="mt-3">Cuenta cuántos <strong>timeout</strong> hubo <strong>en las últimas 200 líneas</strong> del log. Lo importante es el recorte: no cuenta los de todo el fichero, solo los recientes. Se lee de izquierda a derecha, cada tubería alimenta al siguiente.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer"><code>find ~/lab -name "*.log" -mtime +30</code></summary>
+        <p class="mt-3">Lista los logs <strong>sin modificar desde hace más de 30 días</strong> — los candidatos a archivar. Ojo al signo: <code>+30</code> es «más antiguos que», <code>-30</code> sería «más recientes que».</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer"><code>grep -l ERROR */log/*.log</code></summary>
+        <p class="mt-3">Devuelve <strong>solo los nombres de los ficheros</strong> que contienen «ERROR», no las líneas. Perfecto para responder «¿qué aplicaciones están fallando?» de un vistazo.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer"><code>ps -ef | grep pagos | wc -l</code></summary>
+        <p class="mt-3">Cuenta los procesos que contienen «pagos»… <strong>más uno</strong>: el propio <code>grep pagos</code> aparece en la lista. Por eso en un script se compara contra 1, no contra 0.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer"><code>chequeo.sh &gt;&gt; chequeos.log 2&gt;&amp;1</code></summary>
+        <p class="mt-3">Ejecuta el script <strong>añadiendo</strong> (no sobrescribiendo) su salida al fichero, y además manda los <strong>errores</strong> al mismo sitio. Sin <code>2&gt;&amp;1</code> los errores se irían a la pantalla y en una tarea de cron se perderían.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer"><code>0 * * * * /home/yamilka/lab/chequeo.sh</code></summary>
+        <p class="mt-3">Una línea de <code>crontab</code>: ejecuta el script <strong>en el minuto 0 de cada hora, todos los días</strong>. Los cinco campos son minuto, hora, día del mes, mes y día de la semana; el asterisco significa «todos».</p>
+      </details>
+    </div>
+
+    <!-- ================= RONDA 5 ================= -->
+    <h2 id="r5" class="font-display text-2xl font-bold mt-14">Ronda 5 — Encuentra el error</h2>
+    <p class="mt-4">Cada comando tiene un fallo. Di cuál es y cómo se corrige.</p>
+
+    <div class="space-y-3 mt-6">
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">1. <code>watch -n 5 ps -ef | grep catalogo</code></summary>
+        <p class="mt-3"><strong>Faltan las comillas.</strong> Tal cual está, <code>watch</code> repite solo <code>ps -ef</code> y la tubería se aplica una única vez a la salida de <code>watch</code>. Correcto: <code>watch -n 5 'ps -ef | grep catalogo'</code>.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">2. <code>grep T0034 pagos.log &gt; incidente.txt</code> … y el fichero queda vacío tras la segunda ejecución</summary>
+        <p class="mt-3"><strong><code>&gt;</code> sobrescribe.</strong> Cada ejecución borra lo anterior. Si querías acumular evidencia de varias búsquedas, es <code>&gt;&gt;</code>. Y si además querías ver el resultado en pantalla, <code>| tee -a incidente.txt</code>.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">3. <code>cut -d' ' -f5 pagos.log | uniq -c</code></summary>
+        <p class="mt-3"><strong>Falta ordenar antes.</strong> <code>uniq</code> solo colapsa líneas repetidas <strong>consecutivas</strong>: sin <code>sort</code> previo, la misma tienda aparece contada varias veces. Correcto: <code>cut -d' ' -f5 pagos.log | sort | uniq -c | sort -nr</code>.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">4. <code>kill -9 4812</code> como primera acción sobre CATALOGO</summary>
+        <p class="mt-3"><strong>Señal equivocada y sin verificar.</strong> Primero <code>ps -ef | grep catalogo</code> para confirmar el PID, después <code>kill -15</code>, verificar, y solo entonces <code>-9</code>. Un <code>-9</code> directo corta el proceso sin cerrar ficheros ni vaciar buffers: pedidos a medias.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">5. <code>grep timeout pagos.log</code> devuelve 0 líneas, pero tú viste «TIMEOUT» en el log</summary>
+        <p class="mt-3"><strong><code>grep</code> distingue mayúsculas.</strong> Añade <code>-i</code>: <code>grep -i timeout pagos.log</code>. Regla práctica en logs: busca siempre con <code>-i</code> salvo que quieras precisión exacta.</p>
+      </details>
+      <details class="bg-white border border-line p-5">
+        <summary class="font-bold cursor-pointer">6. <code>./chequeo.sh</code> responde «Permission denied» aunque el fichero es tuyo</summary>
+        <p class="mt-3"><strong>Falta el permiso de ejecución.</strong> Ser el dueño no basta: <code>chmod +x chequeo.sh</code>. Compruébalo con <code>ls -l</code> — debe aparecer la <code>x</code> en el bloque del usuario.</p>
+      </details>
+    </div>
+
+    <!-- ================= RONDA 6 ================= -->
+    <h2 id="r6" class="font-display text-2xl font-bold mt-14">Ronda 6 — Simulacro de incidente</h2>
+    <p class="mt-4">
+      Sin ayuda hasta el final. Son las <strong>2:14 a. m.</strong> Te escriben: <em>«los cobros de la tienda T0034 están fallando y CATALOGO parece caído»</em>.
+      Resuelve los seis pasos en tu laboratorio escribiendo los comandos, y solo al terminar abre la solución completa.
+    </p>
+
+    <section class="border border-line bg-white p-8 md:p-10 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4">Tu turno</p>
+      <ol class="list-decimal pl-6 space-y-3 my-5 text-ink/80">
+        <li>Aterriza: hora del servidor, uptime, espacio en disco y quién más está conectado.</li>
+        <li>Verifica el estado de los cinco binarios. ¿Cuáles están arriba? ¿A qué hora arrancaron?</li>
+        <li>Localiza el log de PAGOS sin escribir la ruta de memoria.</li>
+        <li>Diagnostica: últimas 50 líneas, filtra la tienda T0034, cuenta cuántas fallaron y con qué código.</li>
+        <li>Deja evidencia en <code>~/incidente-0214.txt</code> viendo el resultado en pantalla, y verifica el conteo.</li>
+        <li>Deja montada la vigilancia mientras esperas: el log en vivo y el chequeo del proceso repitiéndose solo.</li>
+      </ol>
+      <details class="bg-sand border border-line p-5 mt-6">
+        <summary class="font-bold cursor-pointer">Solución completa del simulacro</summary>
+        <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code># 1. Aterrizar
+$ date ; uptime -p ; df -h ; who
+
+# 2. Estado de los binarios
+$ for app in pagos catalogo inventario envios notifica
+&gt; do
+&gt;   echo "--- $app ---" ; ps -ef | grep $app
+&gt; done
+
+# 3. Localizar el log
+$ find ~/lab -name "pagos*.log" -mtime -1
+
+# 4. Diagnosticar
+$ tail -50 ~/lab/pagos/log/pagos.log
+$ grep T0034 ~/lab/pagos/log/pagos.log
+$ grep T0034 ~/lab/pagos/log/pagos.log | grep -c COD=91
+
+# 5. Evidencia
+$ grep T0034 ~/lab/pagos/log/pagos.log | tee ~/incidente-0214.txt
+$ wc -l ~/incidente-0214.txt
+
+# 6. Vigilancia (dos pestañas de tu cliente SSH)
+$ tail -f ~/lab/pagos/log/pagos.log
+$ watch -n 5 'ps -ef | grep catalogo'</code></pre>
+        <p class="!mt-3 text-sm">Lo que se evalúa no es la sintaxis exacta, sino <strong>el orden</strong>: contexto de la máquina → estado de los procesos → log correcto → filtro → evidencia → vigilancia. Si llegaste ahí, el turno de guardia está cubierto.</p>
+      </details>
+    </section>
+
+    <!-- ================= AUTOEVALUACIÓN ================= -->
+    <h2 class="font-display text-2xl font-bold mt-14">Cómo te fue</h2>
+    <p class="mt-4">Cuenta los retos que resolviste <strong>sin abrir la pista</strong>, sobre 45.</p>
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead>
+          <tr class="bg-sand text-left">
+            <th class="p-3 font-bold border-b border-line">Aciertos</th>
+            <th class="p-3 font-bold border-b border-line">Qué significa y qué hacer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Menos de 20</td><td class="p-3">Aún estás leyendo, no recordando. Vuelve a <a href="/Linux-course/practicas">Prácticas de campo</a> y ejecuta las misiones 1 a 5 en el laboratorio.</td></tr>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">20 a 32</td><td class="p-3">Base sólida. Repite solo las rondas donde fallaste; suelen ser la 4 y la 5, que exigen leer comandos en vez de escribirlos.</td></tr>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">33 a 42</td><td class="p-3">Ya te defiendes en un turno real. Repasa la <a href="/Linux-course/practicas">chuleta de guardia</a> una vez por semana para no perder el reflejo.</td></tr>
+          <tr><td class="p-3 font-semibold">43 o más</td><td class="p-3">Interiorizado. El siguiente paso está en el bloque «Fuera del temario» de <a href="/Linux-course/practicas">Prácticas</a>: <code>awk</code>, <code>ss</code>/<code>netstat</code> y <code>systemctl</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/practicas" class="btn-secundario">Prácticas de campo</a>
+      <a href="/Linux-course/comandos" class="btn-primario">Ver todos los comandos</a>
+    </nav>
+
+  </article>
+</Layout>

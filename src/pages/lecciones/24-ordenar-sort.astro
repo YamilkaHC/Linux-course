@@ -1,0 +1,124 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 24. Fuente: transcripciones/video_21.md (primera mitad: sort -r, -o, -n, pipes)
+---
+
+<Layout titulo="Ordenar resultados con sort — Curso Linux" descripcion="Ordena líneas alfabética o numéricamente con sort; invierte con -r, ordena por número con -n y guarda el resultado con -o o por redirección.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 24</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">6 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Ordenar resultados con sort</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Tras <a href="/Linux-course/lecciones/23-buscar-texto-grep">buscar con grep</a>, toca ordenar. <code>sort</code> pone en orden cualquier lista —alfabético o numérico— y se combina de maravilla con tuberías.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A ordenar líneas alfabéticamente con <strong><code>sort fichero</code></strong> y a invertir el orden con <code>-r</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A guardar el resultado ordenado con <code>-o</code> (o con la <a href="/Linux-course/lecciones/19-entrada-salida-y-redirecciones">redirección</a> <code>&gt;</code>).</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A ordenar por <strong>número</strong> con <code>-n</code>, evitando el fallo del orden alfabético con cifras.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Ordenar un fichero</h2>
+    <p class="mt-4">Con el fichero <code>nombres</code>, ordenar es tan simple como pasarle el nombre. Con ficheros no hace falta tubería: <code>sort</code> los lee directo.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sort nombres          # ordena alfabéticamente (A → Z)
+$ cat nombres | sort    # equivalente, usando tubería</code></pre>
+    <p class="mt-4">Con <code>-r</code> (<em>reverse</em>) lo inviertes, de la Z a la A:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sort -r nombres       # orden inverso: Z → A
+$ sort /etc/passwd      # también ordena los usuarios del sistema
+$ sort -r /etc/passwd   # ...y al revés</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>sort nombres</code> y luego <code>sort -r nombres</code>. <strong>Meta:</strong> ver la misma lista ordenada en los dos sentidos.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Guardar el resultado: -o y &gt;</h2>
+    <p class="mt-4">Para conservar la lista ordenada en un fichero nuevo, usa <code>-o</code> seguido del destino. Es lo mismo que redirigir con <code>&gt;</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sort nombres -o nombres_ordenados   # guarda el orden en un fichero nuevo
+$ sort nombres > nombres_nuevos       # idéntico, con redirección
+$ cat nombres_ordenados               # comprueba el resultado</code></pre>
+    <p class="mt-4">También funciona en un <a href="/Linux-course/lecciones/21-tuberias-y-filtros">pipeline</a>: ordenar la salida de otro comando.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls | sort             # ordena alfabéticamente los ficheros del directorio</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Ordenar por número: -n</h2>
+    <p class="mt-4">Aquí hay una trampa. Por defecto <code>sort</code> ordena <strong>alfabéticamente</strong>, carácter a carácter, aunque sean números. Con <a href="/Linux-course/lecciones/14-espacio-en-disco"><code>du</code></a> mostrando tamaños, el resultado sale mal:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ du -m | sort          # MAL: ordena "10" antes que "2" (orden de texto)</code></pre>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">Alfabético ≠ numérico</p>
+      <p class="!mt-2 text-cream/90">En orden de texto, «10» va antes que «2» porque compara el primer carácter (<code>1</code> &lt; <code>2</code>). Para ordenar como números de verdad, añade <code>-n</code>.</p>
+    </div>
+
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ du -m | sort -n       # BIEN: orden numérico real, del más pequeño al mayor</code></pre>
+    <p class="mt-4">Ahora sí: los tamaños van del 1 al mayor (por ejemplo, hasta 182 MB), en orden correcto.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Compara <code>du -m | sort</code> con <code>du -m | sort -n</code>. <strong>Meta:</strong> comprobar que solo el segundo ordena bien los tamaños, porque el primero los trata como texto.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: ordenar de todas formas</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Ordena <code>nombres</code> con <code>sort nombres</code> y luego al revés con <code>sort -r nombres</code>.</li>
+        <li>Guarda el orden en un fichero con <code>sort nombres -o nombres_ordenados</code> y compruébalo con <code>cat</code>. Repite usando <code>&gt;</code> en vez de <code>-o</code>.</li>
+        <li>Ordena la salida de un comando: <code>ls | sort</code>.</li>
+        <li>Compara <code>du -m | sort</code> con <code>du -m | sort -n</code>. <strong>Reto:</strong> explica por qué el primero coloca «10» antes que «2».</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>sort fichero</code> ordena las líneas alfabéticamente (con ficheros no hace falta tubería); <code>-r</code> invierte el orden a Z → A. También ordena la salida de otros comandos por tubería: <code>ls | sort</code>.</p>
+      <p>Con <code>-o destino</code> guardas el resultado en un fichero, exactamente igual que con la redirección <code>&gt;</code>.</p>
+      <p>Cuidado con los números: <code>sort</code> ordena como texto por defecto y coloca «10» antes que «2». Para orden numérico real usa <code>-n</code> (ideal tras <code>du -m</code>).</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Hace falta <code>cat fichero | sort</code>, o basta con <code>sort fichero</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Basta con <code>sort fichero</code>: <code>sort</code> lee ficheros directamente, no necesita la tubería. El <code>cat ... | sort</code> da el mismo resultado, pero es un paso de más cuando trabajas con un fichero.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Qué dos formas hay de guardar la salida ordenada en un fichero?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Con la opción <code>-o destino</code> (<code>sort nombres -o ordenados</code>) o con la redirección <code>&gt;</code> (<code>sort nombres &gt; ordenados</code>). Ambas producen el mismo fichero.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Ordenas tamaños con <code>sort</code> y «10» aparece antes que «2». ¿Cómo lo arreglas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Añadiendo <code>-n</code> para ordenar numéricamente. Sin <code>-n</code>, <code>sort</code> compara los números como texto y «10» va antes que «2» por su primer carácter.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/23-buscar-texto-grep" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/25-cortar-campos-cut" class="btn-primario">Siguiente: cortar campos con cut</a>
+    </nav>
+
+  </article>
+</Layout>

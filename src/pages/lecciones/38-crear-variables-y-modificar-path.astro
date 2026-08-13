@@ -1,0 +1,209 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 38. Fuente: transcripciones/video_31.md (crear y modificar variables, ejecutables y PATH)
+---
+
+<Layout titulo="Crear variables y modificar el PATH — Curso Linux" descripcion="Crea variables con NOMBRE=valor, cámbialas, y añade tu propio directorio de ejecutables al PATH con PATH=$PATH:/ruta sin perder lo anterior.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 38</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">9 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Crear variables y modificar el PATH</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      En la lección anterior leíste variables. Ahora las creas, las cambias y le enseñas a Linux dónde encontrar tus propios ejecutables.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A crear y modificar variables con <code>nombre=valor</code> (sin <code>$</code> al crear, con <code>$</code> al leer): es la base de todo script que escribas después.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Por qué tus variables nuevas aparecen en <code>set</code> pero no en <code>printenv</code>, y qué dice eso de dónde nacieron.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Por qué Linux no ejecuta un programa que está en tu directorio actual, y cómo añadir tu carpeta al <code>PATH</code> <strong>sin borrar el resto</strong> (el error más caro de esta lección).</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Crear una variable: una línea</h2>
+    <p class="mt-4">No hay comando ni ceremonia. Escribes el nombre, el igual y el valor:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ v=10
+$ echo $v
+10
+
+$ var=20
+$ echo $var
+20</code></pre>
+    <p class="mt-4">Fíjate en la asimetría, porque es la fuente número uno de errores: al <strong>crear o modificar</strong> la variable NO se pone el signo <code>$</code>, solo el nombre. El <code>$</code> se usa después, para <strong>leer</strong> el valor, como ya viste en <a href="/Linux-course/lecciones/37-variables-de-entorno">printenv y echo $VAR</a>.</p>
+    <p class="mt-4">Aquí las hemos creado a propósito en <strong>minúsculas</strong>. Las del sistema van siempre en mayúsculas y no se tocan; las tuyas, para tus scripts y programas, pueden ir en minúsculas sin problema. De hecho, es una buena forma de distinguirlas de un vistazo.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>v=10</code> y muéstrala con <code>echo $v</code>. Después escribe <code>echo v</code> (sin dólar). <strong>Meta:</strong> fijar que el <code>$</code> solo aparece al leer, nunca al asignar.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">¿Dónde han ido a parar? set sí, printenv no</h2>
+    <p class="mt-4">Busca tus variables recién creadas en las dos listas:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ printenv | grep var
+                        # nada: no aparece
+
+$ set | grep var
+var=20                  # aquí sí está</code></pre>
+    <p class="mt-4">La razón es la que viste en la lección anterior: las variables de <strong>entorno</strong> se crean cuando el usuario entra en el sistema, y tus variables no han nacido ahí, sino dentro de la shell que tienes abierta. Por eso quedan etiquetadas como variables de <strong>shell</strong> y solo las ve <code>set</code>.</p>
+    <p class="mt-4">Nota práctica: <code>set | less</code> devuelve una cantidad enorme de texto, así que filtrar con <a href="/Linux-course/lecciones/23-buscar-texto-grep">grep</a> tras una <a href="/Linux-course/lecciones/21-tuberias-y-filtros">tubería</a> no es un lujo, es la única forma cómoda de encontrar algo.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Modificar el valor</h2>
+    <p class="mt-4">Se cambia exactamente igual que se crea: asignando de nuevo.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ v=10
+$ v=xxxx
+$ echo $v
+xxxx                    # el 10 anterior ha desaparecido</code></pre>
+    <p class="mt-4">Linux acepta cualquier cosa: donde había un número ahora hay texto y no protesta. Comprobar que el valor tiene sentido es responsabilidad tuya, no del sistema.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>var=20</code>, encuéntrala con <code>set | grep var</code>, cámbiala a <code>var=hola</code> y vuelve a mirarla. <strong>Meta:</strong> ver que asignar de nuevo sustituye, no añade.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Caso real: tu propio ejecutable</h2>
+    <p class="mt-4">Vamos a por la parte interesante. Crea un directorio, mete dentro un pequeño script y hazlo ejecutable:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ pwd
+/home/user001
+$ mkdir ejecutable
+$ cd ejecutable
+$ ls -l                        # vacío, aún no hay nada
+
+$ echo "ls -l" &gt; listar.sh     # crea el fichero con una instrucción dentro
+$ cat listar.sh
+ls -l
+
+$ ls -l
+-rw-r--r-- 1 user001 user001 6 ... listar.sh   # sin permisos de ejecución</code></pre>
+    <p class="mt-4">La extensión <code>.sh</code> es una <strong>buena práctica</strong>, no una obligación: a diferencia de Windows con <code>.bat</code> o <code>.cmd</code>, Linux no necesita que el fichero se llame de ninguna manera concreta. Los scripts se ven a fondo más adelante; por ahora basta con saber que este fichero contiene un comando.</p>
+    <p class="mt-4">Le falta lo esencial: el permiso de ejecución. Aplica lo de <a href="/Linux-course/lecciones/34-cambiar-permisos-chmod">chmod</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ chmod +x listar.sh
+$ ls -l
+-rwxr-xr-x 1 user001 user001 6 ... listar.sh   # ahora hay x en los tres bloques</code></pre>
+    <p class="mt-4">Sin <code>u</code>, <code>g</code> ni <code>o</code> delante, <code>+x</code> da el permiso a todos. Además, el nombre te aparecerá <strong>en verde</strong> en el listado: la terminal colorea así los ejecutables.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Sorpresa: Linux no lo encuentra</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ listar.sh
+listar.sh: orden no encontrada</code></pre>
+    <p class="mt-4">¿Cómo que no lo encuentra, si estás dentro del mismo directorio? Esta es una de las diferencias clave con Windows: Windows busca en el PATH <strong>y además</strong> en el directorio actual. Linux busca <strong>solo</strong> en los directorios del <code>PATH</code>, y tu carpeta no está en él.</p>
+    <p class="mt-4">Tienes dos formas de ejecutarlo igualmente:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ /home/user001/ejecutable/listar.sh    # ruta absoluta completa
+$ ./listar.sh                           # el punto es "el directorio actual"</code></pre>
+    <p class="mt-4">El <code>.</code> significa directorio actual, como viste al aprender <a href="/Linux-course/lecciones/07-navegar-ficheros">rutas relativas</a>: <code>./listar.sh</code> le dice a Linux «busca el fichero aquí mismo». Ambas ejecutan el script y verás la salida del <code>ls -l</code> que lleva dentro.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>listar.sh</code> a secas y comprueba el error. Después lánzalo con <code>./listar.sh</code>. <strong>Meta:</strong> comprobar de primera mano que el directorio actual no está en el PATH.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">La solución: añadir tu directorio al PATH</h2>
+    <p class="mt-4">Escribir la ruta completa o el <code>./</code> está bien para un uso puntual. Si vas a usar el programa a diario, es tedioso. Para eso existe el <code>PATH</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ echo $PATH
+/usr/local/bin:/usr/bin:/bin:/usr/local/games
+
+$ PATH=$PATH:/home/user001/ejecutable
+
+$ echo $PATH
+/usr/local/bin:/usr/bin:/bin:/usr/local/games:/home/user001/ejecutable</code></pre>
+    <p class="mt-4">Lee la asignación despacio, porque es el corazón de la lección: a la izquierda <code>PATH=</code> (sin dólar, porque estás asignando); a la derecha <code>$PATH</code> (con dólar, porque estás leyendo lo que ya había), <strong>dos puntos</strong> como separador, y tu directorio nuevo. Es como decirle: «además de todo lo que ya tenías, busca también aquí».</p>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Cuidado</p>
+      <p class="!mt-0">Si escribes <code>PATH=/home/user001/ejecutable</code> y olvidas el <code>$PATH</code>, <strong>borras todos los directorios anteriores</strong>. Linux dejará de encontrar <code>ls</code>, <code>cat</code> y prácticamente cualquier comando en esa sesión. Al modificar una variable que ya tiene valor, la regla es: incluye siempre <code>$VARIABLE</code> en la parte derecha si quieres conservar lo anterior.</p>
+    </div>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 190" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Añadir sin borrar</text>
+
+        <rect x="30" y="42" width="230" height="46" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="145" y="62" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">PATH=$PATH:/mi/dir</text>
+        <text x="145" y="80" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">conserva lo anterior + añade</text>
+
+        <rect x="300" y="42" width="230" height="46" fill="#FDFCFB" stroke="#E5E1D8"/>
+        <text x="415" y="62" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">PATH=/mi/dir</text>
+        <text x="415" y="80" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">borra todo lo anterior</text>
+
+        <line x1="30" y1="112" x2="530" y2="112" stroke="#E5E1D8"/>
+
+        <text x="30" y="136" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">/usr/local/bin</text>
+        <text x="130" y="136" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">:</text>
+        <text x="142" y="136" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">/usr/bin</text>
+        <text x="205" y="136" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">:</text>
+        <text x="217" y="136" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">/bin</text>
+        <text x="252" y="136" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none">:</text>
+        <rect x="262" y="122" width="180" height="20" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="352" y="136" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">/home/user001/ejecutable</text>
+
+        <text x="280" y="170" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">Linux recorre los directorios en orden, separados por dos puntos</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">El nuevo directorio se añade al final de la lista que Linux recorre.</figcaption>
+    </figure>
+
+    <p class="mt-4">Con el PATH actualizado, el resultado es inmediato:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd /tmp
+$ listar.sh          # ya funciona desde cualquier sitio, sin ./ ni ruta completa</code></pre>
+    <p class="mt-4">Y encaja con lo que aprendiste en <a href="/Linux-course/lecciones/16-editar-y-localizar-comandos">which y whereis</a>: prueba <code>which listar.sh</code> y verás que ahora <code>which</code> sí lo localiza, porque busca precisamente dentro del PATH.</p>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: monta tu directorio de ejecutables</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Crea las variables <code>v=10</code> y <code>var=20</code>, léelas con <code>echo</code> y localízalas con <code>set | grep var</code>. Comprueba después que <code>printenv | grep var</code> no devuelve nada y explica por qué.</li>
+        <li>Desde tu home, crea <code>ejecutable/</code>, entra y genera el script con <code>echo "ls -l" &gt; listar.sh</code>. Míralo con <code>cat listar.sh</code> y con <code>ls -l</code>.</li>
+        <li>Dale permiso con <code>chmod +x listar.sh</code>, verifica las <code>x</code> con <code>ls -l</code> y ejecútalo de las dos formas: ruta absoluta completa y <code>./listar.sh</code>. Antes, intenta lanzarlo escribiendo solo <code>listar.sh</code> para ver el error.</li>
+        <li><strong>Reto:</strong> guarda tu PATH actual en un fichero con <code>echo $PATH &gt; /tmp/path_original.txt</code> (tu red de seguridad). Añade tu directorio con <code>PATH=$PATH:/home/user001/ejecutable</code>, muévete a <code>/tmp</code> y lanza <code>listar.sh</code> a secas. Confirma con <code>which listar.sh</code> y cuenta los directorios de tu PATH con <code>echo $PATH | tr ":" "\n" | wc -l</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Crear o modificar una variable es escribir <code>nombre=valor</code>, sin <code>$</code>; el <code>$</code> solo se usa para leerla con <code>echo $nombre</code>. Las variables que creas en la terminal son de shell, así que aparecen en <code>set</code> pero no en <code>printenv</code>.</p>
+      <p>Linux no ejecuta un programa que esté en tu directorio actual: solo busca en los directorios del <code>PATH</code>. Mientras tanto, lo lanzas con la ruta absoluta completa o con <code>./programa</code>, y antes le das permiso con <code>chmod +x</code>.</p>
+      <p>Para usarlo desde cualquier sitio se añade su directorio al PATH con <code>PATH=$PATH:/ruta/nueva</code>. Incluir <code>$PATH</code> a la derecha es obligatorio: sin él borras todos los directorios anteriores y pierdes los comandos del sistema en esa sesión.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Acabas de crear <code>var=20</code>. ¿Por qué no la ves con <code>printenv</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque <code>printenv</code> solo muestra variables de <strong>entorno</strong>, que se crean al entrar el usuario en el sistema. La tuya ha nacido dentro de la shell abierta, así que es una variable de <strong>shell</strong> y solo la lista <code>set</code> (fíltrala con <code>set | grep var</code>).</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Tu script tiene permiso <code>x</code> y estás en su directorio, pero <code>listar.sh</code> da «orden no encontrada». ¿Por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque Linux, a diferencia de Windows, no busca ejecutables en el directorio actual: solo en los directorios listados en <code>PATH</code>. Lánzalo con <code>./listar.sh</code> o con su ruta absoluta, o añade su directorio al PATH.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué diferencia hay entre <code>PATH=$PATH:/mi/dir</code> y <code>PATH=/mi/dir</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">La primera <strong>añade</strong> tu directorio al final de los que ya había, porque <code>$PATH</code> a la derecha recupera el valor anterior. La segunda <strong>sustituye</strong> el contenido completo: pierdes <code>/bin</code>, <code>/usr/bin</code> y demás, y Linux deja de encontrar los comandos del sistema en esa sesión.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/37-variables-de-entorno" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/39-prompt-ps1-y-ficheros-de-arranque" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

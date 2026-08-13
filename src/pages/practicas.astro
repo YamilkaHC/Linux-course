@@ -1,0 +1,474 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Pagina de practicas dirigidas. No sigue el temario completo del curso:
+// selecciona solo lo que se usa a diario en soporte de un servidor remoto de
+// produccion (PAGOS, CATALOGO, INVENTARIO, ENVIOS, NOTIFICA) accediendo por SSH.
+---
+
+<Layout
+  titulo="Prácticas de campo — Linux para soporte de producción"
+  descripcion="Ejercicios prácticos de Linux enfocados en el día a día de un servidor de producción: logs de PAGOS, CATALOGO, INVENTARIO, ENVIOS y NOTIFICA por SSH."
+>
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4 flex-wrap">
+      <span class="etiqueta">Prácticas de campo</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">9 misiones · laboratorio incluido</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Linux en tu día a día</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Entras por SSH a un servidor donde corren PAGOS, CATALOGO, INVENTARIO, ENVIOS y NOTIFICA.
+      No necesitas las 80 lecciones: necesitas unos 25 comandos, muy bien interiorizados. Estos son.
+    </p>
+
+    <!-- ================= PARA QUÉ SIRVE ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Para qué es esta página</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Practicar <strong>solo lo que se usa en un servidor de producción</strong>: leer logs, buscar un pedido, ver si un binario está arriba, liberar disco, editar un config con <code>vi</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Hacerlo con <strong>ejercicios ejecutables</strong>. Montas un laboratorio que imita la estructura de las aplicaciones y practicas ahí, sin tocar producción.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Salir con <strong>reflejos</strong>, no con teoría: ante «se cayó CATALOGO» o «la tienda T0034 no cerró el pedido», saber qué escribir sin pensarlo.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= ÍNDICE DE MISIONES ================= -->
+    <nav class="border border-line bg-white p-6 md:p-8 mt-10">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4">Las 9 misiones</p>
+      <ol class="grid md:grid-cols-2 gap-y-2 gap-x-8 text-sm !mt-0">
+        <li><a href="#m0">0 · Montar el laboratorio</a></li>
+        <li><a href="#m1">1 · Aterrizar en el servidor</a></li>
+        <li><a href="#m2">2 · Llegar al log correcto</a></li>
+        <li><a href="#m3">3 · Leer el log en vivo</a></li>
+        <li><a href="#m4">4 · Cazar un pedido</a></li>
+        <li><a href="#m5">5 · ¿Está arriba el binario?</a></li>
+        <li><a href="#m6">6 · Disco lleno a las 2 a. m.</a></li>
+        <li><a href="#m7">7 · «Permission denied»</a></li>
+        <li><a href="#m8">8 · Editar un config con vi</a></li>
+        <li><a href="#m9">9 · Automatizar tu guardia</a></li>
+      </ol>
+    </nav>
+
+    <!-- ================= CÓMO TRABAJAR ================= -->
+    <h2 class="font-display text-2xl font-bold mt-12">Cómo trabajar esta página</h2>
+    <p class="mt-4">
+      Abre tu Debian de la <a href="/Linux-course/lecciones/03-instalar-debian">Lección 3</a> (o cualquier Linux al que tengas acceso libre) y monta el laboratorio de la Misión 0.
+      Todos los ejercicios se ejecutan ahí: los ficheros, los nombres de aplicación y el formato de log imitan los de un servidor real, así que el músculo que entrenas es el mismo.
+    </p>
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Regla de oro</p>
+      <p class="!mt-2">En producción, <strong>todo lo que sea leer es seguro</strong> (<code>ls</code>, <code>cat</code>, <code>tail</code>, <code>grep</code>, <code>ps</code>, <code>df</code>, <code>du</code>). Todo lo que <strong>escriba, borre o mate procesos</strong> (<code>rm</code>, <code>chmod</code>, <code>kill</code>, <code>vi</code> guardando) se practica aquí, no allá. En el servidor real eso va con procedimiento y autorización.</p>
+    </div>
+
+    <!-- ================= MISIÓN 0 ================= -->
+    <h2 id="m0" class="font-display text-2xl font-bold mt-12">Misión 0 — Montar el laboratorio</h2>
+    <p class="mt-4">Creas una estructura parecida a la de un servidor real: una carpeta por aplicación, con su <code>log</code> y su <code>cfg</code>. Usas <a href="/Linux-course/lecciones/09-crear-y-copiar"><code>mkdir -p</code></a> dentro de un <a href="/Linux-course/lecciones/79-el-bucle-for">bucle <code>for</code></a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ mkdir -p ~/lab
+$ cd ~/lab
+$ for app in pagos catalogo inventario envios notifica
+&gt; do
+&gt;   mkdir -p $app/log $app/cfg
+&gt; done
+$ tree ~/lab            # comprueba la estructura</code></pre>
+
+    <p class="mt-4">Ahora llenas el log de PAGOS con pedidos falsos. <code>echo</code> más <a href="/Linux-course/lecciones/19-entrada-salida-y-redirecciones"><code>&gt;&gt;</code></a> escribe línea a línea; <a href="/Linux-course/lecciones/18-fecha-y-tiempo-activo"><code>date</code></a> pone la marca de tiempo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd ~/lab/pagos/log
+$ for i in 1 2 3 4 5 6 7 8
+&gt; do
+&gt;   echo "$(date '+%d/%m/%Y %H:%M:%S') PAGOS PED=9000$i TIENDA=T0034 COD=00 APROBADO COBRO" &gt;&gt; pagos.log
+&gt; done
+$ echo "$(date '+%d/%m/%Y %H:%M:%S') PAGOS PED=90009 TIENDA=T0034 COD=91 TIMEOUT DE PASARELA" &gt;&gt; pagos.log
+$ echo "$(date '+%d/%m/%Y %H:%M:%S') PAGOS PED=90010 TIENDA=T0077 COD=51 STOCK INSUFICIENTE" &gt;&gt; pagos.log
+$ echo "$(date '+%d/%m/%Y %H:%M:%S') PAGOS ERROR conexion con ENVIOS rechazada" &gt;&gt; pagos.log
+$ cat pagos.log</code></pre>
+
+    <p class="mt-4">Repite lo mismo para las demás aplicaciones (cambia <code>pagos</code> por <code>catalogo</code>, <code>inventario</code>, <code>envios</code>, <code>notifica</code>) para tener varios logs con contenido distinto. Y crea un config de mentira para la Misión 8:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd ~/lab/catalogo/cfg
+$ echo "HOST=10.20.30.40" &gt; catalogo.cfg
+$ echo "PUERTO=8080" &gt;&gt; catalogo.cfg
+$ echo "TIMEOUT=30" &gt;&gt; catalogo.cfg
+$ echo "LOG_LEVEL=INFO" &gt;&gt; catalogo.cfg
+$ cat catalogo.cfg</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Monta el laboratorio completo y termina con <code>tree ~/lab</code>. <strong>Meta:</strong> ver cinco aplicaciones, cada una con <code>log/</code> y <code>cfg/</code>, y al menos <code>pagos</code> con su fichero de log lleno. Es tu campo de práctica para las 9 misiones.</p>
+    </div>
+
+    <!-- ================= MISIÓN 1 ================= -->
+    <h2 id="m1" class="font-display text-2xl font-bold mt-12">Misión 1 — Aterrizar en el servidor</h2>
+    <p class="mt-4">Acabas de conectarte por SSH. Antes de tocar nada, cuatro preguntas: <em>¿quién soy?</em>, <em>¿dónde estoy?</em>, <em>¿quién más está conectado?</em>, <em>¿cómo está la máquina?</em></p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ id                    # tu usuario, tu UID y TODOS tus grupos
+$ logname               # con qué usuario iniciaste sesión de verdad
+$ pwd                   # en qué directorio te dejó el login
+$ who                   # quién más está dentro (¿el otro turno sigue trabajando?)
+$ date                  # hora del SERVIDOR, no la de tu laptop
+$ uptime -p             # cuánto lleva encendido; un uptime bajo = reinicio reciente
+$ df -h                 # espacio en disco: la causa #1 de servicios caídos
+$ free -m               # memoria disponible</code></pre>
+    <p class="mt-4">
+      <code>date</code> importa más de lo que parece: cuando reportas «el pedido falló a las 10:42», esa hora tiene que ser la del servidor, no la de tu equipo.
+      Y <code>id</code> te dice de entrada si perteneces al grupo que puede leer los logs de la aplicación — la mitad de los «no me deja» se explican ahí (<a href="/Linux-course/lecciones/32-usuarios-y-grupos">Lección 32</a>).
+    </p>
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta los ocho comandos en orden y anota tres datos: tus grupos, el porcentaje de uso del disco más lleno y el uptime. <strong>Meta:</strong> que este bloque se te vuelva un reflejo de los primeros 15 segundos de cada conexión.</p>
+    </div>
+
+    <!-- ================= MISIÓN 2 ================= -->
+    <h2 id="m2" class="font-display text-2xl font-bold mt-12">Misión 2 — Llegar al log correcto</h2>
+    <p class="mt-4">Te dicen: «revisa el log de INVENTARIO». Nadie te da la ruta. Tres caminos, de más rápido a más seguro:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd ~/lab/inventario/log ; ls -l   # 1. si ya sabes la ruta
+$ ls -lt                            # ordena por fecha: el más reciente ARRIBA
+$ ls -ltr                           # al revés: el más reciente ABAJO (útil con muchos ficheros)</code></pre>
+    <p class="mt-4">Si no sabes dónde está, <a href="/Linux-course/lecciones/41-buscar-ficheros-find"><code>find</code></a> es la herramienta. Búsqueda por nombre y por fecha de modificación:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ find ~/lab -name "*.log"                 # todos los logs bajo lab
+$ find ~/lab -name "inventario*"           # los ficheros de INVENTARIO, se llamen como se llamen
+$ find ~/lab -name "*.log" -mtime -1       # modificados en las últimas 24 h = los que están VIVOS
+$ find / -name "catalogo*" 2&gt;/dev/null     # búsqueda global; 2&gt;/dev/null oculta los "permiso denegado"</code></pre>
+    <p class="mt-4">
+      Ese <code>-mtime -1</code> es oro puro en soporte: te separa los logs activos de los archivados hace meses (<a href="/Linux-course/lecciones/42-find-tipo-fecha-y-tamano">Lección 42</a>).
+      Y <code>2&gt;/dev/null</code> limpia la salida cuando buscas en directorios donde no tienes permiso (<a href="/Linux-course/lecciones/20-redirecciones-entrada-y-error">Lección 20</a>).
+    </p>
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Desde <code>~</code>, encuentra todos los <code>.log</code> de tu laboratorio con <code>find</code>, luego solo los tocados hoy con <code>-mtime -1</code>, y por último ordena una carpeta con <code>ls -lt</code>. <strong>Meta:</strong> localizar un log sin saber la ruta de memoria.</p>
+    </div>
+
+    <!-- ================= MISIÓN 3 ================= -->
+    <h2 id="m3" class="font-display text-2xl font-bold mt-12">Misión 3 — Leer el log en vivo</h2>
+    <p class="mt-4">Regla del oficio: <strong>a un log de producción nunca se le hace <code>cat</code></strong>. Puede tener millones de líneas y te ahoga la sesión. Se lee por el final, que es donde está lo que acaba de pasar:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd ~/lab/pagos/log
+$ tail pagos.log            # últimas 10 líneas
+$ tail -50 pagos.log        # últimas 50: lo típico al empezar a diagnosticar
+$ tail -f pagos.log         # EN VIVO: se queda pegado imprimiendo lo nuevo. Ctrl+C para salir
+$ head -20 pagos.log        # el arranque del log: aquí se ven los errores de inicio del binario</code></pre>
+    <p class="mt-4">
+      <code>tail -f</code> es tu comando estrella (<a href="/Linux-course/lecciones/12-ver-mas-y-explorar">Lección 12</a>): lo dejas corriendo en una pestaña de tu cliente SSH, pides que reintenten el pedido y ves aparecer las líneas en el momento. Diagnóstico en tiempo real.
+    </p>
+    <p>Cuando el log es grande y quieres <em>navegarlo</em>, usa <code>less</code>: entra sin cargarlo entero, buscas con <code>/</code>, saltas con <code>n</code> y sales con <code>q</code>.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ less pagos.log
+  /COD=91        # busca dentro; n = siguiente coincidencia
+  G              # ir al final    g = ir al principio
+  q              # salir</code></pre>
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Abre dos pestañas. En una deja <code>tail -f ~/lab/pagos/log/pagos.log</code>; en la otra ejecuta <code>echo "$(date '+%H:%M:%S') PAGOS PED=90011 COD=00 APROBADO" &gt;&gt; ~/lab/pagos/log/pagos.log</code>. <strong>Meta:</strong> ver la línea aparecer sola en la primera pestaña. Eso es exactamente lo que harás mientras el cliente reintenta el pago.</p>
+    </div>
+
+    <!-- ================= MISIÓN 4 ================= -->
+    <h2 id="m4" class="font-display text-2xl font-bold mt-12">Misión 4 — Cazar un pedido</h2>
+    <p class="mt-4">La misión más frecuente de todas: «la tienda T0034 rechazó un cobro a las 10:42, ¿qué pasó?». <a href="/Linux-course/lecciones/23-buscar-texto-grep"><code>grep</code></a> es el 80 % de tu trabajo diario.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd ~/lab/pagos/log
+$ grep PED=90009 pagos.log      # por número de pedido: lo más preciso
+$ grep T0034 pagos.log          # todo lo que hizo esa tienda
+$ grep "COD=91" pagos.log       # todos los timeout
+$ grep -i error pagos.log       # -i ignora mayúsculas: capta error, Error y ERROR
+$ grep -c "COD=00" pagos.log    # -c CUENTA: cuántos aprobados hay
+$ grep -l ERROR *.log           # -l: solo los NOMBRES de ficheros con errores</code></pre>
+    <p class="mt-4">Ahora en varias aplicaciones a la vez. Cuando no sabes cuál de los binarios falló, buscas el número de pedido en todos los logs y el propio <code>grep</code> te dice en cuál apareció:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cd ~/lab
+$ grep -s PED=90009 */log/*.log         # ¿en qué aplicación se ve ese pedido?
+$ grep -si timeout */log/*.log          # -s calla los avisos, -i ignora mayúsculas</code></pre>
+    <p class="mt-4">Y encadenado con <a href="/Linux-course/lecciones/21-tuberias-y-filtros">tuberías</a>, que es donde <code>grep</code> se vuelve una herramienta de análisis y no solo de búsqueda:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ grep COD=91 pagos/log/pagos.log | wc -l           # cuántos timeout hubo
+$ grep T0034 pagos/log/pagos.log | tail -5          # las 5 últimas de esa tienda
+$ tail -200 pagos/log/pagos.log | grep COD=51       # solo errores recientes, no los de ayer
+$ ps -ef | grep catalogo                            # grep filtrando la salida de OTRO comando</code></pre>
+    <p class="mt-4">Un paso más: sacar estadísticas del log para el reporte del incidente. <a href="/Linux-course/lecciones/25-cortar-campos-cut"><code>cut</code></a> recorta la columna, <a href="/Linux-course/lecciones/24-ordenar-sort"><code>sort</code></a> ordena y <code>uniq -c</code> cuenta repetidos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cut -d' ' -f5 pagos/log/pagos.log             # quédate con la columna de la tienda (separador espacio)
+$ cut -d' ' -f5 pagos/log/pagos.log | sort | uniq -c | sort -nr
+      # ranking: qué tienda generó más movimientos. uniq -c cuenta, sort -nr ordena de mayor a menor</code></pre>
+    <p class="mt-4">Y guardar la evidencia. <code>&gt;</code> crea el fichero, <code>&gt;&gt;</code> añade, y <a href="/Linux-course/lecciones/22-contar-y-tee"><code>tee</code></a> te muestra el resultado en pantalla <em>y</em> lo guarda a la vez:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ grep T0034 pagos/log/pagos.log &gt; ~/incidente-0034.txt      # guarda callado
+$ grep T0034 pagos/log/pagos.log | tee ~/incidente-0034.txt  # muestra Y guarda
+$ wc -l ~/incidente-0034.txt                                 # cuántas líneas recogiste</code></pre>
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Contesta con comandos: <strong>(a)</strong> ¿cuántos pedidos aprobados hay en <code>pagos.log</code>? <strong>(b)</strong> ¿qué línea corresponde a <code>PED=90009</code> y qué código trae? <strong>(c)</strong> guarda en <code>~/reporte.txt</code> todas las líneas de la tienda T0034 y verifica el conteo con <code>wc -l</code>. <strong>Meta:</strong> resolver un caso real sin abrir el fichero entero.</p>
+    </div>
+
+    <!-- ================= MISIÓN 5 ================= -->
+    <h2 id="m5" class="font-display text-2xl font-bold mt-12">Misión 5 — ¿Está arriba el binario?</h2>
+    <p class="mt-4">«Se cayó CATALOGO». Antes de escalar, compruébalo. <a href="/Linux-course/lecciones/26-procesos-y-ps"><code>ps -ef</code></a> lista todos los procesos del sistema y <code>grep</code> filtra el que te interesa — este par es el pan de cada día:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps -ef | grep catalogo      # ¿existe el proceso? ¿con qué PID? ¿desde qué hora?
+$ ps -ef | grep pagos
+$ ps -ef | grep envios
+$ ps -ef | wc -l              # cuántos procesos hay en total en el servidor</code></pre>
+    <p class="mt-4">Lee la salida por columnas: <strong>UID</strong> (con qué usuario corre), <strong>PID</strong> (su número), <strong>PPID</strong> (quién lo lanzó), <strong>STIME</strong> (a qué hora arrancó) y el comando completo. Si el STIME es de hace 5 minutos, el binario se reinició — dato clave para el reporte.</p>
+    <p>Para ver relaciones padre-hijo (un proceso que lanza subprocesos por cada canal o terminal), <a href="/Linux-course/lecciones/27-arbol-de-procesos-pstree"><code>pstree</code></a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ pstree -p              # árbol completo con PIDs
+$ pstree -s -p 1234      # la cadena de padres de un PID concreto
+$ ps xf                  # tus procesos en formato árbol</code></pre>
+    <p class="mt-4">Si el reclamo es «el sistema está lento», <a href="/Linux-course/lecciones/29-monitorear-con-top"><code>top</code></a> te dice quién se está comiendo la máquina. Dentro de <code>top</code>: <code>P</code> ordena por CPU, <code>M</code> por memoria, <code>u</code> filtra por usuario, <code>q</code> sale.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ top                                        # cabecera: uptime, carga, tareas, CPU, memoria, swap
+$ watch -n 5 'ps -ef | grep notifica'        # repite el chequeo cada 5 s mientras esperas</code></pre>
+    <p class="mt-4"><code>watch -n 5</code> (<a href="/Linux-course/lecciones/46-monitorear-con-watch">Lección 46</a>) es perfecto para vigilar si un proceso vuelve a levantar después de un reinicio, sin repetir el comando a mano.</p>
+
+    <h3 class="font-display text-xl font-bold mt-8">Matar un proceso: el orden correcto</h3>
+    <p class="mt-4">
+      Esto es lo único de la página que puede tumbar un servicio en producción, así que va con cuidado y con autorización.
+      La secuencia correcta es siempre la misma: primero pides al proceso que termine ordenadamente, y solo si no responde lo fuerzas.
+    </p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps -ef | grep catalogo   # 1. confirma el PID exacto. NUNCA mates un PID que no verificaste
+$ kill -15 1234            # 2. SIGTERM: le pide cerrar bien (cierra ficheros, vacía buffers)
+$ ps -ef | grep catalogo   # 3. comprueba si murió
+$ kill -9 1234             # 4. SOLO si sigue vivo. SIGKILL: lo mata en seco, sin cerrar nada</code></pre>
+    <p class="mt-4">
+      <code>kill -9</code> sobre un binario que procesa pedidos puede dejar operaciones a medias o ficheros corruptos: es el último recurso, no el primero (<a href="/Linux-course/lecciones/30-senales-y-kill">Lección 30</a>).
+      Practica los dos en tu laboratorio con un proceso inofensivo:
+    </p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sleep 600 &amp;              # lanza un proceso de mentira en segundo plano
+$ jobs                     # lo ves listado como trabajo
+$ ps -ef | grep sleep      # anota su PID
+$ kill -15 PID_DEL_SLEEP   # pruébalo aquí, no en CATALOGO</code></pre>
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lanza tres <code>sleep 600 &amp;</code>, lístalos con <code>ps -ef | grep sleep</code>, mátalos con <code>kill -15</code> y verifica que desaparecieron. <strong>Meta:</strong> ejecutar la secuencia verificar → PID → -15 → verificar sin dudar, para que el día que sea en serio no improvises.</p>
+    </div>
+
+    <!-- ================= MISIÓN 6 ================= -->
+    <h2 id="m6" class="font-display text-2xl font-bold mt-12">Misión 6 — Disco lleno a las 2 a. m.</h2>
+    <p class="mt-4">Un servidor de producción con el disco al 100 % deja de escribir logs y las aplicaciones empiezan a fallar sin razón aparente. Y el culpable casi siempre son… los logs. Diagnóstico en tres pasos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ df -h                        # 1. ¿QUÉ partición está llena? mira la columna "Use%"
+$ cd ~/lab
+$ du -h                         # 2. ¿QUÉ directorio pesa? recorre y suma
+$ du -h pagos                   # el peso de una aplicación concreta
+$ find . -size +50M             # 3. ¿QUÉ fichero concreto? los mayores de 50 MB</code></pre>
+    <p class="mt-4"><code>df</code> mira el disco desde arriba (particiones), <code>du</code> desde abajo (directorios). Se usan juntos: <code>df</code> te dice dónde está el problema, <code>du</code> te dice quién lo causa (<a href="/Linux-course/lecciones/14-espacio-en-disco">Lección 14</a>).</p>
+    <p>Encontrado el culpable, lo archivas en vez de borrarlo. <code>tar</code> empaqueta y comprime de una vez (<a href="/Linux-course/lecciones/45-zip-y-tar-comprimido">Lección 45</a>):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ find ~/lab -name "*.log" -mtime +30             # logs sin tocar hace más de 30 días
+$ cd ~/lab
+$ tar czvf logs-pagos-respaldo.tar.gz pagos/log   # c crea, z comprime, v muestra, f fichero
+$ tar tzvf logs-pagos-respaldo.tar.gz             # t LISTA el contenido: verifica ANTES de borrar
+$ gzip -k pagos/log/pagos.log                     # comprimir un log suelto conservando el original</code></pre>
+    <div class="border border-line bg-white p-6 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Antes de borrar nada</p>
+      <p class="!mt-2">
+        Verifica siempre el respaldo con <code>tar tzvf</code> antes de eliminar el original, y borra fichero por fichero.
+        <strong><code>rm -r</code> no pregunta, no manda a papelera y no tiene deshacer</strong> (<a href="/Linux-course/lecciones/10-mover-y-borrar">Lección 10</a>).
+        Un <code>rm -r</code> con la ruta equivocada en un servidor de producción es un incidente mayor, no un error recuperable.
+        Usa <code>rm -i</code>, que pide confirmación por cada fichero.
+      </p>
+    </div>
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">En <code>~/lab</code>: mira el espacio con <code>df -h</code>, pesa cada aplicación con <code>du -h</code>, empaqueta <code>pagos/log</code> con <code>tar czvf</code>, lista el paquete con <code>tar tzvf</code> y extrae en otra carpeta con <code>tar xzvf</code>. <strong>Meta:</strong> completar el ciclo empaquetar → verificar → restaurar, que es el procedimiento real antes de liberar espacio.</p>
+    </div>
+
+    <!-- ================= MISIÓN 7 ================= -->
+    <h2 id="m7" class="font-display text-2xl font-bold mt-12">Misión 7 — «Permission denied»</h2>
+    <p class="mt-4">Te pasa a diario: intentas leer un log de la aplicación y el servidor te dice que no. No es un fallo, es el modelo de permisos. Diagnóstico:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -l pagos/log/pagos.log
+-rw-r-----  1 appuser appgrp  1420 abr 28 10:42 pagos.log
+$ id                       # ¿pertenezco al grupo appgrp?</code></pre>
+    <p class="mt-4">Lee la primera columna en tres bloques de tres (<a href="/Linux-course/lecciones/33-permisos-rwx">Lección 33</a>): <strong>usuario</strong> <code>rw-</code>, <strong>grupo</strong> <code>r--</code>, <strong>otros</strong> <code>---</code>. Si no eres <code>appuser</code> ni estás en <code>appgrp</code>, caes en «otros» y no puedes ni leerlo. La solución real no es forzar el permiso: es pedir que te agreguen al grupo correcto.</p>
+    <p>En tu laboratorio sí puedes practicar los cambios:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ chmod +x revisar.sh          # el clásico: hacer ejecutable un script
+$ chmod 750 revisar.sh          # octal: 7 dueño (rwx), 5 grupo (r-x), 0 otros (nada)
+$ chmod 640 catalogo.cfg        # config: dueño lee y escribe, grupo lee, otros nada
+$ ls -l                         # confirma el cambio
+$ sudo chown otrousuario fichero   # cambiar de dueño exige privilegios</code></pre>
+    <p class="mt-4">Los tres números que debes tener memorizados: <strong>755</strong> (script ejecutable por todos), <strong>750</strong> (ejecutable solo por tu grupo), <strong>640</strong> (config legible por el grupo, protegido de terceros). Repaso en <a href="/Linux-course/lecciones/35-permisos-octal-y-umask">Lección 35</a>.</p>
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea <code>~/lab/prueba.cfg</code>, quítale todo permiso con <code>chmod 000 prueba.cfg</code> e intenta leerlo con <code>cat</code>. Después devuélvele acceso con <code>chmod 640</code> y vuelve a leerlo. <strong>Meta:</strong> provocar tú misma el «Permission denied» y saber exactamente qué número lo arregla.</p>
+    </div>
+
+    <!-- ================= MISIÓN 8 ================= -->
+    <h2 id="m8" class="font-display text-2xl font-bold mt-12">Misión 8 — Editar un config con vi</h2>
+    <p class="mt-4">
+      En un servidor remoto por SSH no hay VS Code. Hay <code>vi</code>, y punto.
+      Vas a tocar un timeout, un puerto o un nivel de log, y necesitas entrar, cambiar una línea y salir sin romper el fichero.
+      Ese es todo el <code>vi</code> que necesitas (lecciones <a href="/Linux-course/lecciones/57-editor-vi-primeros-pasos">57</a> a <a href="/Linux-course/lecciones/65-trucos-de-vi">65</a>).
+    </p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cp catalogo.cfg catalogo.cfg.bak   # 0. SIEMPRE respalda antes de editar un config
+$ vi catalogo.cfg
+
+  :set nu          # numera las líneas (para reportar "cambié la línea 3")
+  /TIMEOUT         # busca la línea; n salta a la siguiente coincidencia
+  i                # entra en modo inserción; escribes; Esc para volver a modo comando
+  dd               # borra la línea entera
+  yy  p            # copia la línea  /  la pega debajo
+  u                # deshacer el último cambio
+  :wq              # guardar y salir
+  :q!              # SALIR SIN GUARDAR (tu botón de pánico si te equivocaste)</code></pre>
+    <p class="mt-4">El cambio quirúrgico más útil es la sustitución (<a href="/Linux-course/lecciones/62-buscar-y-reemplazar-en-vi">Lección 62</a>): cambiar un valor en todo el fichero sin editar a mano:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>  :%s/TIMEOUT=30/TIMEOUT=60/g      # en TODO el fichero (%), TODAS las veces (g)
+  :s/INFO/DEBUG/                   # solo en la línea actual, primera coincidencia</code></pre>
+    <div class="border border-line bg-white p-6 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Si vi se queja al abrir</p>
+      <p class="!mt-2">
+        El aviso de fichero <code>.swp</code> significa que alguien lo está editando ahora mismo, o que una sesión murió a medias (se cayó la VPN, cerraste la terminal).
+        Antes de tocar nada averigua cuál de los dos es: si hay otra persona dentro, dos ediciones simultáneas se pisan y el último en guardar gana.
+        Si fue una caída tuya, recuperas con <code>:recover</code> y luego borras el <code>.swp</code> (<a href="/Linux-course/lecciones/64-recuperar-un-fichero-en-vi">Lección 64</a>).
+      </p>
+    </div>
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Sobre <code>~/lab/catalogo/cfg/catalogo.cfg</code>: respáldalo, ábrelo con <code>vi</code>, activa <code>:set nu</code>, cambia el <code>TIMEOUT</code> a 60 con <code>:%s/</code>, guarda con <code>:wq</code> y compara con <code>cat</code>. Repite pero saliendo con <code>:q!</code> y comprueba que el fichero quedó intacto. <strong>Meta:</strong> confiar en tu botón de pánico.</p>
+    </div>
+
+    <!-- ================= MISIÓN 9 ================= -->
+    <h2 id="m9" class="font-display text-2xl font-bold mt-12">Misión 9 — Automatizar tu guardia</h2>
+    <p class="mt-4">Lo que haces tres veces al día, lo escribes una vez. Primero los <a href="/Linux-course/lecciones/17-alias-time-y-calendario">alias</a>, atajos para los comandos largos que repites:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ alias logpagos='tail -f ~/lab/pagos/log/pagos.log'
+$ alias vercatalogo='ps -ef | grep catalogo'
+$ alias disco='df -h'
+$ alias                    # lista todos tus alias
+$ logpagos                 # ahora es un solo comando</code></pre>
+    <p class="mt-4">Para que sobrevivan a la desconexión, los pones en tu <code>~/.bashrc</code> (<a href="/Linux-course/lecciones/39-prompt-ps1-y-ficheros-de-arranque">Lección 39</a>).</p>
+    <p>Después, el script de chequeo. Este junta casi todo el curso: <a href="/Linux-course/lecciones/66-tu-primer-script">shebang</a>, <a href="/Linux-course/lecciones/69-guardar-la-salida-de-un-comando">sustitución de comandos</a>, <a href="/Linux-course/lecciones/79-el-bucle-for">bucle <code>for</code></a> e <a href="/Linux-course/lecciones/72-condicionales-if-else"><code>if</code></a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ vi ~/lab/chequeo.sh
+
+#!/bin/bash
+# Chequeo rapido de los binarios de la plataforma
+echo "=== Chequeo $(date '+%d/%m/%Y %H:%M:%S') ==="
+echo "Uptime:$(uptime -p)"
+echo ""
+echo "--- Disco ---"
+df -h | grep -v tmpfs
+echo ""
+echo "--- Procesos ---"
+for app in pagos catalogo inventario envios notifica
+do
+  vivos=$(ps -ef | grep $app | wc -l)
+  if [ $vivos -gt 1 ]
+  then
+    echo "$app: ARRIBA ($vivos procesos)"
+  else
+    echo "$app: NO SE ENCUENTRA  &lt;&lt;&lt; REVISAR"
+  fi
+done
+
+$ chmod +x ~/lab/chequeo.sh
+$ ~/lab/chequeo.sh
+$ ~/lab/chequeo.sh &gt; ~/chequeo-del-dia.txt    # guarda el resultado como evidencia</code></pre>
+    <p class="mt-4">Por último, que se ejecute solo. <a href="/Linux-course/lecciones/48-tu-propio-crontab"><code>crontab -e</code></a> programa el chequeo cada hora y redirige la salida a un fichero (si no rediriges, cron intenta enviarte correo):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ crontab -e
+  0 * * * * /home/TU_USUARIO/lab/chequeo.sh &gt;&gt; /home/TU_USUARIO/chequeos.log 2&gt;&amp;1
+  # min hora dia mes diasemana → "al minuto 0 de cada hora, todos los días"
+
+$ crontab -l      # lista tus tareas programadas</code></pre>
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Escribe <code>chequeo.sh</code>, dale permisos con <code>chmod +x</code> y ejecútalo. Después lánzalo dos veces guardando en el mismo fichero con <code>&gt;&gt;</code> y revisa el resultado con <code>tail</code>. <strong>Meta:</strong> tener un script propio que resuma en 5 segundos el estado que hoy consultas comando por comando.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="border border-line bg-white p-8 md:p-10 mt-14">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4">Reto de guardia · integra las 9 misiones</p>
+      <p class="!mt-0"><strong>Son las 2:14 a. m. Te llaman: «los cobros de la tienda T0034 están fallando y CATALOGO parece caído».</strong> Resuélvelo en tu laboratorio, en orden, sin mirar arriba:</p>
+      <ol class="list-decimal pl-6 space-y-3 my-5 text-ink/80">
+        <li><strong>Aterriza:</strong> confirma quién eres, la hora del servidor, el uptime y el espacio en disco.</li>
+        <li><strong>Verifica el binario:</strong> ¿existe el proceso de CATALOGO? Anota PID y hora de arranque. ¿Y los otros cuatro?</li>
+        <li><strong>Localiza el log</strong> de PAGOS sin escribir la ruta de memoria: encuéntralo con <code>find</code> y filtra por modificados hoy.</li>
+        <li><strong>Diagnostica:</strong> saca las últimas 50 líneas y filtra las de la tienda T0034. ¿Cuántas fallaron? ¿Con qué código?</li>
+        <li><strong>Cuantifica:</strong> cuenta cuántos pedidos con <code>COD=91</code> hay y qué tienda acumula más movimientos (<code>cut</code> + <code>sort</code> + <code>uniq -c</code>).</li>
+        <li><strong>Deja evidencia:</strong> guarda todas las líneas de T0034 en <code>~/incidente-0214.txt</code> con <code>tee</code> y verifica el conteo con <code>wc -l</code>.</li>
+        <li><strong>Revisa el config:</strong> abre <code>catalogo.cfg</code> con <code>vi</code> (respáldalo antes), comprueba el <code>TIMEOUT</code> y sal sin guardar.</li>
+        <li><strong>Vigila:</strong> deja un <code>watch -n 5</code> comprobando si CATALOGO vuelve, y un <code>tail -f</code> sobre el log en otra pestaña.</li>
+        <li><strong>Reporta:</strong> ejecuta <code>chequeo.sh</code> y guarda su salida junto a la evidencia. Ese es tu informe de incidente.</li>
+      </ol>
+      <p class="!mt-0 text-sm text-ink/60">Si completas los nueve pasos sin consultar, ya tienes el Linux que un turno de soporte necesita.</p>
+    </section>
+
+    <!-- ================= CHULETA ================= -->
+    <h2 class="font-display text-2xl font-bold mt-14">Chuleta de guardia</h2>
+    <p class="mt-4">Los comandos que de verdad vas a escribir. Imprímela o pégala en tus notas.</p>
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead>
+          <tr class="bg-sand text-left">
+            <th class="p-3 font-bold border-b border-line">Necesitas…</th>
+            <th class="p-3 font-bold border-b border-line">Escribe</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-line"><td class="p-3">Saber quién eres y tus grupos</td><td class="p-3"><code>id</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Hora real del servidor</td><td class="p-3"><code>date</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Espacio en disco</td><td class="p-3"><code>df -h</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Qué directorio pesa</td><td class="p-3"><code>du -h</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Ver el log en vivo</td><td class="p-3"><code>tail -f fichero.log</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Últimas N líneas</td><td class="p-3"><code>tail -50 fichero.log</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Buscar un pedido</td><td class="p-3"><code>grep PED=90009 fichero.log</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Buscar sin importar mayúsculas</td><td class="p-3"><code>grep -i error fichero.log</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Contar coincidencias</td><td class="p-3"><code>grep -c COD=91 fichero.log</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Buscar en todos los logs</td><td class="p-3"><code>grep -s PED=90009 */log/*.log</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Ranking de repetidos</td><td class="p-3"><code>cut -d' ' -f5 f.log | sort | uniq -c | sort -nr</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Ver y guardar a la vez</td><td class="p-3"><code>comando | tee evidencia.txt</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">¿Está arriba el binario?</td><td class="p-3"><code>ps -ef | grep catalogo</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Quién consume la máquina</td><td class="p-3"><code>top</code> (P=CPU, M=memoria, q=salir)</td></tr>
+          <tr class="border-b border-line"><td class="p-3">Repetir un chequeo solo</td><td class="p-3"><code>watch -n 5 'ps -ef | grep pagos'</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Parar un proceso (ordenado)</td><td class="p-3"><code>kill -15 PID</code> → verificar → <code>kill -9 PID</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Encontrar un fichero</td><td class="p-3"><code>find /ruta -name "*.log"</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Solo lo modificado hoy</td><td class="p-3"><code>find /ruta -name "*.log" -mtime -1</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Archivar logs viejos</td><td class="p-3"><code>tar czvf resp.tar.gz carpeta</code> · verificar con <code>tar tzvf</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Ver permisos</td><td class="p-3"><code>ls -l</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Hacer ejecutable un script</td><td class="p-3"><code>chmod +x script.sh</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Editar y salir sin romper nada</td><td class="p-3"><code>vi f</code> → <code>/buscar</code> → <code>i</code> → <code>Esc</code> → <code>:wq</code> o <code>:q!</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Cambiar un valor en todo el config</td><td class="p-3"><code>:%s/viejo/nuevo/g</code></td></tr>
+          <tr class="border-b border-line"><td class="p-3">Atajo permanente</td><td class="p-3"><code>alias logpagos='tail -f ruta.log'</code></td></tr>
+          <tr><td class="p-3">Tarea programada</td><td class="p-3"><code>crontab -e</code> · <code>crontab -l</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ================= FUERA DEL TEMARIO ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Fuera del temario del curso</h2>
+      <p class="!mt-0">
+        Estos comandos existen y son habituales en soporte, pero <strong>no se enseñan en este curso</strong> y su comportamiento depende de cómo esté montado tu servidor.
+        Los dejo nombrados para que sepas que existen y los confirmes con tu equipo antes de usarlos en producción:
+      </p>
+      <ul class="list-disc pl-6 space-y-2 my-4 text-ink/80">
+        <li><code>ssh usuario@servidor</code> — es lo que ejecuta por debajo cualquier cliente gráfico cuando abres una sesión.</li>
+        <li><code>scp</code> / <code>sftp</code> — copiar ficheros entre tu equipo y el servidor.</li>
+        <li><code>netstat</code> o <code>ss</code> — ver puertos y conexiones abiertas; útil para confirmar si el puerto 8080 está escuchando.</li>
+        <li><code>systemctl status</code> / <code>service</code> — estado de servicios gestionados por el sistema, si tus binarios están registrados así.</li>
+        <li><code>awk</code> — corta y calcula sobre columnas con mucha más potencia que <code>cut</code>; el siguiente paso natural cuando <code>cut</code> se te quede corto.</li>
+      </ul>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-14">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba tus reflejos</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Te piden revisar «qué está pasando ahora mismo» en el log de ENVIOS. ¿<code>cat</code>, <code>less</code> o <code>tail -f</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>tail -f</code>. Muestra lo que se escribe <strong>en el momento</strong> y se queda vigilando. <code>cat</code> vuelca el fichero entero (inviable en un log de producción) y <code>less</code> sirve para navegar un log grande, pero no para ver lo que llega en vivo.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Necesitas parar CATALOGO. ¿Cuál es la secuencia correcta y por qué <code>kill -9</code> no es el primer paso?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Primero <code>ps -ef | grep catalogo</code> para confirmar el PID exacto, luego <code>kill -15</code> (SIGTERM), que le pide cerrar de forma ordenada: cierra ficheros y vacía buffers. Solo si el proceso sigue vivo después de verificar, se usa <code>kill -9</code> (SIGKILL), que lo corta en seco y puede dejar operaciones a medias o ficheros corruptos.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. El disco está al 98 %. ¿Con qué dos comandos localizas al culpable y en qué orden?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Primero <code>df -h</code>, que te dice <strong>qué partición</strong> está llena (mira la columna <em>Use%</em>). Después <code>du -h</code> dentro de esa ruta, que te dice <strong>qué directorio</strong> pesa. Y para el fichero concreto, <code>find . -size +50M</code>. Antes de borrar: archivar con <code>tar czvf</code> y verificar con <code>tar tzvf</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <div class="border border-line bg-white p-6 md:p-8 mt-12">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Siguiente paso</p>
+      <p class="!mt-0">¿Te lo aprendiste de verdad? En <a href="/Linux-course/retos">Ponte a prueba</a> hay 45 retos con las respuestas ocultas: mismas situaciones, pero ahí las resuelves tú.</p>
+    </div>
+
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/" class="btn-secundario">Inicio</a>
+      <a href="/Linux-course/retos" class="btn-primario">Ponte a prueba</a>
+    </nav>
+
+  </article>
+</Layout>

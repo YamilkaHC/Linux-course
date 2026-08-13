@@ -1,0 +1,191 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 5. Fuente: transcripciones/video 3.md (parte 2: intérprete de comandos y primeros comandos)
+---
+
+<Layout titulo="Primeros comandos en la terminal — Curso Linux" descripcion="El intérprete de comandos de Linux: sintaxis, df, who, date, ls, cd, su, free, top y cómo instalar paquetes con apt.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 5</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">9 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Primeros comandos en la terminal</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      El intérprete de comandos (shell) es tu forma más directa de mandar en Linux. Aquí escribes tus primeros comandos reales.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Qué es el <strong>shell</strong> y cómo se lee la <strong>sintaxis</strong> de un comando: comando, opciones y argumentos.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Comandos reales para <strong>ver el sistema y moverte</strong>: <code>df</code>, <code>who</code>, <code>date</code>, <code>ls</code>, <code>cd</code>, <code>free</code>, <code>top</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A convertirte en <strong>root</strong> con <code>su -</code> y a <strong>instalar un paquete</strong> con <code>apt</code> cuando falte un comando.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">¿Qué es el intérprete de comandos?</h2>
+    <p class="mt-4">Abre tu terminal (la que anclaste en la <a href="/Linux-course/lecciones/04-explorar-escritorio">Lección 4</a>). Escribe cualquier disparate y pulsa Enter:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ asdfghjk
+orden no encontrada</code></pre>
+    <p>Ese mensaje lo produce el <strong>intérprete de comandos</strong> o <strong>shell</strong>: un programa que se ejecuta al iniciar sesión y actúa de puente entre tú y el sistema. Cada cosa que escribes, el shell la recoge y comprueba si es un comando válido. Ahora prueba uno que sí existe:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ df -h</code></pre>
+    <p><code>df -h</code> muestra las <strong>unidades de almacenamiento</strong>: cuánto espacio tiene cada una, cuánto está usado, cuánto libre y dónde está montada. Como es un comando válido, el sistema lo ejecuta en lugar de quejarse.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>df -h</code>. <strong>Meta:</strong> localizar en la tabla la línea cuyo punto de montaje es <code>/</code> (la partición raíz) y ver su porcentaje de uso.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">La anatomía de un comando</h2>
+    <p class="mt-4">Un comando se escribe así: primero el <strong>nombre</strong>, luego las <strong>opciones</strong> (con guion) y por último los <strong>argumentos</strong>. En <code>df -h</code>, <code>df</code> es el comando y <code>-h</code> una opción que lo hace legible para humanos.</p>
+
+    <svg viewBox="0 0 560 150" class="w-full max-w-xl my-6" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Anatomía de un comando: comando, opción y argumento">
+      <rect x="0" y="0" width="560" height="150" fill="#FDFCFB"/>
+      <text x="60" y="70" font-family="Inter, sans-serif" font-size="26" font-weight="700" fill="#1A1A1A">apt</text>
+      <text x="150" y="70" font-family="Inter, sans-serif" font-size="26" font-weight="700" fill="#1A1A1A">install</text>
+      <text x="300" y="70" font-family="Inter, sans-serif" font-size="26" font-weight="700" fill="#1A1A1A">htop</text>
+      <line x1="60" y1="90" x2="120" y2="90" stroke="#1A1A1A" stroke-width="1.5"/>
+      <line x1="150" y1="90" x2="270" y2="90" stroke="#1A1A1A" stroke-width="1.5"/>
+      <line x1="300" y1="90" x2="380" y2="90" stroke="#1A1A1A" stroke-width="1.5"/>
+      <text x="60" y="115" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A">comando</text>
+      <text x="150" y="115" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A">opción / acción</text>
+      <text x="300" y="115" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A">argumento</text>
+    </svg>
+
+    <p>Dos reglas de oro:</p>
+    <ul class="list-disc pl-6 space-y-2 my-4 text-ink/80">
+      <li>Linux <strong>distingue mayúsculas y minúsculas</strong>. Los comandos se escriben en minúscula, pero algunas opciones se escriben en mayúscula: no es lo mismo <code>-h</code> que <code>-H</code>.</li>
+      <li>Hay comandos <strong>con</strong> opciones/argumentos (<code>df -h</code>) y comandos <strong>sin</strong> nada (como <code>who</code>).</li>
+    </ul>
+    <p>Prueba dos comandos que no llevan argumentos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ who     # usuario actual, método de conexión y fecha/hora de la sesión
+$ date    # fecha y hora del sistema</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>who</code> y <code>date</code>. <strong>Meta:</strong> identificar tu nombre de usuario en la salida de <code>who</code> y la hora exacta en la de <code>date</code>.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cancelar un comando: Ctrl + C</h2>
+    <p class="mt-4">A veces un comando se queda «colgado» o simplemente te equivocaste. Para <strong>cortarlo</strong> y recuperar el control se pulsa <strong>Ctrl + C</strong>. Míralo con <code>ping</code>, que prueba la conexión a un servidor y no para solo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ping www.google.com
+# ...envía paquetes sin parar...
+# pulsa Ctrl + C para detenerlo</code></pre>
+    <p>Para <strong>limpiar</strong> la pantalla de la terminal en cualquier momento, usa <code>clear</code>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Lanza <code>ping www.google.com</code>, deja que envíe varios paquetes y detenlo con <strong>Ctrl + C</strong>. Después escribe <code>clear</code>. <strong>Meta:</strong> ver el resumen de paquetes al cancelar y la pantalla limpia.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Moverte por el sistema: ls y cd</h2>
+    <p class="mt-4">Estos dos comandos son los que más usarás. <code>ls</code> <strong>lista</strong> el contenido de la carpeta actual; <code>cd</code> <strong>cambia</strong> de carpeta:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls              # muestra Descargas, Documentos, Escritorio, Imágenes...
+$ cd Documentos   # entras en la carpeta Documentos
+$ ls              # su contenido (vacío al principio)
+$ cd ..           # vuelves a la carpeta anterior</code></pre>
+    <p>Fíjate en que, al entrar en <code>Documentos</code>, el <em>prompt</em> añade el nombre de la carpeta: así siempre sabes dónde estás. Con <code>cd ..</code> subes un nivel y ese nombre desaparece.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea dos carpetas dentro de <em>Documentos</em> desde el explorador de archivos (por ejemplo <code>prueba</code> y <code>prueba2</code>). Luego, en la terminal, entra con <code>cd Documentos</code> y ejecuta <code>ls</code>. <strong>Meta:</strong> ver esas dos carpetas listadas en la terminal.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Convertirte en root: su -</h2>
+    <p class="mt-4">Tu usuario normal no puede tocarlo todo. Para tareas de administración pasas al usuario <strong>root</strong> (el superusuario) con:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ su -
+Contraseña:    # escribe la contraseña de root que definiste al instalar</code></pre>
+    <p>Al acertar, el <em>prompt</em> cambia: aparece tu usuario <strong>root</strong> y el símbolo pasa de <code>$</code> a <code>#</code>. Ese <code>#</code> es la señal de que tienes control total del sistema.</p>
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead>
+          <tr class="bg-sand text-left">
+            <th class="p-3 font-bold border-b border-line">Símbolo del prompt</th>
+            <th class="p-3 font-bold border-b border-line">Significa</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-line"><td class="p-3 font-semibold"><code>$</code></td><td class="p-3">Estás como usuario normal (privilegios limitados).</td></tr>
+          <tr><td class="p-3 font-semibold"><code>#</code></td><td class="p-3">Estás como root (control total: cuidado con lo que ejecutas).</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Ya como root puedes ver la memoria del sistema y los procesos activos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code># free -m    # memoria total, usada, libre y en caché (en MB)
+# top        # procesos activos en tiempo real (sal con Ctrl + C)</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cuando falta un comando: apt</h2>
+    <p class="mt-4">Existe <code>htop</code>, una versión más completa de <code>top</code>. Pero al ejecutarlo por primera vez:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code># htop
+orden no encontrada</code></pre>
+    <p>No está instalado. Los programas en Debian se descargan e instalan con el <strong>gestor de paquetes</strong> <code>apt</code>. El flujo es: primero <strong>buscar</strong> si el paquete existe, luego <strong>instalarlo</strong>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code># apt search htop    # comprueba que el paquete está disponible
+# apt install htop   # lo descarga e instala
+# htop               # ahora sí funciona</code></pre>
+    <p>Si al terminar la instalación no aparece ningún error, se instaló bien. Ahora <code>htop</code> muestra los procesos con mucho más detalle, incluida la ruta de cada servicio.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Como root, instala <code>htop</code> con <code>apt install htop</code> y ejecútalo. <strong>Meta:</strong> ver la lista de procesos de <code>htop</code> y salir con <strong>Ctrl + C</strong>.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: tu primer recorrido en terminal</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Consulta el estado del equipo: <code>df -h</code> (discos), <code>free -m</code> (memoria) y <code>date</code> (hora). Anota el porcentaje de uso de la partición <code>/</code>.</li>
+        <li>Navega: entra con <code>cd Documentos</code>, lista con <code>ls</code>, vuelve con <code>cd ..</code> y limpia con <code>clear</code>.</li>
+        <li>Lanza <code>ping www.google.com</code>, obsérvalo un momento y cancélalo con <strong>Ctrl + C</strong>.</li>
+        <li>Conviértete en root con <code>su -</code> (confirma que el prompt pasa a <code>#</code>), busca e instala <code>htop</code> con <code>apt</code> y ejecútalo. <strong>Reto extra:</strong> compara la salida de <code>top</code> y <code>htop</code> y di qué te resulta más claro.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>El shell es el programa que interpreta lo que escribes; un comando se ordena como nombre, opciones (con guion) y argumentos, y Linux distingue mayúsculas de minúsculas.</p>
+      <p>Con <code>df</code>, <code>free</code>, <code>who</code>, <code>date</code>, <code>ls</code> y <code>cd</code> observas el sistema y te mueves por él; <strong>Ctrl + C</strong> cancela y <code>clear</code> limpia.</p>
+      <p>Con <code>su -</code> pasas a root (el prompt cambia de <code>$</code> a <code>#</code>) y con <code>apt search</code> / <code>apt install</code> instalas los paquetes que falten, como <code>htop</code>.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué diferencia hay entre el prompt <code>$</code> y el <code>#</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>$</code> indica que trabajas como <strong>usuario normal</strong> (privilegios limitados); <code>#</code> indica que eres <strong>root</strong>, con control total del sistema. Pasas de uno a otro con <code>su -</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Ejecutas un comando y aparece «orden no encontrada». ¿Qué puede pasar?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">O el comando está mal escrito (no es válido), o el <strong>paquete que lo contiene no está instalado</strong>. En el segundo caso lo instalas con <code>apt search</code> y <code>apt install</code>, como hicimos con <code>htop</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Cómo cancelas un comando que se quedó ejecutándose, como un <code>ping</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Con <strong>Ctrl + C</strong>: termina el trabajo actual y te devuelve el control de la terminal.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/04-explorar-escritorio" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/06-usuarios-y-ficheros" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>

@@ -1,0 +1,154 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 21. Fuente: transcripciones/video_18.md (tuberías |, filtros, uniq -c/-d)
+---
+
+<Layout titulo="Tuberías y filtros: el pipe | y uniq — Curso Linux" descripcion="Encadena comandos con la tubería | (pipe), entiende qué es un filtro (wc, grep, sort, cut, uniq) y elimina líneas repetidas con uniq (-c, -d).">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 21</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Tuberías y filtros: encadenar comandos</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      La tubería <code>|</code> es de lo más potente de Linux: conecta la salida de un comando con la entrada del siguiente. Combínala con <em>filtros</em> como <code>uniq</code> y montarás cadenas que resuelven tareas en una sola línea.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A conectar comandos con la <strong>tubería</strong> <code>|</code>, mandando la salida de uno como entrada del siguiente.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Qué es un <strong>filtro</strong> (<code>wc</code>, <code>grep</code>, <code>sort</code>, <code>cut</code>, <code>uniq</code>): un comando que necesita recibir su entrada de otro.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A eliminar líneas repetidas con <strong><code>uniq</code></strong> y a contarlas con <code>-c</code> o mostrar solo duplicadas con <code>-d</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">El problema: ficheros intermedios</h2>
+    <p class="mt-4">Con solo <a href="/Linux-course/lecciones/20-redirecciones-entrada-y-error">redirecciones</a>, encadenar operaciones obliga a crear ficheros intermedios. Para transformar un texto en dos pasos acabarías así:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat documento1.txt > documento2.txt   # copia
+$ tr a p < documento2.txt > documento3.txt   # transforma y guarda
+$ cat documento3.txt                     # por fin, el resultado</code></pre>
+    <p class="mt-4">Funciona, pero es engorroso y deja ficheros de sobra. La tubería elimina todo eso.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">La tubería: |</h2>
+    <p class="mt-4">El símbolo <code>|</code> (barra vertical, encima de <kbd>Enter</kbd> en teclado inglés, o junto al <kbd>1</kbd> en muchos teclados en español) manda la salida de un comando directamente a la entrada del siguiente, <strong>sin ficheros de por medio</strong>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat documento2.txt | tr a p     # la salida de cat entra en tr
+$ cat documento2.txt | wc -l      # la salida de cat entra en wc: cuenta líneas</code></pre>
+    <p class="mt-4">Lo mismo que antes hacías con <code>&lt;</code> desde un fichero, ahora te lo da el comando de la izquierda. Y puedes encadenar varios pasos: eso es un <strong>pipeline</strong>.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Un pipeline de tres pasos</text>
+        <rect x="15" y="45" width="120" height="45" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="75" y="72" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">cat documento2</text>
+        <line x1="135" y1="67" x2="185" y2="67"/>
+        <path d="M178 62 L185 67 L178 72" fill="none"/>
+        <text x="160" y="60" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">|</text>
+        <rect x="185" y="45" width="110" height="45" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="240" y="72" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">tr a m</text>
+        <line x1="295" y1="67" x2="345" y2="67"/>
+        <path d="M338 62 L345 67 L338 72" fill="none"/>
+        <text x="320" y="60" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">|</text>
+        <rect x="345" y="45" width="110" height="45" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="400" y="72" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">wc -l</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Cada <code>|</code> pasa el resultado al siguiente comando, como agua por una tubería.</figcaption>
+    </figure>
+
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat documento2.txt | tr a m | wc -l   # lee, transforma y cuenta, todo de una</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>cat documento1.txt | wc -l</code> y luego <code>cat documento1.txt | tr a X</code>. <strong>Meta:</strong> comprobar que el segundo comando trabaja sobre lo que le entrega el primero, sin ningún fichero intermedio.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">¿Qué es un filtro?</h2>
+    <p class="mt-4">Un <strong>filtro</strong> es un comando que necesita recibir su entrada de otro sitio: por sí solo se queda esperando. Si escribes <code>sort</code> o <code>grep</code> a secas, Linux espera que le des algo que ordenar o buscar. Por eso son la pareja perfecta de las tuberías. Los más habituales:</p>
+    <ul class="list-disc pl-6 space-y-1 mt-4">
+      <li><code>wc</code> — cuenta líneas, palabras y caracteres.</li>
+      <li><code>grep</code> — busca texto dentro de lo que recibe.</li>
+      <li><code>sort</code> — ordena el contenido.</li>
+      <li><code>diff</code> — busca diferencias entre entradas.</li>
+      <li><code>cut</code> — corta trozos (campos) de cada línea.</li>
+      <li><code>uniq</code> — elimina líneas repetidas.</li>
+    </ul>
+
+    <h2 class="font-display text-2xl font-bold mt-10">uniq: quitar líneas repetidas</h2>
+    <p class="mt-4">Crea con <a href="/Linux-course/lecciones/16-editar-y-localizar-comandos"><code>edit</code></a> un fichero <code>nombres</code> con nombres, algunos repetidos en líneas seguidas. <code>uniq</code> elimina los duplicados, como el <code>DISTINCT</code> de una base de datos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat nombres | uniq       # muestra cada nombre una sola vez</code></pre>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">Ojo: solo repetidos consecutivos</p>
+      <p class="!mt-2 text-cream/90"><code>uniq</code> solo elimina líneas repetidas que están <strong>una junto a otra</strong>. Si los duplicados están dispersos, primero hay que ordenar el fichero con <code>sort</code> (lo verás en un par de lecciones). Además, es <a href="/Linux-course/lecciones/08-comodines-y-tipos-de-archivo">case-sensitive</a>: «Ana» y «ana» cuentan como distintos.</p>
+    </div>
+
+    <p class="mt-4">Dos opciones muy útiles: <code>-c</code> antepone cuántas veces aparece cada línea, y <code>-d</code> muestra <strong>solo</strong> las que están duplicadas:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat nombres | uniq -c    # cuenta ocurrencias: "3 Tomas", "2 Jose"...
+$ cat nombres | uniq -d    # solo los nombres que se repiten
+$ cat nombres | uniq -d > repetidos.txt   # y los guardas con redirección</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Con tu fichero <code>nombres</code> ejecuta <code>cat nombres | uniq</code>, luego <code>uniq -c</code> y <code>uniq -d</code>. <strong>Meta:</strong> ver la lista sin duplicados, con el conteo, y solo los repetidos.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: tuberías y uniq</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Compara los dos caminos: transforma un fichero con redirecciones y ficheros intermedios, y luego lo mismo con una sola tubería <code>cat fichero | tr a p</code>.</li>
+        <li>Monta un pipeline de tres pasos: <code>cat documento1.txt | tr a m | wc -l</code>. Explica qué hace cada tramo.</li>
+        <li>Crea con <code>edit</code> un fichero <code>nombres</code> con nombres repetidos en líneas seguidas y ejecuta <code>cat nombres | uniq</code>.</li>
+        <li>Usa <code>cat nombres | uniq -c</code> para contar ocurrencias y <code>cat nombres | uniq -d</code> para ver solo los repetidos. <strong>Reto:</strong> guarda los duplicados en <code>repetidos.txt</code> con una redirección y léelo con <code>cat</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>La tubería <code>|</code> conecta la salida de un comando con la entrada del siguiente, sin ficheros intermedios. Encadenando varias formas un <strong>pipeline</strong>: <code>cat fichero | tr a m | wc -l</code> lee, transforma y cuenta de una sola vez.</p>
+      <p>Un <strong>filtro</strong> es un comando que necesita recibir su entrada de otro (<code>wc</code>, <code>grep</code>, <code>sort</code>, <code>diff</code>, <code>cut</code>, <code>uniq</code>); por eso encajan tan bien tras una tubería.</p>
+      <p><code>uniq</code> elimina líneas repetidas <strong>consecutivas</strong> (ordena antes con <code>sort</code> si hace falta). Con <code>-c</code> cuenta cuántas veces aparece cada una y con <code>-d</code> muestra solo las duplicadas. Es case-sensitive.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué hace la tubería <code>|</code> en <code>cat fichero | wc -l</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Manda la salida de <code>cat fichero</code> directamente a la entrada de <code>wc -l</code>, sin pasar por un fichero intermedio. Así <code>wc</code> cuenta las líneas de lo que produce <code>cat</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Por qué a <code>sort</code> o <code>grep</code> se les llama filtros?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque necesitan recibir su entrada de otro sitio: por sí solos no hacen nada útil, se quedan esperando datos. Filtran o transforman lo que les llega, normalmente a través de una tubería.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Tienes duplicados dispersos por el fichero y <code>uniq</code> no los elimina. ¿Por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque <code>uniq</code> solo elimina repetidos que están en líneas <strong>consecutivas</strong>. Si están separados, primero hay que ordenar el fichero con <code>sort</code> para que los iguales queden juntos.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/20-redirecciones-entrada-y-error" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/22-contar-y-tee" class="btn-primario">Siguiente: contar con wc y tee</a>
+    </nav>
+
+  </article>
+</Layout>

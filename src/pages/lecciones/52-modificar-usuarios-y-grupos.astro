@@ -1,0 +1,142 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 52. Fuente: transcripciones/video_41.md (segunda parte: usermod y groupmod)
+---
+
+<Layout titulo="Modificar usuarios y grupos — Curso Linux" descripcion="Cambia el grupo principal con usermod -g, añade grupos secundarios con -G y renombra o renumera grupos con groupmod -n y -g.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 52</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">4 min de lectura</span>
+      <span class="etiqueta-arribita">Por arribita</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Modificar usuarios y grupos</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Te equivocaste de grupo al crear la cuenta. Se corrige con una opción, sin borrar nada.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span><code>-g</code> minúscula vs <code>-G</code> mayúscula: grupo <strong>principal</strong> vs <strong>secundarios</strong>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Por qué los secundarios aparecen en <code>/etc/group</code> y no en <code>/etc/passwd</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Renombrar y renumerar grupos con <code>groupmod</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">usermod: corregir el grupo principal</h2>
+    <p class="mt-4">Mismas opciones que <a href="/Linux-course/lecciones/51-crear-usuarios-useradd">useradd</a>, pero para modificar. Ejemplo: mover <code>dsa1</code> de <code>desarrollo</code> (1002) a <code>testing</code> (3000):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo usermod -g 3000 dsa1
+
+$ cat /etc/passwd | grep dsa1
+dsa1:x:1002:3000:usuario desarrollo 1:/home/dsa1:/bin/bash</code></pre>
+    <p class="mt-4">Cuarto campo: de 1002 a 3000. Un comando, sin borrar nada.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Grupos secundarios: -G mayúscula</h2>
+    <p class="mt-4">Que <code>dsa1</code> también pertenezca a <code>desarrollo</code> como secundario:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo usermod -G 1002 dsa1
+$ sudo usermod -G 1002 dsa2
+
+$ cat /etc/group | grep desarrollo
+desarrollo:x:1002:dsa1,dsa2</code></pre>
+    <p class="mt-4">Regla clave: <strong><code>-g</code> = principal (uno solo, va en <code>/etc/passwd</code>). <code>-G</code> = secundarios (van en <code>/etc/group</code>).</strong> Por eso al añadir secundarios, <code>/etc/passwd</code> no cambia.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 190" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Dónde se anota cada pertenencia</text>
+
+        <rect x="30" y="44" width="230" height="106" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="145" y="66" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">-g  principal</text>
+        <line x1="55" y1="78" x2="235" y2="78" stroke="#E5E1D8"/>
+        <text x="145" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">uno solo</text>
+        <text x="145" y="120" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">se guarda en</text>
+        <text x="145" y="138" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">/etc/passwd</text>
+
+        <rect x="300" y="44" width="230" height="106" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="415" y="66" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">-G  secundarios</text>
+        <line x1="325" y1="78" x2="505" y2="78" stroke="#E5E1D8"/>
+        <text x="415" y="98" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">los que hagan falta</text>
+        <text x="415" y="120" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">se guardan en</text>
+        <text x="415" y="138" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">/etc/group</text>
+
+        <text x="280" y="178" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">minúscula o mayúscula: la única diferencia, y cambia de fichero</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Una letra decide dónde acaba el dato.</figcaption>
+    </figure>
+
+    <h2 class="font-display text-2xl font-bold mt-10">groupmod: renombrar y renumerar</h2>
+    <p class="mt-4">Dos opciones útiles: <code>-n</code> (nombre) y <code>-g</code> (GID).</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo groupmod -n dsa desarrollo
+
+$ cat /etc/group | grep dsa
+dsa:x:1002:dsa1,dsa2</code></pre>
+    <p class="mt-4">Orden: <strong>primero nombre nuevo, después actual</strong>. Usuarios dentro siguen intactos. Cambiar GID:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ sudo groupmod -g 3005 dsa
+
+$ cat /etc/group | grep dsa
+dsa:x:3005:dsa1,dsa2</code></pre>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Cuidado al renumerar GID</p>
+      <p class="!mt-0">Los ficheros en disco guardan el <strong>número</strong>, no el nombre (<a href="/Linux-course/lecciones/33-permisos-rwx">permisos rwx</a>). Al cambiar GID, ficheros existentes quedan apuntando al viejo. En producción, revisa antes con <code>find</code>.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: reorganizar el equipo</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Mueve <code>dsa1</code> a <code>testing</code> con <code>sudo usermod -g 3000 dsa1</code> y verifica cuarto campo.</li>
+        <li>Añade <code>dsa1</code> y <code>dsa2</code> como secundarios de <code>desarrollo</code> con <code>-G 1002</code>. Búscalos en <code>/etc/group</code>.</li>
+        <li><strong>Reto:</strong> renombra con <code>groupmod -n dsa desarrollo</code>, cambia GID con <code>groupmod -g 3005 dsa</code> y busca huérfanos: <code>sudo find /home -gid 1002 2&gt; /dev/null</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>usermod</code> corrige cualquier campo sin borrar la cuenta. <code>-g</code> minúscula = grupo principal; <code>-G</code> mayúscula = secundarios.</p>
+      <p>Principal va en <code>/etc/passwd</code> (GID); secundarios en <code>/etc/group</code> (lista separada por comas).</p>
+      <p><code>groupmod -n nuevo actual</code> renombra; <code>groupmod -g GID grupo</code> renumera. Los ficheros existentes guardan el número antiguo.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué diferencia hay entre <code>usermod -g 1002</code> y <code>usermod -G 1002</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Minúscula cambia grupo <strong>principal</strong> (en <code>/etc/passwd</code>). Mayúscula gestiona <strong>secundarios</strong> (en <code>/etc/group</code>).</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Añades un grupo secundario y <code>/etc/passwd</code> no cambia. ¿Ha fallado?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No. Secundarios se anotan en <code>/etc/group</code>, no en <code>passwd</code>. Comprueba ahí o con <code>id usuario</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Cómo renombrar el grupo <code>desarrollo</code> a <code>dsa</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>sudo groupmod -n dsa desarrollo</code>: primero nombre nuevo, después actual. Usuarios dentro se mantienen.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/51-crear-usuarios-useradd" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/53-contrasenas-con-passwd" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

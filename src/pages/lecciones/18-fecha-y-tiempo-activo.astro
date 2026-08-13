@@ -1,0 +1,147 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 18. Fuente: transcripciones/video_15.md (date con formatos, cambiar fecha, uptime)
+---
+
+<Layout titulo="Fecha del sistema y tiempo activo: date y uptime — Curso Linux" descripcion="Consulta y formatea la fecha con date (+%d, %m, %B…), entiende por qué cambiarla necesita root, y mira cuánto lleva encendido tu equipo con uptime (-p, -s).">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 18</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">6 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">La fecha del sistema y el tiempo encendido</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      <code>date</code> te da la fecha y la moldea con el formato que quieras —clave para nombrar backups y scripts—, y <code>uptime</code> te dice cuánto lleva tu equipo arrancado.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A ver la fecha con <strong><code>date</code></strong> y a darle formato con códigos como <code>%d</code>, <code>%m</code>, <code>%y</code> y <code>%B</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A entender por qué <strong>cambiar la fecha</strong> requiere <a href="/Linux-course/lecciones/06-usuarios-y-ficheros">root</a> y por qué es mejor no hacerlo a mano.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A consultar cuánto lleva encendido tu sistema con <strong><code>uptime</code></strong> y sus opciones <code>-p</code> y <code>-s</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">date: la fecha, a tu manera</h2>
+    <p class="mt-4"><code>date</code> a secas te muestra la fecha completa: día, mes, año, hora, minutos y segundos. Pero lo potente es darle formato: pon <code>+</code> y, entre comillas, códigos que empiezan por <code>%</code>. Cada código se sustituye por un trozo de la fecha:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ date                  # fecha y hora completas
+$ date +"%d"            # solo el día (p. ej. 25)
+$ date +"%m"            # solo el mes en número (p. ej. 04)
+$ date +"%y"            # año en 2 cifras (p. ej. 22)</code></pre>
+
+    <p class="mt-4">Cuidado con mayúsculas y minúsculas: <code>%B</code> da el nombre <strong>completo</strong> del mes (abril) y <code>%b</code> el <strong>abreviado</strong> (abr). Puedes mezclar códigos con texto normal: lo que no lleva <code>%</code> se imprime tal cual.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ date +"%B"            # abril  (nombre completo, B mayúscula)
+$ date +"%b"            # abr    (abreviado, b minúscula)
+$ date +"Hoy es %d de %B"   # Hoy es 25 de abril</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">¿Para qué tanto formato?</p>
+      <p class="!mt-2">Estos formatos brillan en <strong>scripts</strong>: por ejemplo, para nombrar un fichero de backup con la fecha y hora dentro (<code>copia_2022-04-25.tar</code>). Lo verás más adelante al trabajar con scripts.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>date +"%d"</code>, luego <code>date +"%B"</code> y por último <code>date +"Hoy es %d de %B"</code>. <strong>Meta:</strong> ver cómo cada código se traduce y cómo el texto suelto queda intacto.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cambiar la fecha: territorio de root</h2>
+    <p class="mt-4"><code>date</code> también permite <strong>fijar</strong> la fecha, con el formato mes-día-hora-minuto y, opcional, el año. Pero como usuario normal recibirás «operación no permitida»: tocar la hora del sistema es cosa de <a href="/Linux-course/lecciones/06-usuarios-y-ficheros">root</a>.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ date 081522002019     # mes 08, día 15, 22:00, año 2019
+                        # → "operación no permitida" sin ser root</code></pre>
+    <p class="mt-4">Fíjate en un detalle: aunque no aplique el cambio, Linux sí <strong>interpreta</strong> la fecha que le diste y te dice qué día de la semana caería. Es una forma curiosa de consultar «¿qué día fue tal fecha?».</p>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">No cambies la fecha a mano</p>
+      <p class="!mt-2 text-cream/90">Aunque puedas hacerlo como root, no es recomendable. La fecha debe sincronizarse automáticamente con un servidor de tiempo, que ajusta cambios horarios según tu región. Modificarla a mano puede causar problemas en el sistema.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">uptime: cuánto lleva encendido</h2>
+    <p class="mt-4"><code>uptime</code> devuelve varias cosas de un vistazo: cuánto tiempo lleva arrancado el sistema, cuántos usuarios hay conectados y la <em>load average</em> (carga media), que veremos al tratar procesos. De momento fíjate en el tiempo activo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ uptime                # tiempo activo + usuarios + carga media
+$ uptime -p             # legible: "up 1 hour, 43 minutes"
+$ uptime -s             # momento exacto de arranque: año-mes-día hora:min:seg</code></pre>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Qué te dice uptime</text>
+        <rect x="20" y="45" width="150" height="80" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="95" y="80" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">tiempo activo</text>
+        <text x="95" y="100" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">-p legible, -s arranque</text>
+        <rect x="185" y="45" width="150" height="80" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="80" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">usuarios</text>
+        <text x="260" y="100" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">conectados ahora</text>
+        <rect x="350" y="45" width="150" height="80" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="425" y="80" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">load average</text>
+        <text x="425" y="100" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">carga media (luego)</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Tiempo activo, usuarios conectados y carga media, en una sola línea.</figcaption>
+    </figure>
+
+    <p class="mt-4">¿Quién está conectado? El comando <a href="/Linux-course/lecciones/12-ver-mas-y-explorar"><code>who</code></a> que ya conoces te lo confirma: usuario, vía de conexión (terminal) y fecha de entrada.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>uptime -p</code> y luego <code>uptime -s</code>. <strong>Meta:</strong> leer en lenguaje llano cuánto lleva encendido tu equipo y el instante exacto en que arrancó.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: fechas y arranque</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Ejecuta <code>date</code> y luego <code>date +"%d"</code>, <code>date +"%m"</code> y <code>date +"%y"</code>. Comprueba que cada código muestra solo su parte de la fecha.</li>
+        <li>Compara <code>date +"%B"</code> con <code>date +"%b"</code> y explica la diferencia entre mayúscula y minúscula.</li>
+        <li>Escribe <code>date +"Hoy es %d de %B de 20%y"</code> y observa cómo se mezclan texto y códigos.</li>
+        <li>Como usuario normal, intenta cambiar la fecha con <code>date</code> y confirma que sale «operación no permitida». <strong>Reto:</strong> ejecuta <code>uptime -p</code>, <code>uptime -s</code> y <code>who</code>, y relaciona la hora de arranque con la de tu conexión.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>date</code> muestra la fecha completa y la formatea con <code>+"%..."</code>: <code>%d</code> día, <code>%m</code> mes, <code>%y</code> año en 2 cifras, <code>%B</code> mes completo y <code>%b</code> abreviado. El texto sin <code>%</code> se imprime tal cual, ideal para scripts y nombres de backup.</p>
+      <p>Cambiar la fecha con <code>date</code> necesita root; como usuario normal ves «operación no permitida», aunque el sistema sí interpreta y te dice qué día caería. Lo recomendable es no tocarla a mano y dejar que se sincronice con un servidor de tiempo.</p>
+      <p><code>uptime</code> informa del tiempo encendido, los usuarios conectados y la carga media; con <code>-p</code> lo da legible y con <code>-s</code> el momento exacto de arranque. <code>who</code> confirma quién está conectado.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué diferencia hay entre <code>date +"%B"</code> y <code>date +"%b"</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>%B</code> (mayúscula) da el nombre completo del mes, como «abril». <code>%b</code> (minúscula) da el abreviado, «abr». Los códigos de <code>date</code> distinguen mayúsculas de minúsculas.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Intentas cambiar la fecha como usuario normal y ves «operación no permitida». ¿Por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque modificar la hora del sistema es una operación reservada a root. Aun así, no es recomendable cambiarla a mano: lo ideal es que se sincronice automáticamente con un servidor de tiempo.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué hace <code>uptime -s</code> frente a <code>uptime -p</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>uptime -p</code> muestra en lenguaje llano cuánto lleva encendido el equipo (p. ej. «up 1 hour, 43 minutes»). <code>uptime -s</code> muestra el instante exacto de arranque, en formato año-mes-día hora:minuto:segundo.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/17-alias-time-y-calendario" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/19-entrada-salida-y-redirecciones" class="btn-primario">Siguiente: entrada, salida y redirecciones</a>
+    </nav>
+
+  </article>
+</Layout>

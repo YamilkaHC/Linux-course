@@ -1,0 +1,148 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 75. Fuente: transcripciones/video_54.md (primera parte: proyecto monitor.sh con if/elif/else)
+---
+
+<Layout titulo="Proyecto: menú monitor — Curso Linux" descripcion="Construye monitor.sh, un menú interactivo que muestra uso de disco, RAM y CPU según la opción elegida, usando read e if/elif/else.">
+  <article class="prose-editorial">
+
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 75</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">5 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Proyecto: menú monitor</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Tu primer programa interactivo: un menú que muestra disco, RAM o CPU según lo que elijas.
+    </p>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Combinar <a href="/Linux-course/lecciones/74-pedir-datos-con-read"><code>read</code></a> con <a href="/Linux-course/lecciones/72-condicionales-if-else"><code>if/elif/else</code></a> para elegir ruta.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Encadenar más de dos condiciones con <code>elif</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Cerrar programa con <code>exit</code> y un código de retorno.</span></li>
+      </ul>
+    </section>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El script completo</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>#!/bin/bash
+
+echo "----- Monitor del sistema -----"
+echo "1) Uso de disco"
+echo "2) Uso de RAM"
+echo "3) Uso de CPU"
+echo "0) Salir"
+
+read -p "Elige una opción: " opcion
+
+if [ $opcion -eq 1 ]
+then
+    echo "--- Uso de disco ---"
+    df -h
+elif [ $opcion -eq 2 ]
+then
+    echo "--- Uso de RAM ---"
+    free -m
+elif [ $opcion -eq 3 ]
+then
+    echo "--- Uso de CPU ---"
+    top -bn1 | head -5
+elif [ $opcion -eq 0 ]
+then
+    echo "Hasta luego"
+    exit 0
+else
+    echo "Opción no válida"
+    exit 1
+fi</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">elif: más de dos ramas</h2>
+    <p class="mt-4"><code>if</code>/<code>else</code> da dos caminos. Con <code>elif</code> añades tantos como necesites. Solo se ejecuta la <strong>primera condición cierta</strong>; las demás se saltan.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 260" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Cadena if / elif / elif / else</text>
+        <rect x="200" y="36" width="160" height="34" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="280" y="58" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">opcion == 1?</text>
+        <line x1="200" y1="53" x2="90" y2="53" stroke="#1A1A1A"/>
+        <text x="145" y="48" font-family="Inter, sans-serif" font-size="8" fill="#1A1A1A" stroke="none" text-anchor="middle">sí</text>
+        <rect x="20" y="40" width="70" height="26" fill="#FDFCFB" stroke="#1A1A1A"/>
+        <text x="55" y="58" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">df -h</text>
+        <line x1="280" y1="70" x2="280" y2="88" stroke="#1A1A1A"/>
+        <text x="290" y="82" font-family="Inter, sans-serif" font-size="8" fill="#1A1A1A" stroke="none">no</text>
+        <rect x="200" y="88" width="160" height="34" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="280" y="110" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">opcion == 2?</text>
+        <line x1="200" y1="105" x2="90" y2="105" stroke="#1A1A1A"/>
+        <rect x="20" y="92" width="70" height="26" fill="#FDFCFB" stroke="#1A1A1A"/>
+        <text x="55" y="110" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">free -m</text>
+        <line x1="280" y1="122" x2="280" y2="140" stroke="#1A1A1A"/>
+        <text x="290" y="134" font-family="Inter, sans-serif" font-size="8" fill="#1A1A1A" stroke="none">no</text>
+        <rect x="200" y="140" width="160" height="34" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="280" y="162" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">opcion == 3?</text>
+        <line x1="200" y1="157" x2="90" y2="157" stroke="#1A1A1A"/>
+        <rect x="20" y="144" width="70" height="26" fill="#FDFCFB" stroke="#1A1A1A"/>
+        <text x="55" y="162" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">top</text>
+        <line x1="280" y1="174" x2="280" y2="192" stroke="#1A1A1A"/>
+        <text x="290" y="186" font-family="Inter, sans-serif" font-size="8" fill="#1A1A1A" stroke="none">no</text>
+        <rect x="200" y="192" width="160" height="34" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="280" y="214" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">else → no válida</text>
+        <text x="280" y="248" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">fi</text>
+      </svg>
+    </figure>
+
+    <h2 class="font-display text-2xl font-bold mt-10">exit y código de retorno</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>exit 0     # todo bien
+exit 1     # error (opción no válida)</code></pre>
+    <p class="mt-4"><code>exit</code> termina script inmediatamente. Número = <a href="/Linux-course/lecciones/71-codigo-de-retorno">código de retorno</a>: 0 OK, distinto de 0 error.</p>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Copia script, dale permisos, prueba opciones 1, 2, 3, 0 y una inválida.</li>
+        <li>Después de opción inválida, comprueba <code>echo $?</code> (debe dar 1).</li>
+        <li><strong>Reto:</strong> añade opción 4 que muestre usuarios conectados (<code>who</code>).</li>
+      </ol>
+    </section>
+
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>elif</code> encadena condiciones tras <code>if</code>. Solo ejecuta la primera cierta.</p>
+      <p><code>exit N</code> termina script con código N. 0 = bien, otro = error.</p>
+      <p>Patrón menú: <code>echo</code> opciones → <code>read</code> elección → <code>if/elif/else/fi</code> despacho.</p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Cuántas condiciones ejecuta una cadena if/elif si hay varias ciertas?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Solo la primera cierta. Las demás se saltan.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Diferencia entre <code>exit 0</code> y <code>exit 1</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>exit 0</code> = terminación correcta. <code>exit 1</code> = terminación con error. Se consulta con <code>echo $?</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Escribes <code>elseif</code> y no funciona. ¿Por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">En bash se escribe separado: <code>elif</code>, no <code>elseif</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/74-pedir-datos-con-read" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/76-operadores-logicos" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

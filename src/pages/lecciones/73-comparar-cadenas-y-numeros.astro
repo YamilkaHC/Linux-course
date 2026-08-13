@@ -1,0 +1,146 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 73. Fuente: transcripciones/video_53.md (primera parte: tests de cadenas y de enteros)
+---
+
+<Layout titulo="Comparar cadenas y números — Curso Linux" descripcion="Tests de cadenas (-z, -n, =, !=) y de enteros (-eq, -ne, -gt) para escribir condiciones que comparan texto y cifras en bash.">
+  <article class="prose-editorial">
+
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 73</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">4 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Comparar cadenas y números</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Ya preguntas si un fichero existe. Ahora toca comparar textos y cifras.
+    </p>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Comparar <strong>cadenas</strong> con <code>=</code>, <code>!=</code>, <code>-z</code> y <code>-n</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Comparar <strong>números</strong> con <code>-eq</code>, <code>-ne</code> y <code>-gt</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Entrecomillar cadenas con espacios.</span></li>
+      </ul>
+    </section>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cadenas</h2>
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Test</th>
+            <th class="text-left p-3 border-b border-line font-bold">Cierto si…</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>cad1 = cad2</code></td><td class="p-3 border-b border-line">Iguales</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>cad1 != cad2</code></td><td class="p-3 border-b border-line">Distintas</td></tr>
+          <tr><td class="p-3 border-b border-line"><code>-z cadena</code></td><td class="p-3 border-b border-line">Vacía (longitud cero)</td></tr>
+          <tr><td class="p-3"><code>-n cadena</code></td><td class="p-3">No vacía</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ test hola = hola; echo $?
+0
+$ test hola = adios; echo $?
+1</code></pre>
+    <p class="mt-4">Cadenas con espacios: usar <strong>comillas</strong>. <code>[ "hola a todos" = "hola a todos" ]</code>. Sin ellas, la shell parte en trozos y falla.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Números: operadores distintos</h2>
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead class="bg-sand">
+          <tr>
+            <th class="text-left p-3 border-b border-line font-bold">Test</th>
+            <th class="text-left p-3 border-b border-line font-bold">Cierto si…</th>
+            <th class="text-left p-3 border-b border-line font-bold">Viene de</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-line"><code>-eq</code></td><td class="p-3 border-b border-line">Iguales</td><td class="p-3 border-b border-line"><em>equal</em></td></tr>
+          <tr><td class="p-3 border-b border-line"><code>-ne</code></td><td class="p-3 border-b border-line">Distintos</td><td class="p-3 border-b border-line"><em>not equal</em></td></tr>
+          <tr><td class="p-3"><code>-gt</code></td><td class="p-3">Primero mayor</td><td class="p-3"><em>greater than</em></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ test 10 -eq 10; echo $?
+0
+$ test 100 -gt 50; echo $?
+0
+$ test 100 -gt 500; echo $?
+1</code></pre>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 175" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Dos familias de operadores</text>
+        <rect x="30" y="44" width="230" height="86" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="145" y="68" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">CADENAS</text>
+        <line x1="55" y1="78" x2="235" y2="78" stroke="#E5E1D8"/>
+        <text x="145" y="98" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">=&nbsp;&nbsp;!=&nbsp;&nbsp;-z&nbsp;&nbsp;-n</text>
+        <text x="145" y="118" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">símbolos</text>
+        <rect x="300" y="44" width="230" height="86" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="415" y="68" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">NÚMEROS</text>
+        <line x1="325" y1="78" x2="505" y2="78" stroke="#E5E1D8"/>
+        <text x="415" y="98" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">-eq&nbsp;&nbsp;-ne&nbsp;&nbsp;-gt</text>
+        <text x="415" y="118" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">letras</text>
+        <text x="280" y="158" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">confundirlas es el error clásico: = para texto, -eq para cifras</text>
+      </svg>
+    </figure>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Con variables en condición completa</h2>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ v1=10; v2=20
+$ if [ $v1 -gt $v2 ]; then echo "$v1 es mayor"; else echo "$v1 es menor"; fi
+10 es menor</code></pre>
+
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Prueba con <code>test</code> las cuatro de cadena y tres numéricas.</li>
+        <li>Compara cadena con espacios sin y con comillas. Anota el error.</li>
+        <li><strong>Reto:</strong> escribe <code>comparar.sh</code> con dos variables numéricas y una de texto, mostrando igualdad (<code>-eq</code>), cuál es mayor (<code>-gt</code>) y si la cadena está vacía (<code>-z</code>).</li>
+      </ol>
+    </section>
+
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Cadenas: <code>=</code> iguales, <code>!=</code> distintas, <code>-z</code> vacía, <code>-n</code> no vacía.</p>
+      <p>Números: <code>-eq</code> iguales, <code>-ne</code> distintos, <code>-gt</code> mayor. Confundir familias = error clásico.</p>
+      <p>Espacios en corchetes + comillas en cadenas con espacios. Punto y coma para condición en una línea.</p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Dos números iguales: <code>=</code> o <code>-eq</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>-eq</code>. <code>=</code> es para cadenas.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Para qué sirve <code>-z</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Cierto si la cadena está vacía. Útil para detectar si el usuario pulsó Enter sin escribir.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. La shell muestra <code>&gt;</code> tras un <code>if</code>. ¿Qué significa?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Comando incompleto: espera el resto hasta que escribas <code>fi</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/72-condicionales-if-else" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/74-pedir-datos-con-read" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

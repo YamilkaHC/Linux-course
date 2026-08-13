@@ -1,0 +1,145 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 26. Fuente: transcripciones/video_22.md (introducción a procesos: jerarquía padre-hijo, estados, ps -f/-l/-ef)
+---
+
+<Layout titulo="Procesos en Linux y el comando ps — Curso Linux" descripcion="Entiende qué es un proceso, la jerarquía padre-hijo (PID, PPID, fork, systemd) y los estados; luego lístalos con ps, ps -f, ps -l y ps -ef | less.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 26</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Procesos en Linux y el comando ps</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Todo lo que se ejecuta en Linux es un proceso, y todos forman un árbol de padres e hijos. Entender esa jerarquía —y verla con <code>ps</code>— es la puerta de entrada a administrar el sistema.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Qué es un <strong>proceso</strong> y cómo la jerarquía <strong>padre-hijo</strong> (<em>fork</em>) nace del proceso 1, <code>systemd</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Las propiedades clave: <strong>PID</strong> (identificador único), <strong>PPID</strong> (proceso padre) y los <strong>estados</strong> (normal, segundo plano, zombie).</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A listar procesos con <strong><code>ps</code></strong>, <code>ps -f</code>, <code>ps -l</code> y todos con <code>ps -ef | less</code>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Qué es un proceso</h2>
+    <p class="mt-4">Un proceso es una <strong>instancia de un programa en ejecución</strong>. Cuando abres un editor, un correo o un backup, el sistema crea un proceso. Como Linux es <strong>multitarea y multiusuario</strong>, corren muchísimos a la vez: desde los del <a href="/Linux-course/lecciones/02-instalacion">kernel</a> hasta los del usuario final. Cada uno recibe su parte de CPU, memoria, instrucciones y variables.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">La jerarquía padre-hijo</h2>
+    <p class="mt-4">Aquí está la idea central: todo proceso tiene un <strong>padre</strong>, salvo el primero. Cuando un proceso necesita lanzar otro, hace un <em>fork</em> (una llamada que crea un <strong>hijo</strong>, al que le hereda usuario, grupo, etc.). Ejemplo cotidiano: tu <a href="/Linux-course/lecciones/05-primeros-comandos">shell</a> es el padre y, al ejecutar <code>ls</code>, lanza un <em>fork</em> que crea <code>ls</code> como hijo.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-md mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">El árbol de procesos</text>
+        <rect x="200" y="35" width="120" height="35" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="57" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">systemd (PID 1)</text>
+        <line x1="260" y1="70" x2="150" y2="105"/>
+        <line x1="260" y1="70" x2="370" y2="105"/>
+        <rect x="90" y="105" width="120" height="35" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="150" y="127" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">servicios</text>
+        <rect x="310" y="105" width="120" height="35" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="370" y="127" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">bash (shell)</text>
+        <line x1="370" y1="140" x2="370" y2="165"/>
+        <rect x="310" y="165" width="120" height="30" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="370" y="184" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">ls (hijo)</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Todo desciende de <code>systemd</code> (PID 1). La shell forka <code>ls</code> como hijo.</figcaption>
+    </figure>
+
+    <p class="mt-4">El proceso <strong>1</strong> es el primero que arranca; antes se llamaba <code>init</code> y hoy, en las distribuciones actuales, <code>systemd</code>. De él (y del PID 2, que gestiona los hilos del kernel) descienden todos los demás. Puedes comprobar la herencia: <code>/sbin/init</code> es un <a href="/Linux-course/lecciones/13-enlaces">enlace</a> que apunta a <code>systemd</code>.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -l /sbin/init      # verás: /sbin/init -> ...systemd (un enlace simbólico)</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Propiedades y estados</h2>
+    <p class="mt-4">Cada proceso lleva un <strong>PID</strong> (número identificador único), un <strong>PPID</strong> (el PID de su padre), el usuario y grupo dueños, y su contexto (memoria, variables). Y tiene un <strong>estado</strong>:</p>
+    <ul class="list-disc pl-6 space-y-1 mt-4">
+      <li><strong>Normal</strong> — ejecución habitual.</li>
+      <li><strong>Segundo plano</strong> (<em>background</em>) — corre sin ocupar la terminal; típico de servicios.</li>
+      <li><strong>Zombie</strong> — ya terminó, pero aún deja rastro en la lista de procesos.</li>
+    </ul>
+
+    <h2 class="font-display text-2xl font-bold mt-10">ps: ver los procesos</h2>
+    <p class="mt-4"><code>ps</code> (<em>process status</em>) a secas muestra los procesos de tu propia shell: verás <code>bash</code> y el propio <code>ps</code>. Con <code>-f</code> (<em>full</em>) añade el <strong>PPID</strong>, y ahí ves la relación padre-hijo: el padre de <code>ps</code> es <code>bash</code>.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps                    # procesos de tu shell: bash y ps (con su PID)
+$ ps -f                 # formato completo: añade PPID, usuario, hora...</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>ps</code> y luego <code>ps -f</code>. <strong>Meta:</strong> localizar el PID de <code>ps</code> y comprobar que su PPID coincide con el PID de <code>bash</code>: hijo y padre.</p>
+    </div>
+
+    <p class="mt-4">Con <code>-l</code> (<em>long</em>) obtienes aún más columnas, entre ellas <strong>S</strong> (estado) y la prioridad. Los estados que verás en esa columna:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps -l                 # formato largo: F (flags), S (estado), prioridad, memoria...
+# S = suspendido (esperando un evento)   R = en ejecución (running)
+# Z = zombie   X = proceso muerto (matado)   W = paginado</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Todos los procesos: ps -ef</h2>
+    <p class="mt-4">Para ver <strong>todos</strong> los procesos del sistema, no solo los tuyos, se usa <code>ps -ef</code> (<em>e</em> = todos, <em>f</em> = full). Como son muchísimos, encadénalo con <a href="/Linux-course/lecciones/12-ver-mas-y-explorar"><code>less</code></a> para paginarlos:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps -ef | less         # todos los procesos, página a página (q para salir)</code></pre>
+    <p class="mt-4">Ahí verás el árbol completo: el PID 1 (<code>systemd</code>), los procesos internos del sistema (a menudo entre corchetes) lanzados por el PID 2, y más abajo los procesos de usuario. Cada uno con su PPID, confirmando la jerarquía hasta llegar al 1.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>ps -ef | less</code> y busca el proceso con PID 1. <strong>Meta:</strong> confirmar que es <code>systemd</code> y ver cómo otros procesos lo tienen (directa o indirectamente) como ancestro. Sal con <kbd>q</kbd>.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: explorar procesos</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Ejecuta <code>ps</code> y <code>ps -f</code>. Identifica el PID y el PPID de <code>ps</code> y comprueba que su padre es <code>bash</code>.</li>
+        <li>Lanza <code>ps -l</code> y localiza la columna <strong>S</strong> (estado). ¿Qué proceso está en <code>R</code> (running) y cuál en <code>S</code> (suspendido)?</li>
+        <li>Comprueba la herencia del arranque con <code>ls -l /sbin/init</code> y observa que apunta a <code>systemd</code>.</li>
+        <li>Explora todos los procesos con <code>ps -ef | less</code>. <strong>Reto:</strong> filtra en su lugar con <a href="/Linux-course/lecciones/23-buscar-texto-grep"><code>grep</code></a>: <code>ps -ef | grep bash</code> para encontrar tus shells.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Un proceso es una instancia de un programa en ejecución. Linux es multitarea y multiusuario, y organiza los procesos en una jerarquía <strong>padre-hijo</strong>: cada uno nace de otro mediante un <em>fork</em>, y todos descienden del proceso <strong>1</strong> (<code>systemd</code>, antes <code>init</code>).</p>
+      <p>Cada proceso tiene un <strong>PID</strong> único, un <strong>PPID</strong> (su padre), dueños y un estado: normal, en segundo plano o zombie (terminado pero con rastro).</p>
+      <p><code>ps</code> lista los procesos de tu shell; <code>ps -f</code> añade el PPID (padre-hijo), <code>ps -l</code> muestra estado y prioridad, y <code>ps -ef | less</code> pagina todos los del sistema.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué es el PPID y por qué todo proceso tiene uno (salvo el primero)?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">El PPID es el PID del proceso padre. Todo proceso nace de otro mediante un <em>fork</em>, así que siempre tiene un padre; la única excepción es el proceso 1 (<code>systemd</code>), el primero que arranca y raíz de todo el árbol.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Ejecutas <code>ls</code> desde tu shell. ¿Quién es el padre y quién el hijo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">La shell (<code>bash</code>) es el padre: hace un <em>fork</em> para lanzar <code>ls</code>, que es el hijo. El PPID de <code>ls</code> será el PID de <code>bash</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué diferencia hay entre <code>ps</code> y <code>ps -ef</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>ps</code> muestra solo los procesos de tu shell actual. <code>ps -ef</code> muestra <strong>todos</strong> los procesos del sistema en formato completo; como son muchos, se suele paginar con <code>| less</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/25-cortar-campos-cut" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/27-arbol-de-procesos-pstree" class="btn-primario">Siguiente: el árbol de procesos</a>
+    </nav>
+
+  </article>
+</Layout>

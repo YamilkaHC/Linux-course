@@ -1,0 +1,183 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 64. Fuente: transcripciones/video_48.md (primera parte: ficheros swap y :recover)
+---
+
+<Layout titulo="Recuperar un fichero en vi — Curso Linux" descripcion="Qué son los ficheros .swp de vi, cómo leer el aviso al reabrir un fichero tras una caída, cómo recuperar el trabajo con :recover y por qué hay que borrar el swap después.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 64</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+      <span class="etiqueta-saltar">Saltar</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Recuperar un fichero en vi</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Se cae el sistema con media hora de trabajo sin guardar. No está perdido: vi lleva guardándolo por su cuenta.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Qué es el <strong>fichero swap</strong> que <code>vi</code> crea en secreto cada vez que editas, y cómo verlo.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A leer el aviso que aparece al reabrir un fichero tras una caída, y a recuperar el trabajo con <code>:recover</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Por qué después hay que <strong>borrar el swap a mano</strong>, o el aviso te perseguirá para siempre.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">El fichero que no sabías que existía</h2>
+    <p class="mt-4">Ya sabes que <code>vi</code> trabaja sobre una copia en memoria y que el fichero real no cambia hasta que haces <a href="/Linux-course/lecciones/63-guardar-y-salir-de-vi">:w</a>. Pero esa copia no está solo en la RAM: <strong>se va escribiendo en un fichero temporal</strong> llamado <em>swap</em>.</p>
+    <p class="mt-4">Compruébalo. Abre tu fichero, entra en modo edición y escribe algo <strong>sin guardar</strong>. Desde otra terminal, en el mismo directorio:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls .*.swp
+.la_tierra.swp</code></pre>
+    <p class="mt-4">Ahí está: se llama igual que tu fichero, empieza por punto —así que está <a href="/Linux-course/lecciones/07-navegar-ficheros">oculto</a>, por eso no lo habías visto— y termina en <code>.swp</code>. Solo existe mientras editas, y se va actualizando con lo que haces.</p>
+    <p class="mt-4">Ese fichero es exactamente tu red de seguridad.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Con el editor abierto y cambios sin guardar, ejecuta <code>ls -la</code> en otra terminal y localiza el <code>.swp</code>. Guarda y sal con <code>:x</code>, y repite el <code>ls</code>. <strong>Meta:</strong> ver aparecer y desaparecer el fichero temporal.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Simular la catástrofe</h2>
+    <p class="mt-4">Vamos a provocar el desastre a propósito, usando lo que aprendiste sobre <a href="/Linux-course/lecciones/30-senales-y-kill">señales y kill</a>. Con el editor abierto y una línea escrita sin guardar, desde la segunda terminal:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ps -f | grep vi
+user001  26426  2210  0 16:20 pts/1  00:00:00 vi la_tierra
+
+$ kill -9 26426</code></pre>
+    <p class="mt-4">Vuelve a la ventana del editor: el sistema informa de que el proceso ha sido eliminado. Acabas de simular exactamente lo que ocurre cuando se cuelga la máquina o se corta la conexión con el servidor, con tu trabajo a medias.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El aviso al volver</h2>
+    <p class="mt-4">Abre otra vez el fichero como si nada hubiera pasado:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ vi la_tierra
+
+E325: ATENCIÓN
+Se ha encontrado un fichero de intercambio ".la_tierra.swp"
+   ...
+(1) Otro programa puede estar editando el mismo fichero.
+(2) Una sesión de edición para este fichero se ha estropeado.
+    Si es así, use ":recover" o "vim -r la_tierra"
+    para recuperar los cambios.
+...
+Pulse INTRO para continuar</code></pre>
+    <p class="mt-4">Parece alarmante, pero está diciendo algo simple: <strong>hay un swap suelto</strong>, o bien porque otra persona tiene el fichero abierto, o bien porque una sesión anterior se rompió. Y te ofrece la salida: <code>:recover</code>.</p>
+    <p class="mt-4">Un apunte de portabilidad: <strong>en algunas distribuciones el nombre del swap empieza por <code>~</code></strong> (la virgulilla, el «palito de la ñ») en lugar de por punto. Cambia el nombre, no la idea.</p>
+    <p class="mt-4">Pulsa Enter y verás el fichero… <strong>sin tus cambios</strong>. Normal: estás viendo el fichero del disco, que nunca llegó a guardarse. No cierres pensando que se ha perdido.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Recuperar: :recover</h2>
+    <p class="mt-4">Desde modo comando, en el <a href="/Linux-course/lecciones/62-buscar-y-reemplazar-en-vi">modo ex</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>:recover
+Recuperación completa. Debería comprobar si todo está correcto.</code></pre>
+    <p class="mt-4">Sube al principio del documento y ahí está la línea que habías escrito antes de la caída, tal cual la dejaste. <code>vi</code> ha leído el swap y ha reconstruido tu sesión.</p>
+    <p class="mt-4">El editor te pide que <strong>revises</strong> el resultado, y conviene hacerlo: la recuperación llega hasta el último momento que quedó registrado, que puede no ser exactamente el instante del corte.</p>
+    <p class="mt-4">Si todo está bien, guarda y sal con <code>:x</code>. Ahora sí, tu trabajo está en el disco.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 205" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Cómo se salva el trabajo</text>
+
+        <rect x="30" y="44" width="130" height="46" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="95" y="64" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">editas</text>
+        <text x="95" y="80" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">sin guardar</text>
+
+        <line x1="166" y1="67" x2="198" y2="67" stroke="#1A1A1A"/>
+        <path d="M198 67 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+
+        <rect x="204" y="44" width="150" height="46" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="279" y="64" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">.fichero.swp</text>
+        <text x="279" y="80" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">se escribe solo</text>
+
+        <line x1="360" y1="67" x2="392" y2="67" stroke="#1A1A1A"/>
+        <path d="M392 67 l-6 -4 v8 z" fill="#1A1A1A" stroke="none"/>
+
+        <rect x="398" y="44" width="130" height="46" fill="#F4F1EA" stroke="#1A1A1A"/>
+        <text x="463" y="64" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">caída</text>
+        <text x="463" y="80" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">se pierde la sesión</text>
+
+        <line x1="463" y1="96" x2="463" y2="122" stroke="#1A1A1A"/>
+        <path d="M463 122 l-4 -6 h8 z" fill="#1A1A1A" stroke="none"/>
+
+        <rect x="204" y="128" width="324" height="46" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="2"/>
+        <text x="366" y="148" font-family="Inter, sans-serif" font-size="11" fill="#1A1A1A" stroke="none" text-anchor="middle">vi fichero  →  :recover  →  :x</text>
+        <text x="366" y="165" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">y después borrar el .swp a mano</text>
+
+        <text x="280" y="196" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">el swap sobrevive a la caída: por eso hay algo que recuperar</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">El swap es lo que queda cuando todo lo demás se cae.</figcaption>
+    </figure>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Haz el ciclo completo: escribe sin guardar, mata el proceso con <code>kill -9</code> desde otra terminal, reabre el fichero, lee el aviso y ejecuta <code>:recover</code>. <strong>Meta:</strong> ver reaparecer tu línea perdida.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Limpia el swap después</h2>
+    <p class="mt-4">Falta un paso que mucha gente olvida. Comprueba desde la terminal:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls .*.swp
+.la_tierra.swp</code></pre>
+    <p class="mt-4">Sigue ahí. El swap de la sesión rota <strong>no se borra solo</strong>, así que la próxima vez que abras el fichero volverá a salirte el mismo aviso, aunque ya no haya nada que recuperar. Bórralo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ rm .la_tierra.swp</code></pre>
+
+    <div class="bg-cream border-2 border-ink p-6 my-8">
+      <p class="!mt-0 text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-3">Recupera primero, borra después</p>
+      <p class="!mt-0">El orden importa: <strong>nunca borres el <code>.swp</code> antes de haber hecho <code>:recover</code> y guardado</strong>. Si lo eliminas primero, tiras a la basura justamente lo que ibas a rescatar. Y si el aviso aparece porque otra persona tiene el fichero abierto de verdad, no borres nada: habla con ella.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: sobrevivir a una caída</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Abre un fichero, escribe tres líneas sin guardar y localiza su swap desde otra terminal con <code>ls -la | grep swp</code>.</li>
+        <li>Encuentra el proceso con <code>ps -f | grep vi</code>, anota su PID y mátalo con <code>kill -9 PID</code>.</li>
+        <li>Reabre el fichero, lee el aviso completo sin prisa y recupera con <code>:recover</code>. Verifica que están tus tres líneas y guarda con <code>:x</code>.</li>
+        <li><strong>Reto:</strong> comprueba qué pasa si no limpias. Sin borrar el <code>.swp</code>, vuelve a abrir el fichero: verás el aviso otra vez pese a estar todo guardado. Bórralo entonces con <code>rm</code> y ábrelo una vez más para confirmar que ya entra limpio.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>Mientras editas, <code>vi</code> mantiene un fichero temporal oculto —<code>.nombre.swp</code>, o con <code>~</code> en algunas distribuciones— donde va registrando los cambios no guardados. Es lo que permite rescatar el trabajo si el sistema se cae.</p>
+      <p>Al reabrir el fichero aparece el aviso E325 sobre un fichero de intercambio encontrado. Verás el contenido antiguo hasta que ejecutes <code>:recover</code>, que reconstruye la sesión desde el swap. Después conviene revisar el resultado y guardar con <code>:x</code>.</p>
+      <p>El swap de una sesión rota no se elimina solo: hay que borrarlo con <code>rm</code> <strong>después</strong> de recuperar, o el aviso reaparecerá en cada apertura.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Reabres un fichero tras una caída y no ves tus cambios. ¿Se han perdido?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No. Estás viendo el contenido del disco, que nunca se guardó. Los cambios están en el fichero swap: ejecuta <code>:recover</code> para traerlos de vuelta y después guarda con <code>:x</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Te molesta el aviso del fichero de intercambio y decides borrar el <code>.swp</code> antes de abrir. ¿Buena idea?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Muy mala: ese fichero contiene justamente los cambios que podrías rescatar. El orden correcto es abrir, <code>:recover</code>, guardar y <strong>solo entonces</strong> borrar el swap.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Por qué no ves el fichero swap con un <code>ls</code> normal?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque su nombre empieza por punto y en Linux eso lo convierte en un fichero oculto. Aparece con <code>ls -a</code>, <code>ls -la</code> o buscándolo con <code>ls .*.swp</code>.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/63-guardar-y-salir-de-vi" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/65-trucos-de-vi" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

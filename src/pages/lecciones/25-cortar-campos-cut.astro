@@ -1,0 +1,127 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 25. Fuente: transcripciones/video_21.md (segunda mitad: cut -f, -d, -c)
+---
+
+<Layout titulo="Cortar campos y columnas con cut — Curso Linux" descripcion="Extrae columnas con cut: campos por tabulador con -f, cambia el separador con -d y corta por posición de carácter con -c cuando los espacios son irregulares.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 25</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Cortar campos y columnas con cut</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Muchas veces solo quieres <em>una</em> columna de un listado: el tamaño, el nombre, el usuario. <code>cut</code> recorta justo el trozo que necesitas, ya sea por campos o por posición exacta.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A extraer campos separados por <strong>tabulador</strong> con <code>cut -f</code> (por defecto).</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A cambiar el separador con <code>-d</code> (delimitador), por ejemplo <code>:</code> en <code>/etc/passwd</code> o espacio en <code>ls -l</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A cortar por <strong>posición</strong> de carácter con <code>-c</code>, la salida cuando los espacios son irregulares.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Campos por tabulador: -f</h2>
+    <p class="mt-4">Por defecto <code>cut</code> separa los datos por <strong>tabulador</strong>. El comando <a href="/Linux-course/lecciones/14-espacio-en-disco"><code>du -a</code></a> devuelve dos campos separados por tabulador —tamaño y nombre—, así que puedes quedarte solo con uno:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ du -a | cut -f1       # solo el primer campo: el tamaño
+$ du -a | cut -f2       # solo el segundo campo: la ruta/nombre</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>du -a | cut -f1</code> y luego <code>du -a | cut -f2</code>. <strong>Meta:</strong> ver cómo cada uno recorta una columna distinta de la misma salida.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Otro separador: -d</h2>
+    <p class="mt-4">Muchos ficheros no usan tabuladores. <a href="/Linux-course/lecciones/11-ver-contenido-cat"><code>/etc/passwd</code></a> separa sus campos con <strong>dos puntos</strong> (<code>:</code>): usuario, id, grupo, directorio home, shell… Si haces <code>cut -f6</code> a secas, no funciona: <code>cut</code> busca tabuladores. Hay que indicarle el separador con <code>-d</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat /etc/passwd | cut -f6            # NO funciona: no hay tabuladores
+$ cat /etc/passwd | cut -d ":" -f6     # el campo 6 (home), separando por ":"
+$ cat /etc/passwd | cut -d ":" -f1,6   # campos 1 y 6: usuario y su home</code></pre>
+    <p class="mt-4">Con <code>-f1,6</code> pides varios campos a la vez. El delimitador siempre entre comillas.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>cat /etc/passwd | cut -d ":" -f1</code> para sacar solo los nombres de usuario, y luego <code>-f1,7</code> para ver usuario y shell. <strong>Meta:</strong> aislar columnas de un fichero real de configuración.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">El problema de los espacios</h2>
+    <p class="mt-4">Podrías pensar en usar <code>-d " "</code> (espacio) para recortar un <a href="/Linux-course/lecciones/07-navegar-ficheros"><code>ls -l</code></a>. A veces sale bien: el propietario suele ser el campo 3.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -l | cut -d " " -f3    # a veces saca el propietario (user001)...</code></pre>
+    <p class="mt-4">Pero al pedir el tamaño (campo 5) aparecen huecos raros. ¿Por qué? En <code>ls -l</code> las columnas se alinean con <strong>varios espacios seguidos</strong>, y <code>cut</code> cuenta <em>cada</em> espacio como un separador. Así, un doble espacio crea un «campo vacío» y descuadra todo el conteo.</p>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">-f falla con espacios irregulares</p>
+      <p class="!mt-2 text-cream/90">Con separadores fijos (tabulador, <code>:</code>) el campo es fiable. Pero cuando el alineado usa un número variable de espacios —como <code>ls -l</code>— cada espacio extra cuenta como separador y los campos se descuadran. Para esos casos, corta por posición.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Cortar por posición: -c</h2>
+    <p class="mt-4">La opción <code>-c</code> (<em>characters</em>) corta por <strong>posición de carácter</strong>, sin importar los espacios. Miras en qué columnas está el dato y pides ese rango. Si el tamaño ocupa de la posición 30 a la 39:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -l | cut -c 30-39      # extrae exactamente las columnas 30 a 39</code></pre>
+    <p class="mt-4">Es más manual —hay que contar las posiciones— pero infalible cuando los campos no tienen un separador limpio. Ahora el tamaño sale correcto, sin los huecos de antes.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Haz <code>ls -l</code>, localiza en qué columnas empieza y acaba el tamaño, y extráelo con <code>ls -l | cut -c INICIO-FIN</code>. <strong>Meta:</strong> conseguir una columna limpia donde <code>-f</code> fallaba.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: recortar columnas</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Extrae por tabulador: <code>du -a | cut -f1</code> (tamaño) y <code>du -a | cut -f2</code> (nombre).</li>
+        <li>Saca del fichero de usuarios el home y el nombre: <code>cat /etc/passwd | cut -d ":" -f6</code> y luego <code>-f1,6</code>.</li>
+        <li>Prueba <code>ls -l | cut -d " " -f5</code> y observa los huecos raros. Explica por qué fallan los campos.</li>
+        <li>Corrígelo con posición: localiza las columnas del tamaño y usa <code>ls -l | cut -c INICIO-FIN</code>. <strong>Reto:</strong> combina lo aprendido y saca solo los shells de <code>/etc/passwd</code> con <code>cut -d ":" -f7</code>, y ordénalos con <a href="/Linux-course/lecciones/24-ordenar-sort"><code>sort</code></a>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>cut -f</code> extrae campos separados por <strong>tabulador</strong> (el separador por defecto): <code>du -a | cut -f1</code> saca la primera columna. Con <code>-f1,6</code> pides varias a la vez.</p>
+      <p><code>-d</code> cambia el separador: <code>cut -d ":" -f6 /etc/passwd</code> corta por dos puntos. El delimitador va entre comillas.</p>
+      <p>Cuando los campos se alinean con espacios irregulares (como <code>ls -l</code>), <code>-f</code> se descuadra porque cada espacio cuenta como separador. Ahí se usa <code>-c INICIO-FIN</code> para cortar por posición exacta de carácter.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Haces <code>cat /etc/passwd | cut -f6</code> y no sale nada útil. ¿Por qué?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque <code>cut -f</code> separa por tabulador por defecto, y <code>/etc/passwd</code> usa dos puntos (<code>:</code>). Hay que indicar el separador con <code>-d ":"</code>: <code>cut -d ":" -f6</code>.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Por qué <code>cut -d " " -f5</code> falla sobre <code>ls -l</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque <code>ls -l</code> alinea las columnas con un número variable de espacios, y <code>cut</code> cuenta cada espacio como un separador. Los espacios de más generan campos vacíos y descuadran la numeración.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Cuándo conviene <code>-c</code> en vez de <code>-f</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Cuando los datos no tienen un separador limpio y se alinean por posición (espacios irregulares). <code>-c INICIO-FIN</code> corta por columnas de carácter exactas, ignorando los espacios; es más manual pero fiable.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/24-ordenar-sort" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/26-procesos-y-ps" class="btn-primario">Siguiente: procesos y ps</a>
+    </nav>
+
+  </article>
+</Layout>

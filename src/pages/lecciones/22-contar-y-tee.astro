@@ -1,0 +1,148 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 22. Fuente: transcripciones/video_19.md (wc a fondo -l/-w/-c/-m/-L, tee, ping como ejemplo)
+---
+
+<Layout titulo="Contar con wc y duplicar salida con tee — Curso Linux" descripcion="Domina wc (-l líneas, -w palabras, -c bytes, -m caracteres, -L línea más larga) y usa tee para ver la salida en pantalla y guardarla en un fichero a la vez.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 22</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Contar con wc y duplicar la salida con tee</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Ya usaste <code>wc</code> de pasada; ahora exprímelo. Y descubre <code>tee</code>, la pieza que faltaba: mostrar un resultado en pantalla y guardarlo en un fichero al mismo tiempo.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A contar con <strong><code>wc</code></strong> líneas (<code>-l</code>), palabras (<code>-w</code>), bytes (<code>-c</code>), caracteres (<code>-m</code>) y la línea más larga (<code>-L</code>).</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>A combinar <code>wc</code> con <a href="/Linux-course/lecciones/21-tuberias-y-filtros">tuberías</a> para responder preguntas: ¿cuántos usuarios? ¿cuántos directorios?</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A usar <strong><code>tee</code></strong> para enviar una salida a la pantalla y a uno o varios ficheros a la vez.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">wc a fondo</h2>
+    <p class="mt-4">Reutiliza el fichero <code>nombres</code> de la <a href="/Linux-course/lecciones/21-tuberias-y-filtros">lección anterior</a>. Sin opciones, <code>wc</code> da <strong>tres cifras</strong>: líneas, palabras y caracteres.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat nombres | wc      # → 10 líneas, 10 palabras, 60 caracteres</code></pre>
+    <p class="mt-4">Cada opción aísla una cifra:</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Las opciones de wc</text>
+        <rect x="20" y="40" width="150" height="65" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="95" y="66" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">-l</text>
+        <text x="95" y="88" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">líneas</text>
+        <rect x="185" y="40" width="150" height="65" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="66" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">-w</text>
+        <text x="260" y="88" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">palabras</text>
+        <rect x="350" y="40" width="150" height="65" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="425" y="66" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">-c / -m</text>
+        <text x="425" y="88" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">bytes / caracteres</text>
+        <rect x="185" y="120" width="150" height="65" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="146" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">-L</text>
+        <text x="260" y="168" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">línea más larga</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Ojo: <code>-l</code> minúscula cuenta líneas; <code>-L</code> mayúscula mide la línea más larga.</figcaption>
+    </figure>
+
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat nombres | wc -l   # 10 → número de líneas
+$ cat nombres | wc -w   # 10 → número de palabras
+$ cat nombres | wc -c   # 60 → bytes
+$ cat nombres | wc -m   # 60 → caracteres
+$ cat nombres | wc -L   # 7  → longitud de la línea más larga (p. ej. "Antonio")</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">¿Bytes o caracteres?</p>
+      <p class="!mt-2">Con texto normal, <code>-c</code> (bytes) y <code>-m</code> (caracteres) dan lo mismo: un carácter = un byte. La diferencia aparece con caracteres especiales o de otros idiomas, donde uno puede ocupar dos bytes. Ahí <code>-c</code> sería mayor que <code>-m</code>.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Sobre tu fichero <code>nombres</code> ejecuta <code>wc</code>, luego <code>wc -l</code>, <code>wc -w</code> y <code>wc -L</code>. <strong>Meta:</strong> distinguir qué cuenta cada opción y notar que <code>-L</code> te da la línea más larga, no un total.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">wc + tuberías: responder preguntas</h2>
+    <p class="mt-4">La verdadera potencia llega al combinar <code>wc -l</code> con otro comando por tubería. Como cada línea de <a href="/Linux-course/lecciones/11-ver-contenido-cat"><code>/etc/passwd</code></a> es un usuario, y cada línea de <a href="/Linux-course/lecciones/07-navegar-ficheros"><code>ls -l</code></a> una entrada, cuentas de un tiro:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat /etc/passwd | wc -l   # ¿cuántos usuarios hay configurados?
+$ ls -l | wc -l             # ¿cuántas entradas hay en este directorio?
+$ uptime | wc -w            # también funciona con la salida de cualquier comando</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">tee: ver y guardar a la vez</h2>
+    <p class="mt-4">Con <a href="/Linux-course/lecciones/19-entrada-salida-y-redirecciones"><code>&gt;</code></a> mandas la salida a un fichero, pero entonces no la ves en pantalla. <code>tee</code> hace <strong>las dos cosas</strong>: la muestra por consola y la guarda en el fichero. Va después de una tubería:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -l | tee listar.txt    # muestra ls -l Y lo guarda en listar.txt
+$ cat listar.txt            # comprueba que el fichero tiene el mismo contenido</code></pre>
+    <p class="mt-4">Su nombre viene de la «T» de fontanería: el flujo se bifurca. Y puede escribir en <strong>varios</strong> ficheros a la vez:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ ls -l | tee listar1.txt listar2.txt   # a pantalla y a ambos ficheros</code></pre>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Un caso real: ping</p>
+      <p class="!mt-2">El comando <code>ping google.com</code> comprueba si un servidor de la red responde y cuánto tarda. Con <kbd>Ctrl+C</kbd> lo detienes. Para verlo en vivo <em>y</em> guardarlo: <code>ping google.com | tee ping.txt</code>. Vas viendo las respuestas mientras se archivan.</p>
+    </div>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>ls -l | tee listar.txt</code> y luego <code>cat listar.txt</code>. <strong>Meta:</strong> confirmar que el resultado salió por pantalla y a la vez quedó guardado en el fichero.</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: contar y bifurcar</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Sobre <code>nombres</code>, ejecuta <code>wc</code>, <code>wc -l</code>, <code>wc -w</code>, <code>wc -c</code> y <code>wc -L</code>. Explica qué mide cada uno.</li>
+        <li>Cuenta los usuarios del sistema con <code>cat /etc/passwd | wc -l</code> y las entradas del directorio actual con <code>ls -l | wc -l</code>.</li>
+        <li>Guarda y muestra a la vez con <code>ls -l | tee listar.txt</code>, y comprueba el fichero con <code>cat listar.txt</code>.</li>
+        <li>Usa <code>tee</code> con dos ficheros: <code>ls -l | tee listar1.txt listar2.txt</code> y verifica ambos con <code>ls -l list*</code>. <strong>Reto:</strong> lanza <code>ping google.com | tee ping.txt</code>, detén con <kbd>Ctrl+C</kbd> y revisa <code>ping.txt</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>wc</code> cuenta el contenido: <code>-l</code> líneas, <code>-w</code> palabras, <code>-c</code> bytes, <code>-m</code> caracteres y <code>-L</code> (mayúscula) la longitud de la línea más larga. Con texto normal, <code>-c</code> y <code>-m</code> coinciden; difieren con caracteres multibyte.</p>
+      <p>Combinado con tuberías, <code>wc -l</code> responde preguntas cotidianas: <code>cat /etc/passwd | wc -l</code> cuenta usuarios, <code>ls -l | wc -l</code> cuenta entradas del directorio.</p>
+      <p><code>tee</code> bifurca la salida: la muestra por pantalla y a la vez la escribe en uno o varios ficheros (<code>ls -l | tee a.txt b.txt</code>). Útil para monitorear algo en vivo, como un <code>ping</code>, mientras se guarda.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Qué diferencia hay entre <code>wc -l</code> y <code>wc -L</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>-l</code> minúscula cuenta el número de líneas. <code>-L</code> mayúscula da la longitud (en caracteres) de la línea más larga del fichero. Son cosas distintas pese a parecerse.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Cómo cuentas cuántos usuarios hay configurados en el sistema?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>cat /etc/passwd | wc -l</code>. Como cada línea de <code>/etc/passwd</code> corresponde a un usuario, contar líneas equivale a contar usuarios.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Quieres ver la salida de un comando en pantalla y guardarla a la vez. ¿<code>&gt;</code> o <code>tee</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4"><code>tee</code>. Con <code>&gt;</code> la salida va solo al fichero y no la ves en pantalla. <code>tee</code> bifurca: la muestra por consola y la escribe en el fichero (o ficheros) al mismo tiempo.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/21-tuberias-y-filtros" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/23-buscar-texto-grep" class="btn-primario">Siguiente: buscar texto con grep</a>
+    </nav>
+
+  </article>
+</Layout>

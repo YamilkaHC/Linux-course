@@ -1,0 +1,156 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 61. Fuente: transcripciones/video_46.md (segunda parte: /, n, N, ?)
+---
+
+<Layout titulo="Buscar en vi — Curso Linux" descripcion="Busca dentro de un fichero con / y ?, salta entre coincidencias con n y N, y entiende por qué vi encuentra trozos de palabra en cualquier posición.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 61</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">6 min de lectura</span>
+      <span class="etiqueta-arribita">Por arribita</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Buscar en vi</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Un fichero de configuración de mil líneas y necesitas una palabra concreta. Dos teclas y estás encima.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A buscar hacia delante con <code>/</code> y hacia atrás con <code>?</code>, y a saltar entre resultados con <code>n</code> y <code>N</code>.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Que <code>vi</code> busca <strong>coincidencias parciales</strong> en cualquier posición de la palabra, no palabras completas.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A leer el aviso de «patrón no encontrado» y a saber si el problema es el patrón o la dirección de búsqueda.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">La barra abre la búsqueda</h2>
+    <p class="mt-4">En modo comando, pulsa <code>/</code>. Fíjate en la esquina inferior izquierda: el cursor <strong>baja a la última línea</strong> de la pantalla y aparece la barra que acabas de escribir. Ese es el sitio donde <code>vi</code> te escucha.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>/tierra          ← se escribe abajo del todo
+                   Enter → el cursor salta a la primera coincidencia</code></pre>
+    <p class="mt-4">Al pulsar Enter, el cursor se coloca en la <strong>primera aparición</strong> de ese texto a partir de donde estabas.</p>
+    <p class="mt-4">Nota de teclado: en los teclados en inglés la barra está junto al <code>Shift</code> derecho; en los españoles hay que buscar la combinación correspondiente. Es el mismo asunto que ya viste con el <code>^</code>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Saltar entre coincidencias: n y N</h2>
+    <p class="mt-4">Una vez hecha la búsqueda, no hace falta repetirla:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>n     → siguiente coincidencia (hacia delante)
+N     → coincidencia anterior (hacia atrás)</code></pre>
+    <p class="mt-4">Pulsa <code>n</code> varias veces y verás el cursor ir saltando de una aparición a la siguiente. Cuando te pases, <code>N</code> —con <code>Shift</code>— retrocede. En un fichero de varias páginas, esta pareja de teclas es lo que de verdad usarás a diario.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Busca una palabra que aparezca varias veces en tu texto con <code>/palabra</code> y recorre todas sus apariciones con <code>n</code> hasta volver al principio. Después desanda dos con <code>N</code>. <strong>Meta:</strong> localizar algo en el otro extremo del fichero sin usar las flechas.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Busca trozos, no palabras</h2>
+    <p class="mt-4">Esto sorprende al principio. Si buscas <code>cono</code>, el cursor puede acabar sobre la palabra <code>conocimiento</code>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>/cono       →  conocimiento</code></pre>
+    <p class="mt-4"><code>vi</code> busca <strong>coincidencias</strong>, no palabras completas. Y va más lejos: el trozo puede estar <strong>en cualquier posición</strong> de la palabra, no solo al principio.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>/mente      →  simplemente
+                  el cursor se coloca justo donde empieza la coincidencia</code></pre>
+    <p class="mt-4">Eso es exactamente lo que quieres cuando buscas en un fichero de configuración: un fragmento te basta para llegar. Y si el resultado sobra, pulsas <code>n</code> y sigues.</p>
+    <p class="mt-4">Si lo que buscas no está, el editor te lo dice abajo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>/linux
+E486: Patrón no encontrado: linux</code></pre>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Buscar hacia atrás: ?</h2>
+    <p class="mt-4">La barra busca <strong>desde el cursor hacia delante</strong>. Para mirar hacia atrás, cambia el símbolo:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>/patron     → busca hacia DELANTE
+?patron     → busca hacia ATRÁS</code></pre>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 560 185" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-xl mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="280" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Dirección de la búsqueda</text>
+
+        <rect x="150" y="44" width="260" height="96" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <line x1="150" y1="92" x2="410" y2="92" stroke="#1A1A1A"/>
+        <text x="280" y="88" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">cursor</text>
+
+        <text x="280" y="66" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">principio del fichero</text>
+        <text x="280" y="128" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">final del fichero</text>
+
+        <line x1="100" y1="70" x2="100" y2="46" stroke="#1A1A1A"/>
+        <path d="M100 46 l-4 6 h8 z" fill="#1A1A1A" stroke="none"/>
+        <text x="100" y="86" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">?</text>
+        <text x="100" y="102" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">atrás</text>
+
+        <line x1="460" y1="114" x2="460" y2="138" stroke="#1A1A1A"/>
+        <path d="M460 138 l-4 -6 h8 z" fill="#1A1A1A" stroke="none"/>
+        <text x="460" y="86" font-family="Inter, sans-serif" font-size="13" fill="#1A1A1A" stroke="none" text-anchor="middle">/</text>
+        <text x="460" y="102" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">delante</text>
+
+        <text x="280" y="162" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">n repite en la misma dirección · N la invierte</text>
+        <text x="280" y="178" font-family="Inter, sans-serif" font-size="9" fill="#1A1A1A" stroke="none" text-anchor="middle">«patrón no encontrado» puede significar que buscas hacia el lado equivocado</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">La búsqueda arranca siempre desde donde está el cursor.</figcaption>
+    </figure>
+
+    <p class="mt-4">Esto explica un error que desconcierta: buscas una palabra que <em>sabes</em> que está en el fichero y te dice «patrón no encontrado». Si usaste <code>?</code> y la palabra está más abajo, no la va a encontrar: <strong>estás mirando hacia el lado contrario</strong>. Cambia a <code>/</code> y aparecerá.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Colócate en mitad del fichero. Busca con <code>?</code> una palabra que solo aparezca al final: verás el aviso. Repite con <code>/</code> y la encontrarás. <strong>Meta:</strong> asociar el mensaje de error con la dirección, no solo con el patrón.</p>
+    </div>
+
+    <p class="mt-4">Estos patrones de búsqueda son la puerta de entrada a algo más grande: la misma idea, ampliada, es la que permitirá <strong>buscar y sustituir</strong> en todo un fichero de una sola orden. Eso llega en las próximas lecciones.</p>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: encontrar cosas rápido</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Genera un fichero grande con <code>man bash &gt; manual.txt</code> y ábrelo con <code>vi manual.txt</code>.</li>
+        <li>Busca <code>/history</code> y recorre diez coincidencias con <code>n</code>, contándolas. Retrocede cinco con <code>N</code>.</li>
+        <li>Comprueba la búsqueda parcial: busca <code>/vari</code> y observa sobre qué palabras cae el cursor. Prueba también un patrón que no exista y lee el mensaje.</li>
+        <li><strong>Reto:</strong> combina búsqueda y edición. Localiza la primera aparición de una palabra con <code>/</code>, bórrala con <code>dw</code>, salta a la siguiente con <code>n</code> y repite tres veces. Sal con <code>:q!</code> sin guardar.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>/patron</code> más Enter busca hacia delante desde el cursor; el patrón se escribe en la última línea de la pantalla. <code>?patron</code> hace lo mismo hacia atrás.</p>
+      <p><code>n</code> salta a la siguiente coincidencia y <code>N</code> a la anterior, sin tener que repetir la búsqueda.</p>
+      <p><code>vi</code> encuentra <strong>coincidencias parciales en cualquier posición</strong> de la palabra: <code>/cono</code> localiza «conocimiento» y <code>/mente</code> localiza «simplemente». Si sale «patrón no encontrado», revisa el patrón… y también la dirección en la que estás buscando.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. Buscas <code>/cono</code> y el cursor acaba sobre «conocimiento». ¿Es un fallo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No. <code>vi</code> busca coincidencias, no palabras completas, y el fragmento puede estar en cualquier posición de la palabra. Si esa aparición no te sirve, pulsa <code>n</code> para ir a la siguiente.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. Sabes que la palabra está en el fichero, pero <code>?palabra</code> dice «patrón no encontrado». ¿Qué pasa?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Que <code>?</code> busca <strong>hacia atrás</strong> desde el cursor, y esa palabra está más abajo. Usa <code>/</code> para buscar hacia delante, o colócate antes en otra posición del fichero.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Ya has buscado un patrón y quieres ver la siguiente aparición. ¿Repites la búsqueda?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No hace falta: pulsa <code>n</code> para avanzar a la siguiente coincidencia y <code>N</code> para volver a la anterior.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/60-copiar-y-pegar-en-vi" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/62-buscar-y-reemplazar-en-vi" class="btn-primario">Siguiente lección</a>
+    </nav>
+
+  </article>
+</Layout>

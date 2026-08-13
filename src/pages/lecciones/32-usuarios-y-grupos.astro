@@ -1,0 +1,138 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 32. Fuente: transcripciones/video_26.md (primera mitad: usuarios /etc/passwd, grupos /etc/group, id)
+---
+
+<Layout titulo="Usuarios y grupos en Linux: /etc/passwd, /etc/group e id — Curso Linux" descripcion="Entiende los usuarios y grupos de Linux: lee /etc/passwd (UID, GID, home, shell) y /etc/group, distingue usuario de grupo y consulta tus grupos con id.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 32</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">7 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">Usuarios y grupos en Linux</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Antes de tocar permisos hay que entender quién es quién: cada usuario tiene un identificador y pertenece a grupos. Eso es lo que decide, más adelante, qué puede hacer cada uno con los ficheros.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>A leer los usuarios en <a href="/Linux-course/lecciones/11-ver-contenido-cat"><code>/etc/passwd</code></a>: nombre, <strong>UID</strong>, <strong>GID</strong>, directorio home y shell.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Qué es un <strong>grupo</strong>, dónde se listan (<code>/etc/group</code>) y por qué un usuario y un grupo pueden llamarse igual.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>A consultar tu identidad y todos tus grupos con el comando <strong><code>id</code></strong>.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-10">Los usuarios: /etc/passwd</h2>
+    <p class="mt-4">Todo usuario tiene un nombre y una clave para entrar al sistema. El fichero <code>/etc/passwd</code> los lista a todos. Cada línea son campos separados por <a href="/Linux-course/lecciones/25-cortar-campos-cut">dos puntos</a>:</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ cat /etc/passwd
+user001:x:1000:1000:User 001:/home/user001:/bin/bash
+#  nombre  │ │    │    descripción  home         shell
+#          │ UID  GID
+#          clave (x = cifrada, guardada aparte)</code></pre>
+    <p class="mt-4">Lo importante ahora: el <strong>UID</strong> (id del usuario) y el <strong>GID</strong> (id de su grupo principal). La clave aparece como <code>x</code> porque está cifrada en otro fichero. Arriba del todo verás a <code>root</code>, el <a href="/Linux-course/lecciones/06-usuarios-y-ficheros">superusuario</a>, con UID <strong>0</strong> y home <code>/root</code>.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>cat /etc/passwd</code> y localiza tu usuario y a <code>root</code>. <strong>Meta:</strong> identificar en cada línea el UID, el GID, el home y la shell. Fíjate en que root tiene UID 0.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Los grupos: /etc/group</h2>
+    <p class="mt-4">Un <strong>grupo</strong> es un conjunto de usuarios con algo en común. Se listan en <code>/etc/group</code>, con su nombre y su GID (necesitas <a href="/Linux-course/lecciones/12-ver-mas-y-explorar"><code>less</code></a> porque <code>cat</code> puede dar permiso denegado según el sistema):</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ less /etc/group       # nombre del grupo : x : GID : miembros</code></pre>
+
+    <div class="bg-ink border-2 border-ink p-5 my-6 text-cream">
+      <p class="!mt-0 text-sm font-bold uppercase tracking-[0.1em]">Usuario ≠ grupo (aunque se llamen igual)</p>
+      <p class="!mt-2 text-cream/90">Existe el <strong>usuario</strong> <code>root</code> y también el <strong>grupo</strong> <code>root</code>: son cosas distintas que casualmente comparten nombre. Al crear un usuario, Linux suele crearle un grupo propio con su mismo nombre. Además, un usuario puede pertenecer a <strong>varios</strong> grupos a la vez.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Tu identidad: el comando id</h2>
+    <p class="mt-4">En <code>/etc/passwd</code> solo ves el grupo <em>principal</em> de un usuario. Para ver <strong>todos</strong> sus grupos, usa <code>id</code>: te da tu UID, tu GID principal y la lista de grupos adicionales a los que perteneces.</p>
+    <pre class="bg-ink text-cream p-4 rounded-none overflow-x-auto text-sm my-4"><code>$ id                    # tu UID, GID y todos tus grupos
+uid=1000(user001) gid=1000(user001) groups=1000(user001),24(cdrom),25(floppy),29(audio),44(video)...
+$ id root               # también puedes preguntar por otro usuario</code></pre>
+    <p class="mt-4">Verás que tu usuario pertenece a grupos como <code>cdrom</code>, <code>audio</code>, <code>video</code>… Esto importa mucho: el grupo determina qué permisos tendrás sobre los ficheros, algo que verás en la <a href="/Linux-course/lecciones/33-permisos-rwx">siguiente lección</a>.</p>
+
+    <figure class="my-8">
+      <svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto" fill="none" stroke="#1A1A1A" stroke-width="1.25">
+        <text x="260" y="20" font-family="Playfair Display, serif" font-size="14" fill="#1A1A1A" stroke="none" text-anchor="middle">Un usuario pertenece a varios grupos</text>
+        <rect x="200" y="35" width="120" height="35" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="57" font-family="Inter, sans-serif" font-size="12" fill="#1A1A1A" stroke="none" text-anchor="middle">user001</text>
+        <line x1="260" y1="70" x2="110" y2="110"/>
+        <line x1="260" y1="70" x2="260" y2="110"/>
+        <line x1="260" y1="70" x2="410" y2="110"/>
+        <rect x="55" y="110" width="110" height="30" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="110" y="129" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">user001 (propio)</text>
+        <rect x="205" y="110" width="110" height="30" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="260" y="129" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">audio</text>
+        <rect x="355" y="110" width="110" height="30" fill="#F4F1EA" stroke="#E5E1D8"/>
+        <text x="410" y="129" font-family="Inter, sans-serif" font-size="10" fill="#1A1A1A" stroke="none" text-anchor="middle">video</text>
+      </svg>
+      <figcaption class="text-center text-sm text-ink/50 mt-2">Un grupo principal (con su nombre) y varios grupos adicionales.</figcaption>
+    </figure>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Ejecuta <code>id</code> y compara sus grupos con lo que veías de tu usuario en <code>/etc/passwd</code>. <strong>Meta:</strong> comprobar que <code>id</code> muestra grupos que <code>/etc/passwd</code> no revelaba (los adicionales).</p>
+    </div>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: quién es quién</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Lee <code>/etc/passwd</code> y localiza tu usuario y root. Anota el UID y el GID de cada uno.</li>
+        <li>Extrae solo los nombres de usuario con <code>cut -d ":" -f1 /etc/passwd</code> (repaso de <a href="/Linux-course/lecciones/25-cortar-campos-cut">cut</a>).</li>
+        <li>Mira los grupos del sistema con <code>less /etc/group</code> y comprueba que existe un grupo <code>root</code> además del usuario root.</li>
+        <li>Ejecuta <code>id</code> y localiza tu grupo principal y los adicionales. <strong>Reto:</strong> cuenta cuántos usuarios hay con <code>cat /etc/passwd | wc -l</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p><code>/etc/passwd</code> lista todos los usuarios; cada línea tiene nombre, clave (cifrada, aparece como <code>x</code>), <strong>UID</strong>, <strong>GID</strong>, descripción, home y shell. El superusuario <code>root</code> tiene UID 0.</p>
+      <p>Un grupo es un conjunto de usuarios; se listan en <code>/etc/group</code> con su GID. Usuario y grupo son cosas distintas aunque se llamen igual, y un usuario puede pertenecer a varios grupos.</p>
+      <p>El comando <code>id</code> muestra tu UID, tu GID principal y todos tus grupos adicionales, que <code>/etc/passwd</code> no revela. Los grupos determinan los permisos sobre los ficheros.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. En <code>/etc/passwd</code>, ¿por qué la clave aparece como una <code>x</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Porque la contraseña real está cifrada y guardada en otro fichero. La <code>x</code> es solo un marcador que indica que la clave existe pero no se muestra ahí por seguridad.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Es lo mismo el usuario <code>root</code> que el grupo <code>root</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">No. Son cosas distintas que comparten nombre: hay un usuario llamado root y un grupo llamado root. Al crear un usuario, Linux suele darle un grupo propio con su mismo nombre.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. ¿Qué te muestra <code>id</code> que no ves en <code>/etc/passwd</code>?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Todos los grupos <strong>adicionales</strong> a los que perteneces. En <code>/etc/passwd</code> solo aparece el grupo principal (el GID); <code>id</code> lista además los otros grupos, como audio, video o cdrom.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/31-procesos-en-segundo-plano" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/33-permisos-rwx" class="btn-primario">Siguiente: los permisos rwx</a>
+    </nav>
+
+  </article>
+</Layout>

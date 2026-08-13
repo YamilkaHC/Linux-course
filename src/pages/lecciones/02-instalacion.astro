@@ -1,0 +1,189 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Módulo 1 - Lección 2. Fuente: transcripciones/video 2.md (parte 1: kernel + VirtualBox + crear VM)
+---
+
+<Layout titulo="El kernel y tu entorno de trabajo — Curso Linux" descripcion="Qué es el kernel de Linux y cómo preparar VirtualBox y una máquina virtual para instalar Debian.">
+  <article class="prose-editorial">
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="flex items-center gap-4">
+      <span class="etiqueta">Módulo 1 &middot; Lección 2</span>
+      <span class="text-[11px] uppercase tracking-[0.15em] text-ink/50">8 min de lectura</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mt-6">El kernel y tu entorno de trabajo</h1>
+    <p class="mt-5 text-lg text-ink/60">
+      Qué es el corazón de Linux y cómo montar VirtualBox y una máquina virtual lista para instalar Debian.
+    </p>
+
+    <!-- ================= QUÉ APRENDERÁS ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-10">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Qué aprenderás</h2>
+      <ul class="space-y-4 !mt-0">
+        <li class="flex gap-3"><span class="font-display font-bold">01</span><span>Qué es el <strong>kernel</strong> y qué tres funciones críticas cumple — para entender qué hace realmente el «corazón» del sistema.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">02</span><span>Cómo instalar <strong>VirtualBox</strong> para trabajar sin tocar tu sistema real — el laboratorio seguro donde probarás todo el curso.</span></li>
+        <li class="flex gap-3"><span class="font-display font-bold">03</span><span>Cómo <strong>crear una máquina virtual</strong> y montar el ISO de Debian, dejándola lista para arrancar la instalación.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================= CUERPO ================= -->
+    <h2 class="font-display text-2xl font-bold mt-12">El kernel: el corazón del sistema</h2>
+    <p class="mt-4">Piensa en un intérprete que se sienta entre tus programas y el hardware físico: cuando abres un archivo, mueves el ratón o reproduces un sonido, algo traduce esa orden al lenguaje del disco, la CPU o la tarjeta de audio. Ese intérprete es el <strong>kernel</strong>.</p>
+    <p>El kernel es el <strong>núcleo de Linux</strong>, el corazón del sistema operativo: se encarga de que el <strong>software y el hardware puedan trabajar juntos</strong>. En Linux se distinguen tres capas: primero el hardware, encima el kernel, y encima las aplicaciones.</p>
+
+    <!-- ================= DIAGRAMA SVG: 3 CAPAS ================= -->
+    <figure class="my-10">
+      <div class="overflow-x-auto border border-line bg-cream p-6">
+        <svg viewBox="0 0 560 260" width="100%" role="img" aria-labelledby="svg-capas-title" style="max-width:560px;margin:0 auto;display:block;">
+          <title id="svg-capas-title">Las tres capas de Linux: hardware, kernel y aplicaciones</title>
+          <rect x="130" y="30" width="300" height="55" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="1.5"/>
+          <text x="280" y="60" text-anchor="middle" font-family="'Playfair Display',serif" font-size="17" font-weight="700" fill="#1A1A1A">Aplicaciones</text>
+          <text x="280" y="78" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#1A1A1A">programas que usas</text>
+          <rect x="130" y="100" width="300" height="55" fill="#F4F1EA" stroke="#1A1A1A" stroke-width="1.5"/>
+          <text x="280" y="130" text-anchor="middle" font-family="'Playfair Display',serif" font-size="17" font-weight="700" fill="#1A1A1A">Kernel</text>
+          <text x="280" y="148" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#1A1A1A">traduce software ↔ hardware</text>
+          <rect x="130" y="170" width="300" height="55" fill="#FDFCFB" stroke="#1A1A1A" stroke-width="1.5"/>
+          <text x="280" y="200" text-anchor="middle" font-family="'Playfair Display',serif" font-size="17" font-weight="700" fill="#1A1A1A">Hardware</text>
+          <text x="280" y="218" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#1A1A1A">CPU, memoria, discos, periféricos</text>
+        </svg>
+      </div>
+      <figcaption class="text-xs text-ink/50 mt-3 text-center">El kernel es la capa intermedia: sin él, las aplicaciones no podrían hablar con el hardware.</figcaption>
+    </figure>
+
+    <p>El kernel es el protagonista directo del buen funcionamiento de todas las aplicaciones, por eso se recomienda tenerlo siempre <strong>actualizado y estable</strong>. Sus funciones más importantes (aunque no las únicas) son tres:</p>
+
+    <div class="overflow-x-auto my-6">
+      <table class="w-full text-sm border border-line">
+        <thead>
+          <tr class="bg-sand text-left">
+            <th class="p-3 font-bold border-b border-line">Función</th>
+            <th class="p-3 font-bold border-b border-line">Qué hace</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Administración de memoria</td><td class="p-3">Reparte la memoria RAM entre todos los programas en ejecución.</td></tr>
+          <tr class="border-b border-line"><td class="p-3 font-semibold">Tiempo de procesamiento</td><td class="p-3">Reparte el tiempo de CPU para que cada programa lo use de forma ordenada.</td></tr>
+          <tr><td class="p-3 font-semibold">Acceso a periféricos</td><td class="p-3">Gestiona todo lo que conectas al equipo: teclado, disco, USB, red…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>¿De dónde se descarga el kernel? De muchos servidores en la red, pero su página oficial es <strong>kernel.org</strong>, donde además hay <em>mirrors</em> (enlaces espejo) con todas las versiones disponibles. Recuerda la familia de distribuciones de la <a href="/Linux-course/lecciones/01-que-es-linux">Lección 1</a>: todas comparten este mismo núcleo.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Por qué trabajarás en una máquina virtual</h2>
+    <p class="mt-4">Vas a instalar Debian de forma <strong>virtual</strong>: dentro de un programa que simula una computadora completa por software. Así practicas la instalación cuantas veces quieras sin tocar ni arriesgar tu sistema real. Esa herramienta de virtualización será <strong>VirtualBox</strong>.</p>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 1 — Instalar VirtualBox</h2>
+    <p class="mt-4">Descárgalo desde su web oficial y elige el instalador de tu sistema anfitrión (el sistema donde instalas la herramienta):</p>
+    <ol class="list-decimal pl-6 space-y-2 my-4 text-ink/80">
+      <li>Busca <strong>virtualbox</strong> en tu navegador y entra al enlace <strong>Downloads</strong> (descargas).</li>
+      <li>Elige <strong>Windows host</strong> si tu equipo es Windows (o el anfitrión que corresponda).</li>
+      <li>Ejecuta el instalador descargado y avanza con <strong>Next</strong>, dejando la parametrización por defecto (incluida la carpeta de instalación).</li>
+      <li>Puedes deseleccionar los iconos que no quieras (barra de tareas, escritorio) y dejar solo el del menú de inicio.</li>
+      <li>Acepta con <strong>Yes</strong> el aviso de que la red se desconectará unos segundos, pulsa <strong>Install</strong> y al final <strong>Finish</strong> para abrir la interfaz.</li>
+    </ol>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Instala VirtualBox en tu equipo y ábrelo. <strong>Meta:</strong> llegar a ver la ventana principal (el <em>Administrador de VirtualBox</em>) con la lista de máquinas vacía.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 2 — Descargar el ISO de Debian</h2>
+    <p class="mt-4">El ISO es la <strong>imagen de instalación</strong> del sistema, un único archivo que contiene todo Debian listo para instalar.</p>
+    <ol class="list-decimal pl-6 space-y-2 my-4 text-ink/80">
+      <li>Busca <strong>linux debian</strong> y entra a la página oficial de la distribución.</li>
+      <li>Pulsa <strong>Descargar</strong> (junto al logo). La descarga arranca automáticamente.</li>
+      <li>En este curso se usa <strong>Debian 11.3</strong>, arquitectura de <strong>64 bits</strong>. Si la web ofrece otra versión, usa el enlace a la 11.3 para ir a la par.</li>
+    </ol>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Descarga el ISO de Debian 64 bits. <strong>Meta:</strong> tener el archivo <code>.iso</code> guardado y localizado en tu carpeta de descargas.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 3 — Crear la máquina virtual</h2>
+    <p class="mt-4">En VirtualBox pulsa <strong>New</strong> (nueva) y define la máquina. Al escribir el nombre, la herramienta reconoce sola el sistema operativo y le pone su logo:</p>
+    <ul class="list-disc pl-6 space-y-2 my-4 text-ink/80">
+      <li><strong>Nombre:</strong> por ejemplo <code>debian_11</code>. VirtualBox detecta que es Linux Debian de 64 bits (si no acierta la arquitectura, la eliges a mano).</li>
+      <li><strong>Memoria RAM:</strong> asigna <strong>2048 MB</strong> (2 GB) o el valor que quieras, pero <strong>nunca más del 40–50 % de tu RAM física</strong>, o el anfitrión sufrirá.</li>
+      <li><strong>Disco virtual:</strong> elige <em>crear un disco virtual ahora</em> y pulsa <strong>Create</strong>.</li>
+    </ul>
+    <p>En la ventana del disco, define su tamaño y tipo:</p>
+    <ul class="list-disc pl-6 space-y-2 my-4 text-ink/80">
+      <li><strong>Tamaño:</strong> unos <strong>21 GB</strong>. Ese espacio se reserva dentro de tu disco físico, así que ten en cuenta el espacio libre real que tienes.</li>
+      <li><strong>Tipo de archivo:</strong> <strong>VDI</strong> (VirtualBox Disk Image). Hay otros formatos que se verán más adelante.</li>
+      <li><strong>Asignación:</strong> <strong>dinámica</strong> — el archivo va creciendo según se llena, hasta el máximo de 21 GB. La alternativa, <em>fija</em>, reserva los 21 GB de golpe.</li>
+    </ul>
+    <p>Pulsa <strong>Create</strong>: ya tienes la máquina en la lista.</p>
+
+    <div class="bg-sand border-l-2 border-ink p-4 my-6">
+      <p class="!mt-0 text-sm font-semibold uppercase tracking-[0.1em] text-ink/60">Pruébalo tú</p>
+      <p class="!mt-2">Crea una VM llamada <code>debian_11</code> con 2 GB de RAM y disco VDI dinámico de 21 GB. <strong>Meta:</strong> ver la nueva máquina apagada en el panel izquierdo de VirtualBox.</p>
+    </div>
+
+    <h2 class="font-display text-2xl font-bold mt-10">Paso 4 — Montar el ISO y arrancar</h2>
+    <p class="mt-4">Falta decirle a la máquina que <em>arranque desde el disco de instalación</em> que descargaste. Selecciona la máquina y entra en <strong>Settings</strong> (configuración) → <strong>Storage</strong> (almacenamiento). Verás dos elementos emulados: la unidad óptica (el «CD/DVD») y el controlador SATA (tu disco duro virtual).</p>
+    <ol class="list-decimal pl-6 space-y-2 my-4 text-ink/80">
+      <li>Haz clic en la unidad óptica que aparece vacía (<em>Empty</em>).</li>
+      <li>En <strong>Optical Drive</strong> pulsa <strong>Choose a disk file</strong> y selecciona el <code>.iso</code> de Debian que descargaste.</li>
+      <li>Confirma con <strong>OK</strong>. Ahora el ISO está montado como si fuera un CD de instalación.</li>
+      <li>Pulsa la flecha verde <strong>Start</strong> para encender la máquina.</li>
+    </ol>
+    <p>Arrancará mostrando el menú de instalación de Debian. <strong>Ahí empieza la <a href="/Linux-course/lecciones/03-instalar-debian">siguiente lección</a>:</strong> el paso a paso de la instalación.</p>
+
+    <!-- ================= PRÁCTICA FINAL ================= -->
+    <section class="bg-sand border border-line p-8 md:p-10 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5 !mt-0">Práctica: deja tu laboratorio listo</h2>
+      <ol class="list-decimal pl-6 space-y-3 text-ink/80 !mt-0">
+        <li>Instala VirtualBox y descarga el ISO de Debian 11.3 de 64 bits.</li>
+        <li>Crea la VM <code>debian_11</code>: 2 GB de RAM, disco VDI dinámico de 21 GB.</li>
+        <li>Monta el ISO en la unidad óptica (Settings → Storage → Choose a disk file).</li>
+        <li>Pulsa <strong>Start</strong> y confirma que aparece el menú gráfico de instalación de Debian. No sigas todavía: eso es la Lección 3.</li>
+      </ol>
+    </section>
+
+    <!-- ================= RESUMEN ================= -->
+    <section class="border-t border-line pt-8 mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-4 !mt-0">Resumen</h2>
+      <p>El kernel es el núcleo que hace dialogar al software con el hardware; administra memoria, tiempo de CPU y periféricos, y conviene tenerlo actualizado.</p>
+      <p>Trabajarás en una máquina virtual con VirtualBox para practicar sin arriesgar tu sistema real.</p>
+      <p>Ya creaste la VM (2 GB RAM, disco VDI dinámico de 21 GB) y montaste el ISO de Debian: la máquina está lista para arrancar la instalación.</p>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section class="mt-12">
+      <h2 class="text-[10px] uppercase font-bold tracking-[0.15em] text-ink/50 mb-5">Comprueba lo aprendido</h2>
+      <div class="space-y-4">
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>1. ¿Cuál es la función del kernel en las tres capas de Linux?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Es la capa intermedia entre el <strong>hardware</strong> y las <strong>aplicaciones</strong>: hace que ambos puedan trabajar juntos, administrando memoria, tiempo de procesamiento y acceso a periféricos.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>2. ¿Por qué se instala Debian en una máquina virtual en lugar de directamente en el equipo?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">Para practicar la instalación y el uso <strong>sin arriesgar ni modificar el sistema real</strong>. VirtualBox simula una computadora completa por software.</p>
+        </details>
+        <details class="bg-white border border-line p-6">
+          <summary class="font-bold cursor-pointer flex items-center justify-between">
+            <span>3. Al crear el disco virtual, ¿qué diferencia hay entre asignación «dinámica» y «fija»?</span>
+            <span class="text-ink/40 text-sm ml-4">Ver respuesta</span>
+          </summary>
+          <p class="mt-4">La <strong>dinámica</strong> hace que el archivo del disco crezca a medida que se llena, hasta el máximo definido. La <strong>fija</strong> reserva todo el tamaño (los 21 GB) de una vez en el disco físico.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= NAVEGACIÓN ================= -->
+    <nav class="flex items-center justify-between gap-4 mt-14 pt-8 border-t border-line">
+      <a href="/Linux-course/lecciones/01-que-es-linux" class="btn-secundario">Anterior</a>
+      <a href="/Linux-course/lecciones/03-instalar-debian" class="btn-primario">Siguiente</a>
+    </nav>
+
+  </article>
+</Layout>
